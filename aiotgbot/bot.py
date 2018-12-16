@@ -19,12 +19,7 @@ from .constants import ChatType, RequestMethod
 from .exceptions import (BadGateway, BotBlocked, BotKicked, MigrateToChat,
                          RestartingTelegram, RetryAfter, TelegramError)
 from .storage import BaseStorage
-from .utils import FreqLimit, KeyLock
-
-try:
-    import ujson as json
-except ImportError:  # pragma: no cover
-    import json  # type: ignore
+from .utils import FreqLimit, KeyLock, json_dumps
 
 TG_API_URL = 'https://api.telegram.org/bot{token}/{method}'
 TG_FILE_URL = 'https://api.telegram.org/file/bot{token}/{path}'
@@ -37,9 +32,6 @@ GROUP_INTERVAL = 3
 
 bot_logger = logging.getLogger('aiotgbot.bot')
 response_logger = logging.getLogger('aiotgbot.response')
-
-json_dumps = partial(json.dumps, ensure_ascii=False,
-                     escape_forward_slashes=False)
 
 EventHandler = Callable[['Bot'], Awaitable[None]]
 
@@ -224,7 +216,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
 
         url = TG_API_URL.format(token=self._token, method=api_method)
         async with request(url) as response:
-            response_dict = await response.json(loads=json.loads)
+            response_dict = await response.json()
         response_logger.debug(response_dict)
         api_response = APIResponse.from_dict(response_dict)
 

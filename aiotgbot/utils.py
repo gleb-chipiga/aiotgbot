@@ -1,4 +1,5 @@
 import asyncio
+import json
 from contextlib import asynccontextmanager, suppress
 from functools import partial
 from html import escape
@@ -7,13 +8,7 @@ from typing import Any, AsyncGenerator, Dict, Iterable, Optional
 from .api_types import MessageEntity
 from .constants import MessageEntityType
 
-try:
-    import ujson as json
-except ImportError:  # pragma: no cover
-    import json  # type: ignore
-
-json_dumps = partial(json.dumps, ensure_ascii=False,
-                     escape_forward_slashes=False)
+json_dumps = partial(json.dumps, ensure_ascii=False)
 
 
 def entity_to_html(entity: MessageEntity, message_text: str) -> str:

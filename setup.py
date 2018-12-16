@@ -1,5 +1,6 @@
 import pathlib
 import re
+
 from setuptools import setup
 
 root = pathlib.Path(__file__).parent
@@ -29,7 +30,7 @@ setup(
     ],
     packages=['aiotgbot'],
     python_requires='>=3.7',
-    install_requires=['aiohttp', 'aiojobs', 'attrs', 'backoff', 'ujson'],
+    install_requires=['aiohttp', 'aiojobs', 'attrs', 'backoff'],
     tests_require=['pytest', 'pytest-asyncio'],
     extras_require={'sqlite': ['aiosqlite']},
     description='Asynchronous library for Telegram bot API'

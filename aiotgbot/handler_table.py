@@ -1,7 +1,7 @@
 from typing import Callable, Iterable, List, Optional
 
-from .bot import (AbstractHandlerTable, BaseFilter, Bot, HandlerCallable,
-                  Handler)
+from .bot import (AbstractHandlerTable, BaseFilter, Bot, Handler,
+                  HandlerCallable)
 from .bot_update import BotUpdate
 from .constants import ContentType, UpdateType
 from .filters import (CallbackQueryDataFilter, CommandsFilter,

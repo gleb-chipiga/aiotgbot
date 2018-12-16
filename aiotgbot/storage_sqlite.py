@@ -1,15 +1,11 @@
 import asyncio
+import json
 from typing import Dict, List, Optional, Tuple, Union
 
 import aiosqlite
 
 from .storage import BaseStorage
 from .utils import json_dumps
-
-try:
-    import ujson as json
-except ImportError:  # pragma: no cover
-    import json  # type: ignore
 
 JsonType = Union[int, float, str, bool, Dict, List]
 

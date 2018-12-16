@@ -1,4 +1,4 @@
-from aiotgbot.exceptions import TelegramError, MigrateToChat, RetryAfter
+from aiotgbot.exceptions import MigrateToChat, RetryAfter, TelegramError
 
 
 def test_telegram_error_init():

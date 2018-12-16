@@ -1,6 +1,6 @@
-from typing import (Any, AsyncIterator, BinaryIO, Dict, Generator, List,
-                    Optional, Set, Tuple, Type, TypeVar, Union, cast,
-                    get_type_hints, Iterable)
+from typing import (Any, AsyncIterator, BinaryIO, Dict, Generator, Iterable,
+                    List, Optional, Set, Tuple, Type, TypeVar, Union, cast,
+                    get_type_hints)
 
 import attr
 
