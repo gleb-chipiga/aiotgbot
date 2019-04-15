@@ -42,6 +42,7 @@ def make_bot_update():
             'callback_query': None,
             'shipping_query': None,
             'pre_checkout_query': None,
+            'poll': None,
             **params
         }
         return BotUpdate(state, context, Update(update_id, **params))

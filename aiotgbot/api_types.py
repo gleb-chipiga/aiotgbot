@@ -178,6 +178,7 @@ class Update(BaseTelegram):
     callback_query: Optional['CallbackQuery']
     shipping_query: Optional['ShippingQuery']
     pre_checkout_query: Optional['PreCheckoutQuery']
+    poll: Optional['Poll']
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -228,6 +229,7 @@ class Message(BaseTelegram):
     forward_from_chat: Optional[Chat]
     forward_from_message_id: Optional[int]
     forward_signature: Optional[str]
+    forward_sender_name: Optional[str]
     forward_date: Optional[int]
     reply_to_message: Optional['Message']
     edit_date: Optional[int]
@@ -249,6 +251,7 @@ class Message(BaseTelegram):
     contact: Optional['Contact']
     location: Optional['Location']
     venue: Optional['Venue']
+    poll: Optional['Poll']
     new_chat_members: Optional[Tuple[User, ...]]
     left_chat_member: Optional[User]
     new_chat_title: Optional[str]
@@ -365,6 +368,20 @@ class Venue(BaseTelegram):
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
+class PollOption(BaseTelegram):
+    text: str
+    voter_count: int
+
+
+@attr.s(slots=True, frozen=True, auto_attribs=True)
+class Poll(BaseTelegram):
+    id: str
+    question: str
+    options: Tuple[PollOption, ...]
+    is_closed: bool
+
+
+@attr.s(slots=True, frozen=True, auto_attribs=True)
 class UserProfilePhotos(BaseTelegram):
     total_count: int
     photos: Tuple[Tuple[PhotoSize, ...], ...]
@@ -457,6 +474,7 @@ class ChatMember(BaseTelegram):
     can_restrict_members: Optional[bool]
     can_pin_messages: Optional[bool]
     can_promote_members: Optional[bool]
+    is_member: Optional[bool]
     can_send_messages: Optional[bool]
     can_send_media_messages: Optional[bool]
     can_send_other_messages: Optional[bool]
