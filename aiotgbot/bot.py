@@ -8,9 +8,9 @@ from typing import (Any, Awaitable, Callable, Dict, Iterator, MutableMapping,
                     Optional, Tuple, Union, cast)
 
 import aiohttp
-import aiojobs
+import aiojobs  # type: ignore
 import attr
-import backoff
+import backoff  # type: ignore
 
 from .api_methods import ApiMethods, ParamsType
 from .api_types import APIResponse, Chat, StreamFile, Update, User
