@@ -2,10 +2,11 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, Iterable, Optional, Tuple, Union
 
-from .api_types import (APIResponse, BaseTelegram, Chat, ChatMember, File,
-                        GameHighScore, InlineKeyboardMarkup, InlineQueryResult,
-                        InputFile, InputMedia, InputMediaPhoto,
-                        InputMediaVideo, LabeledPrice, MaskPosition, Message,
+from .api_types import (APIResponse, BaseTelegram, Chat, ChatMember,
+                        ChatPermissions, File, GameHighScore,
+                        InlineKeyboardMarkup, InlineQueryResult, InputFile,
+                        InputMedia, InputMediaPhoto, InputMediaVideo,
+                        LabeledPrice, MaskPosition, Message,
                         PassportElementError, Poll, ReplyMarkup,
                         ShippingOption, StickerSet, Update, User,
                         UserProfilePhotos, WebhookInfo)
@@ -28,6 +29,7 @@ def _parse_mode_to_str(parse_mode: Optional[ParseMode]) -> Optional[str]:
 
 
 ParamsType = Dict[str, Union[int, float, str, InputFile, InputMedia,
+                             ChatPermissions,
                              Iterable[str],
                              Dict[str, InputFile],
                              Iterable[LabeledPrice],
@@ -470,20 +472,13 @@ class ApiMethods(ABC):
     async def restrict_chat_member(
         self, chat_id: Union[int, str],
         user_id: int,
+        permissions: ChatPermissions,
         until_date: Optional[int] = None,
-        can_send_messages: Optional[bool] = None,
-        can_send_media_messages: Optional[bool] = None,
-        can_send_other_messages: Optional[bool] = None,
-        can_add_web_page_previews: Optional[bool] = None
     ) -> bool:
         response = await self._request(
             RequestMethod.POST, 'restrictChatMember', params={
                 'chat_id': chat_id, 'user_id': user_id,
-                'until_date': until_date,
-                'can_send_messages': can_send_messages,
-                'can_send_media_messages': can_send_media_messages,
-                'can_send_other_messages': can_send_other_messages,
-                'can_add_web_page_previews': can_add_web_page_previews})
+                'permissions': permissions, 'until_date': until_date})
 
         return response.result
 
@@ -517,6 +512,16 @@ class ApiMethods(ABC):
         response = await self._request(RequestMethod.POST,
                                        'exportChatInviteLink',
                                        params={'chat_id': chat_id})
+
+        return response.result
+
+    async def set_chat_permissions(
+        self, chat_id: Union[int, str],
+        permissions: ChatPermissions
+    ) -> bool:
+        response = await self._safe_request(
+            RequestMethod.POST, 'setChatPermissions', chat_id,
+            params={'permissions': permissions})
 
         return response.result
 

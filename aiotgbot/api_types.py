@@ -212,11 +212,11 @@ class Chat(BaseTelegram):
     username: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
-    all_members_are_administrators: Optional[bool]
     photo: Optional['ChatPhoto']
     description: Optional[str]
     invite_link: Optional[str]
     pinned_message: Optional['Message']
+    permissions: Optional['ChatPermissions'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -489,6 +489,19 @@ class ChatMember(BaseTelegram):
     can_send_media_messages: Optional[bool]
     can_send_other_messages: Optional[bool]
     can_add_web_page_previews: Optional[bool]
+    can_send_polls: Optional[bool]
+
+
+@attr.s(slots=True, frozen=True, auto_attribs=True)
+class ChatPermissions(BaseTelegram):
+    can_send_messages: Optional[bool] = None
+    can_send_media_messages: Optional[bool] = None
+    can_send_polls: Optional[bool] = None
+    can_send_other_messages: Optional[bool] = None
+    can_add_web_page_previews: Optional[bool] = None
+    can_change_info: Optional[bool] = None
+    can_invite_users: Optional[bool] = None
+    can_pin_messages: Optional[bool] = None
 
 
 InputMedia = Union['InputMediaAnimation',
@@ -560,6 +573,7 @@ class Sticker(BaseTelegram):
     file_id: str
     width: int
     height: int
+    is_animated: bool
     thumb: Optional[PhotoSize]
     emoji: Optional[str]
     set_name: Optional[str]
@@ -571,6 +585,7 @@ class Sticker(BaseTelegram):
 class StickerSet(BaseTelegram):
     name: str
     title: str
+    is_animated: bool
     contains_masks: bool
     stickers: Tuple[Sticker, ...]
 
