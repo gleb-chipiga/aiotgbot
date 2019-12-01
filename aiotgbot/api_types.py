@@ -267,6 +267,7 @@ class Message(BaseTelegram):
     successful_payment: Optional['SuccessfulPayment']
     connected_website: Optional[str]
     passport_data: Optional['PassportData']
+    reply_markup: Optional['InlineKeyboardMarkup']
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -430,11 +431,20 @@ class InlineKeyboardMarkup(BaseTelegram):
 class InlineKeyboardButton(BaseTelegram):
     text: str
     url: Optional[str] = None
+    login_url: Optional['LoginUrl'] = None
     callback_data: Optional[str] = None
     switch_inline_query: Optional[str] = None
     switch_inline_query_current_chat: Optional[str] = None
     callback_game: Optional['CallbackGame'] = None
     pay: Optional[bool] = None
+
+
+@attr.s(slots=True, frozen=True, auto_attribs=True)
+class LoginUrl(BaseTelegram):
+    url: str
+    forward_text: Optional[str]
+    bot_username: Optional[str]
+    request_write_access: Optional[bool] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
