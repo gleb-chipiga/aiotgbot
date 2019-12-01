@@ -1,4 +1,4 @@
-__version__ = '0.2.0.dev1'
+__version__ = '0.3.0.dev1'
 
 from .api_types import (BaseTelegram, CallbackQuery, Chat, ChosenInlineResult,
                         Contact, File, InlineKeyboardButton,
