@@ -206,8 +206,6 @@ class User(BaseTelegram):
     can_join_groups: Optional[bool]
     can_read_all_group_messages: Optional[bool]
     supports_inline_queries: Optional[bool]
-    sticker_set_name: Optional[str]
-    can_set_sticker_set: Optional[bool]
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -222,8 +220,10 @@ class Chat(BaseTelegram):
     description: Optional[str]
     invite_link: Optional[str]
     pinned_message: Optional['Message']
-    permissions: Optional['ChatPermissions'] = None
-    slow_mode_delay: Optional[int] = None
+    permissions: Optional['ChatPermissions']
+    slow_mode_delay: Optional[int]
+    sticker_set_name: Optional[str]
+    can_set_sticker_set: Optional[bool]
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
