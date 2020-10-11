@@ -1,6 +1,6 @@
 from typing import (Any, AsyncIterator, BinaryIO, Dict, Generator, Iterable,
                     List, Optional, Set, Tuple, Type, TypeVar, Union, cast,
-                    get_type_hints)
+                    get_args, get_origin, get_type_hints)
 
 import attr
 
@@ -17,24 +17,24 @@ class StreamFile:
 
 
 def _is_tuple(_type: Any) -> bool:
-    return getattr(_type, '__origin__', None) is tuple
+    return get_origin(_type) is tuple
 
 
 def _is_list(_type: Any) -> bool:
-    return getattr(_type, '__origin__', None) is list
+    return get_origin(_type) is list
 
 
 def _is_union(_type: Any) -> bool:
-    return getattr(_type, '__origin__', None) is Union
+    return get_origin(_type) is Union
 
 
 def _is_optional(_type: Any) -> bool:
-    return _type is Any or (_is_union(_type) and type(None) in _type.__args__)
+    return _type is Any or (_is_union(_type) and type(None) in get_args(_type))
 
 
 def _is_attr_union(_type: Any) -> bool:
     return _is_union(_type) and all(attr.has(arg_type) or arg_type is _NoneType
-                                    for arg_type in _type.__args__)
+                                    for arg_type in get_args(_type))
 
 
 _NoneType: Type[None] = type(None)
@@ -118,20 +118,20 @@ class BaseTelegram:
         elif _type is Any:
             return value
         elif _is_tuple(_type) and isinstance(value, list):
-            return tuple(BaseTelegram.handle_field(_type.__args__[0], item)
+            return tuple(BaseTelegram.handle_field(get_args(_type)[0], item)
                          for item in value)
         elif _is_list(_type) and isinstance(value, list):
-            return [BaseTelegram.handle_field(_type.__args__[0], item)
+            return [BaseTelegram.handle_field(get_args(_type)[0], item)
                     for item in value]
         elif _is_list(_type) or _is_tuple(_type):
             raise DataMappingError(f'Data "{value}" is not list')
         elif _is_optional(_type) and value is None:
             return None
-        elif _is_optional(_type) and len(_type.__args__) == 2:
-            return BaseTelegram.handle_field(_type.__args__[0], value)
+        elif _is_optional(_type) and len(get_args(_type)) == 2:
+            return BaseTelegram.handle_field(get_args(_type)[0], value)
         elif _is_attr_union(_type) and isinstance(value, dict):
             types: List[Tuple[int, Any]] = []
-            for arg_type in _type.__args__:
+            for arg_type in get_args(_type):
                 fields: Set[str] = set(key.rstrip('_') for key
                                        in get_type_hints(arg_type).keys())
                 data_keys: Set[str] = set(value.keys())
@@ -139,7 +139,7 @@ class BaseTelegram:
                     continue
                 types.append((len(fields & data_keys), arg_type))
             if len(types) == 0:
-                arg_types = ', '.join(t.__name__ for t in _type.__args__)
+                arg_types = ', '.join(t.__name__ for t in get_args(_type))
                 message = f'Data "{value}" not match any of "{arg_types}"'
                 raise DataMappingError(message)
             types = sorted(types, key=lambda t: t[0], reverse=True)
