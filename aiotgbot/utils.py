@@ -2,63 +2,9 @@ import asyncio
 import json
 from contextlib import asynccontextmanager, suppress
 from functools import partial
-from html import escape
-from typing import Any, AsyncGenerator, Dict, Iterable, Optional
-
-from .api_types import MessageEntity
-from .constants import MessageEntityType
+from typing import Any, AsyncGenerator, Dict, Optional
 
 json_dumps = partial(json.dumps, ensure_ascii=False)
-
-
-def entity_to_html(entity: MessageEntity, message_text: str) -> str:
-    if message_text == '':
-        return message_text
-
-    message_bytes = message_text.encode('utf-16-le')
-    entity_bytes = message_bytes[entity.offset * 2:(entity.offset +
-                                                    entity.length) * 2]
-    entity_text = entity_bytes.decode('utf-16-le')
-
-    if entity.type == MessageEntityType.BOLD:
-        return f'<b>{escape(entity_text)}</b>'
-    elif entity.type == MessageEntityType.ITALIC:
-        return f'<i>{escape(entity_text)}</i>'
-    elif entity.type == MessageEntityType.PRE:
-        return f'<pre>{escape(entity_text)}</pre>'
-    elif entity.type == MessageEntityType.CODE:
-        return f'<code>{escape(entity_text)}</code>'
-    elif entity.type == MessageEntityType.TEXT_LINK:
-        return f'<a href="{entity.url}">{escape(entity_text)}</a>'
-    elif (entity.type == MessageEntityType.TEXT_MENTION and
-          entity.user is not None):
-        username = entity.user.username
-        return f'<a href="https://t.me/{username}">{escape(entity_text)}</a>'
-    else:
-        return entity_text
-
-
-def entities_to_html(entities: Optional[Iterable[MessageEntity]],
-                     message_text: str) -> str:
-    if entities is None:
-        return message_text
-
-    message_bytes = message_text.encode('utf-16-le')
-    result = ''
-    offset = 0
-
-    for entity in sorted(entities, key=lambda _entity: _entity.offset):
-        entity_text = entity_to_html(entity, message_text)
-
-        part = message_bytes[offset * 2:entity.offset * 2]
-        result += escape(part.decode('utf-16-le')) + entity_text
-
-        offset = entity.offset + entity.length
-
-    part = message_bytes[offset * 2:]
-    result += escape(part.decode('utf-16-le'))
-
-    return result
 
 
 class KeyLock:

@@ -49,6 +49,8 @@ class MessageEntityType(str, Enum):
     PRE = 'pre'
     TEXT_LINK = 'text_link'
     TEXT_MENTION = 'text_mention'
+    UNDERLINE = 'underline'
+    STRIKETHROUGH = 'strikethrough'
 
 
 class UpdateType(str, Enum):
@@ -95,3 +97,4 @@ class ContentType(str, Enum):
 class ParseMode(str, Enum):
     MARKDOWN = 'Markdown'
     HTML = 'HTML'
+    MARKDOWN2 = 'Markdown2'

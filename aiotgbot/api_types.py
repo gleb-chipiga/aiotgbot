@@ -217,6 +217,7 @@ class Chat(BaseTelegram):
     invite_link: Optional[str]
     pinned_message: Optional['Message']
     permissions: Optional['ChatPermissions'] = None
+    slow_mode_delay: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -282,6 +283,7 @@ class MessageEntity(BaseTelegram):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class PhotoSize(BaseTelegram):
     file_id: str
+    file_unique_id: str
     width: int
     height: int
     file_size: int
@@ -290,6 +292,7 @@ class PhotoSize(BaseTelegram):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Audio(BaseTelegram):
     file_id: str
+    file_unique_id: str
     duration: int
     performer: Optional[str]
     title: Optional[str]
@@ -301,6 +304,7 @@ class Audio(BaseTelegram):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Document(BaseTelegram):
     file_id: str
+    file_unique_id: str
     thumb: Optional[PhotoSize]
     file_name: Optional[str]
     mime_type: Optional[str]
@@ -310,6 +314,7 @@ class Document(BaseTelegram):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Video(BaseTelegram):
     file_id: str
+    file_unique_id: str
     width: int
     height: int
     duration: int
@@ -321,6 +326,7 @@ class Video(BaseTelegram):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Animation(BaseTelegram):
     file_id: str
+    file_unique_id: str
     thumb: Optional[PhotoSize]
     file_name: Optional[str]
     mime_type: Optional[str]
@@ -330,6 +336,7 @@ class Animation(BaseTelegram):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Voice(BaseTelegram):
     file_id: str
+    file_unique_id: str
     duration: int
     mime_type: Optional[str]
     file_size: Optional[int]
@@ -338,6 +345,7 @@ class Voice(BaseTelegram):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class VideoNote(BaseTelegram):
     file_id: str
+    file_unique_id: str
     length: int
     duration: int
     thumb: Optional[PhotoSize]
@@ -391,6 +399,7 @@ class UserProfilePhotos(BaseTelegram):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class File(BaseTelegram):
     file_id: str
+    file_unique_id: str
     file_size: Optional[int]
     file_path: Optional[str]
 
@@ -467,13 +476,16 @@ class ForceReply(BaseTelegram):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class ChatPhoto(BaseTelegram):
     small_file_id: str
+    small_file_unique_id: str
     big_file_id: str
+    big_file_unique_id: str
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class ChatMember(BaseTelegram):
     user: User
     status: str
+    custom_title: str
     until_date: Optional[int]
     can_be_edited: Optional[bool]
     can_change_info: Optional[bool]
@@ -571,6 +583,7 @@ InputFile = Union[BinaryIO, StreamFile]
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Sticker(BaseTelegram):
     file_id: str
+    file_unique_id: str
     width: int
     height: int
     is_animated: bool
@@ -1012,6 +1025,7 @@ class PassportData(BaseTelegram):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class PassportFile(BaseTelegram):
     file_id: str
+    file_unique_id: str
     file_size: int
     file_date: int
 

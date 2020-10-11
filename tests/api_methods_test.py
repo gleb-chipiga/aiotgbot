@@ -183,6 +183,7 @@ async def test_api_methods_send_chat_action(bot):
 async def test_api_methods_get_file(bot):
     _file = File.from_dict({
         'file_id': '1',
+        'file_unique_id': '2',
         'file_size': 11,
         'file_path': 'path'
     })

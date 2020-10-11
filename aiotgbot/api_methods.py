@@ -508,6 +508,19 @@ class ApiMethods(ABC):
 
         return response.result
 
+    async def set_chat_administrator_custom_title(
+        self, chat_id: Union[int, str],
+        user_id: int,
+        custom_title: str
+    ) -> bool:
+        response = await self._request(
+            RequestMethod.POST, 'setChatAdministratorCustomTitle', params={
+                'chat_id': chat_id,
+                'user_id': user_id,
+                'custom_title': custom_title})
+
+        return response.result
+
     async def export_chat_invite_link(self, chat_id: Union[int, str]) -> str:
         response = await self._request(RequestMethod.POST,
                                        'exportChatInviteLink',
