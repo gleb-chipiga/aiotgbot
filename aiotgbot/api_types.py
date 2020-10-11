@@ -239,6 +239,7 @@ class Message(BaseTelegram):
     forward_sender_name: Optional[str]
     forward_date: Optional[int]
     reply_to_message: Optional['Message']
+    via_bot: Optional[User]
     edit_date: Optional[int]
     media_group_id: Optional[str]
     author_signature: Optional[str]
