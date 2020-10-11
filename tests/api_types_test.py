@@ -5,9 +5,10 @@ import pytest
 
 from aiotgbot.api_types import (BaseTelegram, CallbackQuery,
                                 ChosenInlineResult, DataMappingError,
-                                InlineQuery, Message, PreCheckoutQuery,
-                                ShippingQuery, _is_attr_union, _is_optional,
-                                _is_tuple, _is_union)
+                                InlineQuery, KeyboardButtonPollType, Message,
+                                Poll, PreCheckoutQuery, ShippingQuery,
+                                _is_attr_union, _is_optional, _is_tuple,
+                                _is_union)
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -231,7 +232,11 @@ def test_base():
     ('from', ShippingQuery, True, False),
     ('from_', ShippingQuery, False, True),
     ('from', PreCheckoutQuery, True, False),
-    ('from_', PreCheckoutQuery, False, True)
+    ('from_', PreCheckoutQuery, False, True),
+    ('type', Poll, True, False),
+    ('type_', Poll, False, True),
+    ('type', KeyboardButtonPollType, True, False),
+    ('type_', KeyboardButtonPollType, False, True)
 ))
 def test_fixed_hints(_str, _type, in_keys, in_fields):
     assert (_str in [k for k, f, t in _type.get_type_hints()]) is in_keys

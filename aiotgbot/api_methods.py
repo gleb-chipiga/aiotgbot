@@ -10,7 +10,7 @@ from .api_types import (APIResponse, BaseTelegram, Chat, ChatMember,
                         PassportElementError, Poll, ReplyMarkup,
                         ShippingOption, StickerSet, Update, User,
                         UserProfilePhotos, WebhookInfo)
-from .constants import ChatAction, ParseMode, RequestMethod
+from .constants import ChatAction, ParseMode, PollType, RequestMethod
 from .utils import json_dumps
 
 api_logger = logging.getLogger('aiotgbot.api')
@@ -411,7 +411,11 @@ class ApiMethods(ABC):
         return Message.from_dict(response.result)
 
     async def send_poll(self, chat_id: Union[int, str], question: str,
-                        options: Iterable[str],
+                        options: Iterable[str], is_anonymous: Optional[bool],
+                        type_: Optional[PollType] = None,
+                        allows_multiple_answers: Optional[bool] = None,
+                        correct_option_id: Optional[bool] = None,
+                        is_closed: Optional[bool] = None,
                         disable_notification: Optional[bool] = None,
                         reply_to_message_id: Optional[int] = None,
                         reply_markup: Optional[ReplyMarkup] = None) -> Message:
@@ -419,6 +423,11 @@ class ApiMethods(ABC):
         response = await self._safe_request(
             RequestMethod.POST, 'sendPoll', chat_id, params={
                 'question': question, 'options': options,
+                'is_anonymous': is_anonymous,
+                'type': type_,
+                'allows_multiple_answers': allows_multiple_answers,
+                'correct_option_id': correct_option_id,
+                'is_closed': is_closed,
                 'disable_notification': disable_notification,
                 'reply_to_message_id': reply_to_message_id,
                 'reply_markup': _to_json(reply_markup)})

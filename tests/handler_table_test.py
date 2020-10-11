@@ -310,7 +310,8 @@ async def test_handler_get_handler():
         'callback_query': None,
         'shipping_query': None,
         'pre_checkout_query': None,
-        'poll': None
+        'poll': None,
+        'poll_answer': None
     }
     bu1 = BotUpdate('state1', ctx, Update(update_id=1, **params))
     assert await ht.get_handler(_bot, bu1) == func

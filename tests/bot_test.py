@@ -70,7 +70,8 @@ async def test_handler_check():
         'callback_query': None,
         'shipping_query': None,
         'pre_checkout_query': None,
-        'poll': None
+        'poll': None,
+        'poll_answer': None
     }
     bu1 = BotUpdate('state1', ctx, Update(update_id=1, **params))
     assert await handler.check(_bot, bu1)

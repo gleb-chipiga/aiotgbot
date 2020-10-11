@@ -4,6 +4,8 @@ from typing import (Any, AsyncIterator, BinaryIO, Dict, Generator, Iterable,
 
 import attr
 
+from aiotgbot.constants import PollType
+
 
 class DataMappingError(BaseException):
     pass
@@ -179,6 +181,7 @@ class Update(BaseTelegram):
     shipping_query: Optional['ShippingQuery']
     pre_checkout_query: Optional['PreCheckoutQuery']
     poll: Optional['Poll']
+    poll_answer: Optional['PollAnswer']
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -200,6 +203,9 @@ class User(BaseTelegram):
     last_name: Optional[str]
     username: Optional[str]
     language_code: Optional[str]
+    can_join_groups: Optional[bool]
+    can_read_all_group_messages: Optional[bool]
+    supports_inline_queries: Optional[bool]
     sticker_set_name: Optional[str]
     can_set_sticker_set: Optional[bool]
 
@@ -278,6 +284,7 @@ class MessageEntity(BaseTelegram):
     length: int
     url: Optional[str]
     user: Optional[User]
+    language: Optional[str]
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -382,12 +389,23 @@ class PollOption(BaseTelegram):
     voter_count: int
 
 
+class PollAnswer(BaseTelegram):
+    poll_id: str
+    user: User
+    option_ids: Tuple[int, ...]
+
+
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Poll(BaseTelegram):
     id: str
     question: str
     options: Tuple[PollOption, ...]
+    total_voter_count: int
     is_closed: bool
+    is_anonymous: bool
+    type_: PollType
+    allows_multiple_answers: bool
+    correct_option_id: Optional[int]
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -423,6 +441,12 @@ class KeyboardButton(BaseTelegram):
     text: str
     request_contact: Optional[bool] = None
     request_location: Optional[bool] = None
+    request_poll: Optional['KeyboardButtonPollType'] = None
+
+
+@attr.s(slots=True, frozen=True, auto_attribs=True)
+class KeyboardButtonPollType(BaseTelegram):
+    type_: PollType
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)

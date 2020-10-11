@@ -25,6 +25,7 @@ def make_upd():
             'shipping_query': None,
             'pre_checkout_query': None,
             'poll': None,
+            'poll_answer': None,
             **params
         }
         return Update(update_id, **params)

@@ -98,3 +98,8 @@ class ParseMode(str, Enum):
     MARKDOWN = 'Markdown'
     HTML = 'HTML'
     MARKDOWN2 = 'Markdown2'
+
+
+class PollType(str, Enum):
+    QUIZ = 'quiz'
+    REGULAR = 'regular'
