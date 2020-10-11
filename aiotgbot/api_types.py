@@ -256,6 +256,7 @@ class Message(BaseTelegram):
     video_note: Optional['VideoNote']
     caption: Optional[str]
     contact: Optional['Contact']
+    dice: Optional['Dice']
     location: Optional['Location']
     venue: Optional['Venue']
     poll: Optional['Poll']
@@ -366,6 +367,12 @@ class Contact(BaseTelegram):
     last_name: Optional[str]
     user_id: Optional[int]
     vcard: Optional[int]
+
+
+@attr.s(slots=True, frozen=True, auto_attribs=True)
+class Dice(BaseTelegram):
+    emoji: str
+    value: int
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -540,6 +547,12 @@ class ChatPermissions(BaseTelegram):
     can_pin_messages: Optional[bool] = None
 
 
+@attr.s(slots=True, frozen=True, auto_attribs=True)
+class BotCommand(BaseTelegram):
+    command: str
+    description: str
+
+
 InputMedia = Union['InputMediaAnimation',
                    'InputMediaDocument',
                    'InputMediaAudio',
@@ -625,6 +638,7 @@ class StickerSet(BaseTelegram):
     is_animated: bool
     contains_masks: bool
     stickers: Tuple[Sticker, ...]
+    thumb: Optional[PhotoSize]
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)

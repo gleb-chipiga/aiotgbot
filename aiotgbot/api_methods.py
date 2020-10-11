@@ -2,15 +2,16 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Dict, Iterable, Optional, Tuple, Union
 
-from .api_types import (APIResponse, BaseTelegram, Chat, ChatMember,
-                        ChatPermissions, File, GameHighScore,
+from .api_types import (APIResponse, BaseTelegram, BotCommand, Chat,
+                        ChatMember, ChatPermissions, File, GameHighScore,
                         InlineKeyboardMarkup, InlineQueryResult, InputFile,
                         InputMedia, InputMediaPhoto, InputMediaVideo,
                         LabeledPrice, MaskPosition, Message,
                         PassportElementError, Poll, ReplyMarkup,
                         ShippingOption, StickerSet, Update, User,
                         UserProfilePhotos, WebhookInfo)
-from .constants import ChatAction, ParseMode, PollType, RequestMethod
+from .constants import (ChatAction, DiceEmoji, ParseMode, PollType,
+                        RequestMethod)
 from .utils import json_dumps
 
 api_logger = logging.getLogger('aiotgbot.api')
@@ -26,6 +27,10 @@ def _strs_to_json(value: Optional[Iterable[str]]) -> Optional[str]:
 
 def _parse_mode_to_str(parse_mode: Optional[ParseMode]) -> Optional[str]:
     return parse_mode.value if parse_mode is not None else None
+
+
+def _dice_emoji_to_str(dice_emoji: Optional[DiceEmoji]) -> Optional[str]:
+    return dice_emoji.value if dice_emoji is not None else None
 
 
 ParamsType = Dict[str, Union[int, float, str, InputFile, InputMedia,
@@ -434,6 +439,21 @@ class ApiMethods(ABC):
 
         return response.result
 
+    async def send_dice(self, chat_id: Union[int, str],
+                        emoji: Optional[DiceEmoji] = None,
+                        disable_notification: Optional[bool] = None,
+                        reply_to_message_id: Optional[int] = None,
+                        reply_markup: Optional[ReplyMarkup] = None) -> Message:
+        api_logger.debug('Send dice "%s" to chat %s', emoji, chat_id)
+        response = await self._safe_request(
+            RequestMethod.POST, 'sendDice', chat_id, params={
+                'emoji': _dice_emoji_to_str(emoji),
+                'disable_notification': disable_notification,
+                'reply_to_message_id': reply_to_message_id,
+                'reply_markup': _to_json(reply_markup)})
+
+        return response.result
+
     async def send_chat_action(self, chat_id: Union[int, str],
                                action: ChatAction) -> bool:
         api_logger.debug('Send action "%s" to chat %s', action, chat_id)
@@ -660,6 +680,21 @@ class ApiMethods(ABC):
 
         return response.result
 
+    async def set_my_commands(self, commands: Iterable[BotCommand]) -> bool:
+        api_logger.debug('Set my commands "%s"', commands)
+        response = await self._request(
+            RequestMethod.POST, 'setMyCommands', params={
+                'commands': json_dumps(tuple(command.to_dict()
+                                             for command in commands))})
+
+        return response.result
+
+    async def get_my_commands(self) -> Tuple[BotCommand, ...]:
+        api_logger.debug('Get my commands')
+        response = await self._request(RequestMethod.GET, 'getMyCommands')
+
+        return tuple(BotCommand.from_dict(item) for item in response.result)
+
     async def edit_message_text(
         self,
         text: str,
@@ -796,15 +831,17 @@ class ApiMethods(ABC):
         return File.from_dict(response.result)
 
     async def create_new_sticker_set(
-        self, user_id: int, name: str, title: str,
-        png_sticker: Union[InputFile, str], emojis: str,
+        self, user_id: int, name: str, title: str, emojis: str,
+        png_sticker: Union[InputFile, str, None] = None,
+        tgs_sticker: Optional[InputFile] = None,
         contains_masks: Optional[bool] = None,
         mask_position: Optional[MaskPosition] = None
     ) -> bool:
         response = await self._request(
             RequestMethod.POST, 'createNewStickerSet', params={
                 'user_id': user_id, 'name': name, 'title': title,
-                'png_sticker': png_sticker, 'emojis': emojis,
+                'emojis': emojis, 'png_sticker': png_sticker,
+                'tgs_sticker': tgs_sticker,
                 'contains_masks': contains_masks,
                 'mask_position': _to_json(mask_position)})
 
@@ -832,9 +869,22 @@ class ApiMethods(ABC):
         return response.result
 
     async def delete_sticker_from_set(self, sticker: str) -> bool:
-        response = await self._request(RequestMethod.POST,
-                                       'deleteStickerFromSet',
-                                       params={'sticker': sticker})
+        response = await self._request(
+            RequestMethod.POST, 'deleteStickerFromSet',
+            params={'sticker': sticker})
+
+        return response.result
+
+    async def set_sticker_set_thumb(
+            self, name: str, user_id: int,
+            thumb: Union[InputFile, str, None] = None
+    ) -> bool:
+        api_logger.debug('Set sticker set "%s" owned by "%s" thumb',
+                         name, user_id)
+        response = await self._request(
+            RequestMethod.POST, 'setStickerSetThumb', params={
+                'name': name, 'user_id': user_id, 'thumb': thumb
+            })
 
         return response.result
 

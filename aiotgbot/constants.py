@@ -103,3 +103,9 @@ class ParseMode(str, Enum):
 class PollType(str, Enum):
     QUIZ = 'quiz'
     REGULAR = 'regular'
+
+
+class DiceEmoji(str, Enum):
+    DICE = '🎲'
+    DARTS = '🎯'
+    BASKETBALL = '🏀'
