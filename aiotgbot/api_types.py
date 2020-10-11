@@ -413,6 +413,10 @@ class Poll(BaseTelegram):
     type_: PollType
     allows_multiple_answers: bool
     correct_option_id: Optional[int]
+    explanation: Optional[str]
+    explanation_entities: Tuple[MessageEntity, ...]
+    open_period: Optional[int]
+    close_date: Optional[int]
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)

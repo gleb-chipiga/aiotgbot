@@ -434,6 +434,10 @@ class ApiMethods(ABC):
                         allows_multiple_answers: Optional[bool] = None,
                         correct_option_id: Optional[bool] = None,
                         is_closed: Optional[bool] = None,
+                        explanation: Optional[str] = None,
+                        explanation_parse_mode: Optional[ParseMode] = None,
+                        open_period: Optional[int] = None,
+                        close_date: Optional[int] = None,
                         disable_notification: Optional[bool] = None,
                         reply_to_message_id: Optional[int] = None,
                         reply_markup: Optional[ReplyMarkup] = None) -> Message:
@@ -446,6 +450,10 @@ class ApiMethods(ABC):
                 'allows_multiple_answers': allows_multiple_answers,
                 'correct_option_id': correct_option_id,
                 'is_closed': is_closed,
+                'explanation': explanation,
+                'explanation_parse_mode': explanation_parse_mode,
+                'open_period': open_period,
+                'close_date': close_date,
                 'disable_notification': disable_notification,
                 'reply_to_message_id': reply_to_message_id,
                 'reply_markup': _to_json(reply_markup)})
