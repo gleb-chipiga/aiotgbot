@@ -12,7 +12,7 @@ mypy:
 test:
 	python -m pytest tests
 cov:
-	python -m pytest --cov=telegram --cov-report html tests
+	python -m pytest --cov=aiotgbot --cov-report html tests
 clean:
 	rm -rf __pycache__
 	rm -rf .mypy_cache
