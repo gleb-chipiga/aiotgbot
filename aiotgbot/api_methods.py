@@ -111,7 +111,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
-        api_logger.debug('Send message "%s" to chat %s', text, chat_id)
+        api_logger.debug('Send message "%s" to chat "%s"', text, chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendMessage', chat_id, params={
                 'text': text,
@@ -127,7 +127,7 @@ class ApiMethods(ABC):
         self, chat_id: Union[int, str], from_chat_id: Union[int, str],
         message_id: int, disable_notification: Optional[bool] = None
     ) -> Message:
-        api_logger.debug('Forward message %s to %s from %s', message_id,
+        api_logger.debug('Forward message %s to "%s" from "%s"', message_id,
                          chat_id, from_chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'forwardMessage', chat_id, params={
@@ -145,6 +145,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
+        api_logger.debug('Send photo to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendPhoto', chat_id, params={
                 'photo': photo, 'caption': caption,
@@ -168,6 +169,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
+        api_logger.debug('Send audio to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendAudio', chat_id, params={
                 'audio': audio, 'caption': caption,
@@ -193,6 +195,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
+        api_logger.debug('Send document to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendDocument', chat_id, params={
                 'document': document, 'thumb': thumb, 'caption': caption,
@@ -218,6 +221,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
+        api_logger.debug('Send video to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendVideo', chat_id, params={
                 'video': video, 'duration': duration, 'width': width,
@@ -243,6 +247,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
+        api_logger.debug('Send animation to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendAnimation', chat_id, params={
                 'animation': animation, 'duration': duration, 'width': width,
@@ -264,6 +269,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
+        api_logger.debug('Send voice to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendVoice', chat_id, params={
                 'voice': voice, 'caption': caption,
@@ -285,6 +291,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
+        api_logger.debug('Send video not to "%s"', chat_id)
         response = await self._safe_request(
              RequestMethod.POST, 'sendVideoNote', chat_id, params={
                 'video_note': video_note, 'duration': duration,
@@ -302,6 +309,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         attachments: Optional[Dict[str, InputFile]] = None
     ) -> Tuple[Message, ...]:
+        api_logger.debug('Send media group to "%s"', chat_id)
         params: ParamsType = {
             'media': json_dumps(tuple(item.to_dict() for item in media)),
             'disable_notification': disable_notification,
@@ -324,6 +332,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
+        api_logger.debug('Send location to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'editMessageLiveLocation', chat_id, params={
                 'latitude': latitude, 'longitude': longitude,
@@ -343,6 +352,7 @@ class ApiMethods(ABC):
         inline_message_id: Optional[str] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Union[Message, bool]:
+        api_logger.debug('Edit live location %s in "%s"', message_id, chat_id)
         response = await self._request(
             RequestMethod.POST, 'editMessageLiveLocation', params={
                 'chat_id': chat_id, 'message_id': message_id,
@@ -361,6 +371,7 @@ class ApiMethods(ABC):
         inline_message_id: Optional[str] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Union[Message, bool]:
+        api_logger.debug('Stop live location %s in "%s"', message_id, chat_id)
         response = await self._request(
             RequestMethod.POST, 'stopMessageLiveLocation', params={
                 'chat_id': chat_id, 'message_id': message_id,
@@ -384,6 +395,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
+        api_logger.debug('Send venue to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendVenue', chat_id, params={
                 'latitude': latitude, 'longitude': longitude, 'title': title,
@@ -405,6 +417,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
+        api_logger.debug('Send contact to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendContact', chat_id, params={
                 'phone_number': phone_number, 'first_name': first_name,
@@ -424,7 +437,7 @@ class ApiMethods(ABC):
                         disable_notification: Optional[bool] = None,
                         reply_to_message_id: Optional[int] = None,
                         reply_markup: Optional[ReplyMarkup] = None) -> Message:
-        api_logger.debug('Send poll "%s" to chat %s', question, chat_id)
+        api_logger.debug('Send poll to chat "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendPoll', chat_id, params={
                 'question': question, 'options': options,
@@ -444,7 +457,7 @@ class ApiMethods(ABC):
                         disable_notification: Optional[bool] = None,
                         reply_to_message_id: Optional[int] = None,
                         reply_markup: Optional[ReplyMarkup] = None) -> Message:
-        api_logger.debug('Send dice "%s" to chat %s', emoji, chat_id)
+        api_logger.debug('Send dice "%s" to chat "%s"', emoji, chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendDice', chat_id, params={
                 'emoji': _dice_emoji_to_str(emoji),
@@ -456,7 +469,7 @@ class ApiMethods(ABC):
 
     async def send_chat_action(self, chat_id: Union[int, str],
                                action: ChatAction) -> bool:
-        api_logger.debug('Send action "%s" to chat %s', action, chat_id)
+        api_logger.debug('Send action "%s" to chat "%s"', action, chat_id)
         response = await self._safe_request(RequestMethod.POST,
                                             'sendChatAction', chat_id,
                                             params={'action': action.value})
@@ -468,6 +481,8 @@ class ApiMethods(ABC):
         offset: Optional[int] = None,
         limit: Optional[int] = None
     ) -> UserProfilePhotos:
+        api_logger.debug('Get user profile photos %s offset %s limit %s',
+                         user_id, offset, limit)
         response = await self._request(RequestMethod.GET,
                                        'getUserProfilePhotos', params={
                                            'user_id': user_id,
@@ -492,6 +507,7 @@ class ApiMethods(ABC):
 
     async def unban_chat_member(self, chat_id: Union[int, str],
                                 user_id: int) -> bool:
+        api_logger.debug('Unban member %s in "%s"', user_id, chat_id)
         response = await self._request(RequestMethod.POST, 'unbanChatMember',
                                        params={'chat_id': chat_id,
                                                'user_id': user_id})
@@ -504,6 +520,7 @@ class ApiMethods(ABC):
         permissions: ChatPermissions,
         until_date: Optional[int] = None,
     ) -> bool:
+        api_logger.debug('Restrict member %s in "%s"', user_id, chat_id)
         response = await self._request(
             RequestMethod.POST, 'restrictChatMember', params={
                 'chat_id': chat_id, 'user_id': user_id,
@@ -523,6 +540,7 @@ class ApiMethods(ABC):
         can_pin_messages: Optional[bool] = None,
         can_promote_members: Optional[bool] = None
     ) -> bool:
+        api_logger.debug('Promote member %s in "%s"', user_id, chat_id)
         response = await self._request(
             RequestMethod.POST, 'promoteChatMember', params={
                 'chat_id': chat_id, 'user_id': user_id,
@@ -542,6 +560,8 @@ class ApiMethods(ABC):
         user_id: int,
         custom_title: str
     ) -> bool:
+        api_logger.debug('Set title "%s" for admin %s in "%s"',
+                         custom_title, user_id, chat_id)
         response = await self._request(
             RequestMethod.POST, 'setChatAdministratorCustomTitle', params={
                 'chat_id': chat_id,
@@ -551,6 +571,7 @@ class ApiMethods(ABC):
         return response.result
 
     async def export_chat_invite_link(self, chat_id: Union[int, str]) -> str:
+        api_logger.debug('Export chat "%s" invite link', chat_id)
         response = await self._request(RequestMethod.POST,
                                        'exportChatInviteLink',
                                        params={'chat_id': chat_id})
@@ -561,6 +582,7 @@ class ApiMethods(ABC):
         self, chat_id: Union[int, str],
         permissions: ChatPermissions
     ) -> bool:
+        api_logger.debug('Set chat "%s" permissions', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'setChatPermissions', chat_id,
             params={'permissions': permissions})
@@ -571,12 +593,14 @@ class ApiMethods(ABC):
         self, chat_id: Union[int, str],
         photo: InputFile
     ) -> bool:
+        api_logger.debug('Set chat "%s" photo', chat_id)
         response = await self._safe_request(RequestMethod.POST, 'setChatPhoto',
                                             chat_id, params={'photo': photo})
 
         return response.result
 
     async def delete_chat_photo(self, chat_id: Union[int, str]) -> bool:
+        api_logger.debug('Delete chat "%s" photo', chat_id)
         response = await self._request(RequestMethod.POST, 'deleteChatPhoto',
                                        params={'chat_id': chat_id})
 
@@ -584,6 +608,7 @@ class ApiMethods(ABC):
 
     async def set_chat_title(self, chat_id: Union[int, str],
                              title: str) -> bool:
+        api_logger.debug('Set title "%s" for chat "%s"', title, chat_id)
         response = await self._request(RequestMethod.POST, 'setChatTitle',
                                        params={'chat_id': chat_id,
                                                'title': title})
@@ -592,6 +617,7 @@ class ApiMethods(ABC):
 
     async def set_chat_description(self, chat_id: Union[int, str],
                                    description: str) -> bool:
+        api_logger.debug('Set chat "%s" description', chat_id)
         response = await self._request(
             RequestMethod.POST, 'setChatDescription', params={
                 'chat_id': chat_id, 'description': description})
@@ -602,6 +628,7 @@ class ApiMethods(ABC):
         self, chat_id: Union[int, str], message_id: int,
         disable_notification: Optional[bool] = None
     ) -> bool:
+        api_logger.debug('Pin message %s in chat "%s"', message_id, chat_id)
         response = await self._request(
             RequestMethod.POST, 'pinChatMessage', params={
                 'chat_id': chat_id, 'message_id': message_id,
@@ -610,13 +637,14 @@ class ApiMethods(ABC):
         return response.result
 
     async def unpin_chat_message(self, chat_id: Union[int, str]) -> bool:
+        api_logger.debug('Unpin message in chat "%s"', chat_id)
         response = await self._request(RequestMethod.POST, 'unpinChatMessage',
                                        params={'chat_id': chat_id})
 
         return response.result
 
     async def leave_chat(self, chat_id: Union[int, str]) -> bool:
-        api_logger.debug('Leave chat %s', chat_id)
+        api_logger.debug('Leave chat "%s"', chat_id)
         response = await self._request(RequestMethod.POST, 'leaveChat',
                                        params={'chat_id': chat_id})
 
@@ -631,6 +659,7 @@ class ApiMethods(ABC):
     async def get_chat_administrators(
         self, chat_id: Union[int, str]
     ) -> Tuple[ChatMember, ...]:
+        api_logger.debug('Get chat administrators "%s"', chat_id)
         response = await self._request(RequestMethod.GET,
                                        'getChatAdministrators',
                                        params={'chat_id': chat_id})
@@ -638,6 +667,7 @@ class ApiMethods(ABC):
         return tuple(ChatMember.from_dict(item) for item in response.result)
 
     async def get_chat_members_count(self, chat_id: Union[int, str]) -> int:
+        api_logger.debug('Get chat members count "%s"', chat_id)
         response = await self._request(
             RequestMethod.GET, 'getChatMembersCount',
             params={'chat_id': chat_id})
@@ -646,6 +676,7 @@ class ApiMethods(ABC):
 
     async def get_chat_member(self, chat_id: Union[int, str],
                               user_id: int) -> ChatMember:
+        api_logger.debug('Get chat "%s" member %s', chat_id, user_id)
         response = await self._request(RequestMethod.GET, 'getChatMember',
                                        params={'chat_id': chat_id,
                                                'user_id': user_id})
@@ -654,6 +685,8 @@ class ApiMethods(ABC):
 
     async def set_chat_sticker_set(self, chat_id: Union[int, str],
                                    sticker_set_name: str) -> bool:
+        api_logger.debug('Set chat "%s" sticker set "%s"', chat_id,
+                         sticker_set_name)
         response = await self._request(
             RequestMethod.POST, 'setChatStickerSet', params={
                 'chat_id': chat_id, 'sticker_set_name': sticker_set_name})
@@ -661,6 +694,7 @@ class ApiMethods(ABC):
         return response.result
 
     async def delete_chat_sticker_set(self, chat_id: Union[int, str]) -> bool:
+        api_logger.debug('Delete chat "%s" sticker set', chat_id)
         response = await self._request(RequestMethod.POST,
                                        'deleteChatStickerSet',
                                        params={'chat_id': chat_id})
@@ -672,6 +706,7 @@ class ApiMethods(ABC):
                                     show_alert: Optional[bool] = None,
                                     url: Optional[str] = None,
                                     cache_time: Optional[int] = None) -> bool:
+        api_logger.debug('Answer callback query "%s"', callback_query_id)
         response = await self._request(
             RequestMethod.POST, 'answerCallbackQuery', params={
                 'callback_query_id': callback_query_id, 'text': text,
@@ -705,6 +740,12 @@ class ApiMethods(ABC):
         disable_web_page_preview: Optional[bool] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Union[Message, bool]:
+        if inline_message_id is None:
+            api_logger.debug('Edit message %s in "%s" text',
+                             message_id, chat_id)
+        else:
+            api_logger.debug('Edit inline message "%s" text',
+                             inline_message_id)
         response = await self._request(
             RequestMethod.POST, 'editMessageText', params={
                 'chat_id': chat_id, 'message_id': message_id,
@@ -726,6 +767,12 @@ class ApiMethods(ABC):
         parse_mode: Optional[ParseMode] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Union[Message, bool]:
+        if inline_message_id is None:
+            api_logger.debug('Edit message %s in "%s" caption',
+                             message_id, chat_id)
+        else:
+            api_logger.debug('Edit inline message "%s" caption',
+                             inline_message_id)
         response = await self._request(
             RequestMethod.POST, 'editMessageCaption', params={
                 'chat_id': chat_id, 'message_id': message_id,
@@ -747,6 +794,12 @@ class ApiMethods(ABC):
         reply_markup: Optional[InlineKeyboardMarkup] = None,
         attachments: Optional[Dict[str, InputFile]] = None
     ) -> Union[Message, bool]:
+        if inline_message_id is None:
+            api_logger.debug('Edit message %s in "%s" media',
+                             message_id, chat_id)
+        else:
+            api_logger.debug('Edit inline message "%s" media',
+                             inline_message_id)
         params: ParamsType = {
             'chat_id': chat_id, 'message_id': message_id,
             'inline_message_id': inline_message_id,
@@ -769,6 +822,12 @@ class ApiMethods(ABC):
         inline_message_id: Optional[str] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Union[Message, bool]:
+        if inline_message_id is None:
+            api_logger.debug('Edit message %s in "%s" reply markup',
+                             message_id, chat_id)
+        else:
+            api_logger.debug('Edit inline message "%s" reply markup',
+                             inline_message_id)
         response = await self._request(
             RequestMethod.POST, 'editMessageReplyMarkup', params={
                 'chat_id': chat_id, 'message_id': message_id,
@@ -785,6 +844,7 @@ class ApiMethods(ABC):
         message_id: int = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Poll:
+        api_logger.debug('Stop poll %s in "%s"', message_id, chat_id)
         response = await self._request(
             RequestMethod.POST, 'stopPoll', params={
                 'chat_id': chat_id, 'message_id': message_id,
@@ -794,6 +854,7 @@ class ApiMethods(ABC):
 
     async def delete_message(self, chat_id: Optional[Union[int, str]] = None,
                              message_id: Optional[int] = None) -> bool:
+        api_logger.debug('Delete message %s in "%s"', message_id, chat_id)
         response = await self._request(RequestMethod.POST, 'deleteMessage',
                                        params={'chat_id': chat_id,
                                                'message_id': message_id})
@@ -807,6 +868,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
+        api_logger.debug('Send sticker to "%s"', chat_id)
         response = await self._request(
             RequestMethod.POST, 'sendSticker', params={
                 'chat_id': chat_id, 'sticker': sticker,
@@ -817,6 +879,7 @@ class ApiMethods(ABC):
         return Message.from_dict(response.result)
 
     async def get_sticker_set(self, name: str) -> StickerSet:
+        api_logger.debug('Get sticker set "%s"', name)
         response = await self._request(RequestMethod.GET, 'getStickerSet',
                                        params={'name': name})
 
@@ -824,6 +887,7 @@ class ApiMethods(ABC):
 
     async def upload_sticker_file(self, user_id: int,
                                   png_sticker: InputFile) -> File:
+        api_logger.debug('Upload sticker file for %s', user_id)
         response = await self._request(RequestMethod.POST, 'uploadStickerFile',
                                        params={'user_id': user_id,
                                                'png_sticker': png_sticker})
@@ -837,6 +901,7 @@ class ApiMethods(ABC):
         contains_masks: Optional[bool] = None,
         mask_position: Optional[MaskPosition] = None
     ) -> bool:
+        api_logger.debug('Create new sticker set "%s" for %s', name, user_id)
         response = await self._request(
             RequestMethod.POST, 'createNewStickerSet', params={
                 'user_id': user_id, 'name': name, 'title': title,
@@ -852,6 +917,7 @@ class ApiMethods(ABC):
         png_sticker: Union[InputFile, str], emojis: str,
         mask_position: Optional[MaskPosition] = None
     ) -> File:
+        api_logger.debug('Add sticker to set "%s" for %s', name, user_id)
         response = await self._request(
             RequestMethod.POST, 'addStickerToSet', params={
                 'user_id': user_id, 'name': name, 'title': title,
@@ -862,6 +928,7 @@ class ApiMethods(ABC):
 
     async def set_sticker_position_in_set(self, sticker: str,
                                           position: int) -> bool:
+        api_logger.debug('Set sticker "%s" position to %s', sticker, position)
         response = await self._request(
             RequestMethod.POST, 'setStickerPositionInSet',
             params={'sticker': sticker, 'position': position})
@@ -869,6 +936,7 @@ class ApiMethods(ABC):
         return response.result
 
     async def delete_sticker_from_set(self, sticker: str) -> bool:
+        api_logger.debug('Delete sticker "%s" from set', sticker)
         response = await self._request(
             RequestMethod.POST, 'deleteStickerFromSet',
             params={'sticker': sticker})
@@ -895,6 +963,7 @@ class ApiMethods(ABC):
         switch_pm_text: Optional[str] = None,
         switch_pm_parameter: Optional[str] = None
     ) -> bool:
+        api_logger.debug('Answer inline query "%s"', inline_query_id)
         response = await self._request(
             RequestMethod.POST, 'answerInlineQuery', params={
                 'inline_query_id': inline_query_id,
@@ -923,6 +992,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Message:
+        api_logger.debug('Send invoice to %s', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendInvoice', chat_id, params={
                 'title': title, 'description': description, 'payload': payload,
@@ -951,6 +1021,7 @@ class ApiMethods(ABC):
         shipping_options: Optional[Iterable[ShippingOption]] = None,
         error_message: Optional[str] = None
     ) -> bool:
+        api_logger.debug('Answer shipping query "%s"', inline_query_id)
         if shipping_options is not None:
             shipping_options_json: Optional[str] = json_dumps(tuple(
                 item.to_dict() for item in shipping_options))
@@ -968,6 +1039,8 @@ class ApiMethods(ABC):
         self, pre_checkout_query_id: str, ok: bool,
         error_message: Optional[str] = None
     ) -> bool:
+        api_logger.debug('Answer pre checkout query "%s"',
+                         pre_checkout_query_id)
         response = await self._request(
             RequestMethod.POST, 'answerPreCheckoutQuery', params={
                 'pre_checkout_query_id': pre_checkout_query_id, 'ok': ok,
@@ -979,6 +1052,7 @@ class ApiMethods(ABC):
         self, user_id: int,
         errors: Iterable[PassportElementError]
     ) -> bool:
+        api_logger.debug('Set passport data errors %s', user_id)
         response = await self._request(
             RequestMethod.POST, 'setPassportDataErrors', params={
                 'user_id': user_id,
@@ -993,6 +1067,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Message:
+        api_logger.debug('Send game "%s" to %s', chat_id, game_short_name)
         response = await self._safe_request(
             RequestMethod.POST, 'sendGame', chat_id, params={
                 'game_short_name': game_short_name,
@@ -1009,6 +1084,7 @@ class ApiMethods(ABC):
         chat_id: Optional[int] = None, message_id: Optional[int] = None,
         inline_message_id: Optional[str] = None
     ) -> Union[Message, bool]:
+        api_logger.debug('Set game score %s for %s', score, user_id)
         response = await self._request(
             RequestMethod.POST, 'setGameScore', params={
                 'user_id': user_id, 'score': score,
@@ -1026,6 +1102,7 @@ class ApiMethods(ABC):
         message_id: Optional[int] = None,
         inline_message_id: Optional[str] = None
     ) -> Tuple[GameHighScore, ...]:
+        api_logger.debug('Get game high scores for %s', user_id)
         response = await self._request(
             RequestMethod.POST, 'getGameHighScores', params={
                 'user_id': user_id, 'chat_id': chat_id,
