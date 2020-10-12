@@ -1,11 +1,13 @@
-from enum import Enum
+from enum import Enum, unique
 
 
+@unique
 class RequestMethod(str, Enum):
     GET = 'GET'
     POST = 'POST'
 
 
+@unique
 class ChatType(str, Enum):
     PRIVATE = 'private'
     GROUP = 'group'
@@ -13,6 +15,7 @@ class ChatType(str, Enum):
     CHANNEL = 'channel'
 
 
+@unique
 class ChatAction(str, Enum):
     TYPING = 'typing'
     UPLOAD_PHOTO = 'upload_photo'
@@ -26,6 +29,7 @@ class ChatAction(str, Enum):
     UPLOAD_VIDEO_NOTE = 'upload_video_note'
 
 
+@unique
 class ChatMemberStatus(str, Enum):
     CREATOR = 'creator'
     ADMINISTRATOR = 'administrator'
@@ -35,6 +39,7 @@ class ChatMemberStatus(str, Enum):
     KICKED = 'kicked'
 
 
+@unique
 class MessageEntityType(str, Enum):
     MENTION = 'mention'
     HASHTAG = 'hashtag'
@@ -53,6 +58,7 @@ class MessageEntityType(str, Enum):
     STRIKETHROUGH = 'strikethrough'
 
 
+@unique
 class UpdateType(str, Enum):
     MESSAGE = 'message'
     EDITED_MESSAGE = 'edited_message'
@@ -65,6 +71,7 @@ class UpdateType(str, Enum):
     PRE_CHECKOUT_QUERY = 'pre_checkout_query'
 
 
+@unique
 class ContentType(str, Enum):
     TEXT = 'text'
     AUDIO = 'audio'
@@ -94,17 +101,20 @@ class ContentType(str, Enum):
     PASSPORT_DATA = 'passport_data'
 
 
+@unique
 class ParseMode(str, Enum):
     MARKDOWN = 'Markdown'
     HTML = 'HTML'
     MARKDOWN2 = 'Markdown2'
 
 
+@unique
 class PollType(str, Enum):
     QUIZ = 'quiz'
     REGULAR = 'regular'
 
 
+@unique
 class DiceEmoji(str, Enum):
     DICE = '🎲'
     DARTS = '🎯'
