@@ -41,7 +41,6 @@ def _is_attr_union(_type: Any) -> bool:
 
 _NoneType: Type[None] = type(None)
 _FieldType = Union[int, str, bool, float, Tuple, List, 'BaseTelegram']
-_TelegramType = TypeVar('_TelegramType', bound='BaseTelegram')
 _HintsGenerator = Generator[Tuple[str, str, Any], None, None]
 
 
@@ -82,18 +81,18 @@ class BaseTelegram:
         return _list
 
     @classmethod
-    def get_type_hints(cls: Type[_TelegramType]) -> _HintsGenerator:
+    def get_type_hints(cls: Type['_TelegramType']) -> _HintsGenerator:
         return ((field.rstrip('_'), field, _type)
                 for field, _type in get_type_hints(cls).items())
 
     @classmethod
-    def from_dict(cls: Type[_TelegramType],
-                  data: Dict[str, Any]) -> _TelegramType:
+    def from_dict(cls: Type['_TelegramType'],
+                  data: Dict[str, Any]) -> '_TelegramType':
         return BaseTelegram.handle_object(cls, data)
 
     @staticmethod
-    def handle_object(cls: Type[_TelegramType],
-                      data: Dict[str, Any]) -> _TelegramType:
+    def handle_object(cls: Type['_TelegramType'],
+                      data: Dict[str, Any]) -> '_TelegramType':
         required = set(field for field, _, _type in cls.get_type_hints()
                        if not _is_optional(_type))
         filled = set(key for key, value in data.items() if value is not None)
@@ -151,6 +150,9 @@ class BaseTelegram:
         else:
             message = f'Data "{value}" not match field type "{_type}"'
             raise DataMappingError(message)
+
+
+_TelegramType = TypeVar('_TelegramType', bound=BaseTelegram)
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
