@@ -6,3 +6,5 @@ aiotgbot/init.py
 aiotgbot.egg-info
 dist
 examples
+htmlcov
+.coverage
