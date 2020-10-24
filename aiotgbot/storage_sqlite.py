@@ -2,7 +2,7 @@ import asyncio
 import json
 from typing import Dict, List, Optional, Tuple, Union
 
-import aiosqlite  # type: ignore
+import aiosqlite
 
 from .storage import BaseStorage
 from .utils import json_dumps
