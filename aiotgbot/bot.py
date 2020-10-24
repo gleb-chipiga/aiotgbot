@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 from functools import partial
 from http import HTTPStatus
 from signal import SIGINT, SIGTERM
-from typing import (Any, Awaitable, Callable, Dict, Iterator, MutableMapping,
-                    Optional, Tuple, Union, cast)
+from typing import (Any, Awaitable, Callable, Dict, Final, Iterator,
+                    MutableMapping, Optional, Tuple, Union, cast)
 
 import aiohttp
 import aiojobs  # type: ignore
@@ -21,14 +21,14 @@ from .exceptions import (BadGateway, BotBlocked, BotKicked, MigrateToChat,
 from .storage import BaseStorage
 from .utils import FreqLimit, KeyLock, json_dumps
 
-TG_API_URL = 'https://api.telegram.org/bot{token}/{method}'
-TG_FILE_URL = 'https://api.telegram.org/file/bot{token}/{path}'
-TG_GET_UPDATES_TIMEOUT = 60
-STATE_PREFIX = 'state'
-CONTEXT_PREFIX = 'context'
-MESSAGE_INTERVAL = 1 / 30
-CHAT_INTERVAL = 1
-GROUP_INTERVAL = 3
+TG_API_URL: Final[str] = 'https://api.telegram.org/bot{token}/{method}'
+TG_FILE_URL: Final[str] = 'https://api.telegram.org/file/bot{token}/{path}'
+TG_GET_UPDATES_TIMEOUT: Final[int] = 60
+STATE_PREFIX: Final[str] = 'state'
+CONTEXT_PREFIX: Final[str] = 'context'
+MESSAGE_INTERVAL: Final[float] = 1 / 30
+CHAT_INTERVAL: Final[float] = 1
+GROUP_INTERVAL: Final[float] = 3
 
 bot_logger = logging.getLogger('aiotgbot.bot')
 response_logger = logging.getLogger('aiotgbot.response')
