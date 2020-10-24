@@ -78,7 +78,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
     @property
     def client(self) -> aiohttp.ClientSession:
         if self._client is None:
-            raise RuntimeError('Acceess to client during bot is not runned.')
+            raise RuntimeError('Access to client during bot is not running.')
         else:
             return self._client
 
@@ -333,7 +333,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
                 await self._storage.set(state_key, bot_update.state)
                 await self._storage.set(context_key,
                                         bot_update.context.to_dict())
-                bot_logger.debug('Setted context for update "%s"',
+                bot_logger.debug('Set context for update "%s"',
                                  update.update_id)
             else:
                 bot_logger.debug('Not found handler for update "%s". Skip.',
