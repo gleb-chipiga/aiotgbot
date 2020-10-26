@@ -31,18 +31,18 @@ class SQLiteStorage(BaseStorage):
         self._connection: Optional[aiosqlite.Connection] = None
 
     async def connection(self) -> aiosqlite.Connection:
-        self._connection_lock = asyncio.Lock()
+        if self._connection_lock is None:
+            self._connection_lock = asyncio.Lock()
 
         async with self._connection_lock:
             if self._connection is None:
-                connection = aiosqlite.connect(
+                self._connection = await aiosqlite.connect(
                     self._database,
                     isolation_level=(self._isolation_level.value
                                      if self._isolation_level is not None
                                      else None),
                     **self._kwargs
                 )
-                self._connection = await connection.__aenter__()
                 async with self._connection.cursor() as cursor:
                     await cursor.execute('CREATE TABLE IF NOT EXISTS kv'
                                          '(key TEXT PRIMARY KEY, value TEXT)')
@@ -52,9 +52,8 @@ class SQLiteStorage(BaseStorage):
     async def close(self) -> None:
         if self._connection_lock is not None:
             async with self._connection_lock:
-                if self._connection:
-                    await self._connection.__aexit__(None, None, None)
-                    del self._connection
+                if self._connection is not None:
+                    await self._connection.close()
                     self._connection = None
 
     async def set(self, key: str, value: Optional[JsonType] = None) -> None:
