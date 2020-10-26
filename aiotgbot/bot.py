@@ -5,7 +5,7 @@ from functools import partial
 from http import HTTPStatus
 from signal import SIGINT, SIGTERM
 from typing import (Any, Awaitable, Callable, Dict, Final, Iterator,
-                    MutableMapping, Optional, Tuple, Union, cast)
+                    MutableMapping, Optional, Protocol, Tuple, Union, cast)
 
 import aiohttp
 import aiojobs  # type: ignore
@@ -36,24 +36,29 @@ response_logger = logging.getLogger('aiotgbot.response')
 EventHandler = Callable[['Bot'], Awaitable[None]]
 
 
+class _SchedulerProtocol(Protocol):
+    async def spawn(self, coro: Awaitable[Any]) -> Any: ...
+    async def close(self) -> None: ...
+
+
 class Bot(MutableMapping[str, Any], ApiMethods):
 
     def __init__(self, token: str, handler_table: 'AbstractHandlerTable',
                  storage: BaseStorage) -> None:
-        self._token = token
+        self._token: str = token
         self._handler_table: AbstractHandlerTable = handler_table
-        self._storage = storage
+        self._storage: BaseStorage = storage
         self._client: Optional[aiohttp.ClientSession] = None
         self._context_lock: Optional[KeyLock] = None
         self._message_limit: Optional[FreqLimit] = None
         self._chat_limit: Optional[FreqLimit] = None
         self._group_limit: Optional[FreqLimit] = None
-        self._scheduler: Any = None
-        self._updates_offset = 0
+        self._scheduler: Optional[_SchedulerProtocol] = None
+        self._updates_offset: int = 0
         self._me: Optional[User] = None
         self._on_shutdown: Optional[EventHandler] = None
         self._poll_task: Optional[asyncio.Task] = None
-        self._polling_started = False
+        self._polling_started: bool = False
         self._data: Dict[str, Any] = {}
 
     def __getitem__(self, key: str) -> Any:
@@ -268,6 +273,8 @@ class Bot(MutableMapping[str, Any], ApiMethods):
 
     @backoff.on_exception(backoff.expo, TelegramError)
     async def _poll(self) -> None:
+        assert self._scheduler is not None, 'Scheduler not initialized'
+
         bot_logger.debug('Get updates from: %s', self._updates_offset)
         while self._polling_started:
             updates = await self.get_updates(offset=self._updates_offset,
