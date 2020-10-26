@@ -5,7 +5,7 @@ from functools import partial
 from http import HTTPStatus
 from signal import SIGINT, SIGTERM
 from typing import (Any, Awaitable, Callable, Dict, Final, Iterator,
-                    MutableMapping, Optional, Protocol, Tuple, Union, cast)
+                    MutableMapping, Optional, Protocol, Tuple, Union)
 
 import aiohttp
 import aiojobs  # type: ignore
@@ -13,7 +13,7 @@ import attr
 import backoff  # type: ignore
 
 from .api_methods import ApiMethods, ParamsType
-from .api_types import APIResponse, Chat, StreamFile, Update, User
+from .api_types import APIResponse, StreamFile, Update, User
 from .bot_update import BotUpdate, Context
 from .constants import ChatType, RequestMethod
 from .exceptions import (BadGateway, BotBlocked, BotKicked, MigrateToChat,
@@ -166,14 +166,17 @@ class Bot(MutableMapping[str, Any], ApiMethods):
 
     @staticmethod
     def _telegram_exception(api_response: APIResponse) -> TelegramError:
-        error_code = cast(int, api_response.error_code)
-        description = cast(str, api_response.description)
+        error_code = api_response.error_code
+        assert error_code is not None
+        description = api_response.description
+        assert description is not None
         if (
             api_response.parameters is not None and
             api_response.parameters.retry_after is not None
         ):
-            return RetryAfter(error_code, description,
-                              cast(int, api_response.parameters.retry_after))
+            retry_after = api_response.parameters.retry_after
+            assert retry_after is not None
+            return RetryAfter(error_code, description, retry_after)
         elif (api_response.parameters is not None and
               api_response.parameters.migrate_to_chat_id is not None):
             return MigrateToChat(error_code, description,
@@ -291,15 +294,21 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         chat_id: Optional[int] = None
 
         if update.message is not None:
-            user_id = cast(User, update.message.from_).id
-            chat_id = cast(Chat, update.message.chat).id
+            assert update.message.from_ is not None
+            user_id = update.message.from_.id
+            assert update.message.chat is not None
+            chat_id = update.message.chat.id
         elif update.edited_message is not None:
-            user_id = cast(User, update.edited_message.from_).id
-            chat_id = cast(Chat, update.edited_message.chat).id
+            assert update.edited_message.from_ is not None
+            user_id = update.edited_message.from_.id
+            assert update.edited_message.chat is not None
+            chat_id = update.edited_message.chat.id
         elif update.channel_post is not None:
-            chat_id = cast(Chat, update.channel_post.chat).id
+            assert update.channel_post.chat is not None
+            chat_id = update.channel_post.chat.id
         elif update.edited_channel_post is not None:
-            chat_id = cast(Chat, update.edited_channel_post.chat).id
+            assert update.edited_channel_post.chat is not None
+            chat_id = update.edited_channel_post.chat.id
         elif update.inline_query is not None:
             user_id = update.inline_query.from_.id
         elif update.chosen_inline_result is not None:
@@ -307,7 +316,8 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         elif (update.callback_query is not None and
               update.callback_query.message is not None):
             user_id = update.callback_query.from_.id
-            chat_id = cast(Chat, update.callback_query.message.chat).id
+            assert update.callback_query.message.chat is not None
+            chat_id = update.callback_query.message.chat.id
         elif update.callback_query is not None:
             user_id = update.callback_query.from_.id
         elif update.shipping_query is not None:
