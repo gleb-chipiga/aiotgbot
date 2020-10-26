@@ -245,12 +245,12 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         request = partial(self._request, http_method=http_method,
                           api_method=api_method, params=params)
 
-        if self._message_limit is None:
-            raise RuntimeError('Message limit not initialized')
-        if self._group_limit is None:
-            raise RuntimeError('Group limit not initialized')
-        if self._chat_limit is None:
-            raise RuntimeError('Chat limit not initialized')
+        assert self._message_limit is not None, 'Message limit not initialized'
+        assert self._group_limit is not None, 'Group limit not initialized'
+        assert self._chat_limit is not None, 'Chat limit not initialized'
+
+        if not self._polling_started:
+            raise RuntimeError('Polling not started')
 
         chat = await self.get_chat(chat_id)
         while True:
@@ -323,8 +323,9 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         update_state = self._update_state(update)
         state_key = f'{STATE_PREFIX}|{update_state}'
         context_key = f'{CONTEXT_PREFIX}|{update_state}'
-        if self._context_lock is None:
-            raise RuntimeError('Context lock not initialized')
+
+        assert self._context_lock is not None, 'Context lock not initialized'
+
         async with self._context_lock.acquire(state_key):
             state = await self._storage.get(state_key)
             context_dict = await self._storage.get(context_key)
