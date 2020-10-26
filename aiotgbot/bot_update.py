@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterator, MutableMapping, Optional
+from typing import Any, Dict, Final, Iterator, MutableMapping, Optional
 
 from .api_types import (CallbackQuery, ChosenInlineResult, InlineQuery,
                         Message, PreCheckoutQuery, ShippingQuery, Update)
@@ -37,9 +37,9 @@ class BotUpdate(MutableMapping[str, Any]):
 
     def __init__(self, state: str, context: Context,
                  update: Update) -> None:
-        self._state = state
-        self._context = context
-        self._update = update
+        self._state: str = state
+        self._context: Final[Context] = context
+        self._update: Final[Update] = update
         self._data: Dict[str, Any] = {}
 
     def __getitem__(self, key: str) -> Any:

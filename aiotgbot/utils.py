@@ -2,7 +2,7 @@ import asyncio
 import json
 from contextlib import asynccontextmanager, suppress
 from functools import partial
-from typing import Any, AsyncGenerator, Dict, Optional
+from typing import Any, AsyncGenerator, Dict, Final, Optional
 
 json_dumps = partial(json.dumps, ensure_ascii=False)
 
@@ -29,9 +29,9 @@ class FreqLimit:
                  '_clean_event', '_clean_task')
 
     def __init__(self, interval: float, clean_interval: float = 0) -> None:
-        self._interval = interval
-        self._clean_interval = (clean_interval if clean_interval > 0
-                                else interval)
+        self._interval: Final = interval
+        self._clean_interval: Final = (clean_interval if clean_interval > 0
+                                       else interval)
         self._events: Dict[Any, asyncio.Event] = {}
         self._ts: Dict[Any, float] = {}
         self._clean_event = asyncio.Event()

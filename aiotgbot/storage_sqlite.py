@@ -1,6 +1,8 @@
 import asyncio
 import json
-from typing import Dict, List, Optional, Tuple, Union
+from enum import Enum
+from pathlib import Path
+from typing import Dict, Final, List, Optional, Tuple, Union
 
 import aiosqlite
 
@@ -10,12 +12,20 @@ from .utils import json_dumps
 JsonType = Union[int, float, str, bool, Dict, List]
 
 
+class IsolationLevel(str, Enum):
+    DEFERRED = 'DEFERRED'
+    IMMEDIATE = 'IMMEDIATE'
+    EXCLUSIVE = 'EXCLUSIVE'
+
+
 class SQLiteStorage(BaseStorage):
 
-    def __init__(self, database=None, isolation_level=None, **kwargs) -> None:
-        self._database = database
-        self._isolation_level = isolation_level
-        self._kwargs = kwargs
+    def __init__(self, database: Union[str, Path],
+                 isolation_level: Optional[IsolationLevel] = None,
+                 **kwargs) -> None:
+        self._database: Final[Union[str, Path]] = database
+        self._isolation_level: Final = isolation_level
+        self._kwargs: Final = kwargs
 
         self._connection_lock: Optional[asyncio.Lock] = None
         self._connection: Optional[aiosqlite.Connection] = None
@@ -26,8 +36,12 @@ class SQLiteStorage(BaseStorage):
         async with self._connection_lock:
             if self._connection is None:
                 connection = aiosqlite.connect(
-                    self._database, isolation_level=self._isolation_level,
-                    **self._kwargs)
+                    self._database,
+                    isolation_level=(self._isolation_level.value
+                                     if self._isolation_level is not None
+                                     else None),
+                    **self._kwargs
+                )
                 self._connection = await connection.__aenter__()
                 async with self._connection.cursor() as cursor:
                     await cursor.execute('CREATE TABLE IF NOT EXISTS kv'

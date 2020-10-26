@@ -45,9 +45,9 @@ class Bot(MutableMapping[str, Any], ApiMethods):
 
     def __init__(self, token: str, handler_table: 'AbstractHandlerTable',
                  storage: BaseStorage) -> None:
-        self._token: str = token
-        self._handler_table: AbstractHandlerTable = handler_table
-        self._storage: BaseStorage = storage
+        self._token: Final[str] = token
+        self._handler_table: Final[AbstractHandlerTable] = handler_table
+        self._storage: Final[BaseStorage] = storage
         self._client: Optional[aiohttp.ClientSession] = None
         self._context_lock: Optional[KeyLock] = None
         self._message_limit: Optional[FreqLimit] = None
