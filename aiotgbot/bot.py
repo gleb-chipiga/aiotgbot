@@ -129,8 +129,9 @@ class Bot(MutableMapping[str, Any], ApiMethods):
             await self._poll_task
         except asyncio.CancelledError:
             pass
-        except Exception:
-            bot_logger.exception('Error while polling updates')
+        except Exception as exception:
+            bot_logger.exception('Error while polling updates',
+                                 exc_info=exception)
 
         await self._scheduler.close()
         await self._finish_polling()
@@ -159,11 +160,9 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         return TG_FILE_URL.format(token=self._token, path=path)
 
     @staticmethod
-    def _scheduler_exception_handler(scheduler, context):
-        try:
-            raise context['exception']
-        except Exception:
-            bot_logger.exception('Update handle error')
+    def _scheduler_exception_handler(_, context):
+        bot_logger.exception('Update handle error',
+                             exc_info=context['exception'])
 
     @staticmethod
     def _telegram_exception(api_response: APIResponse) -> TelegramError:
