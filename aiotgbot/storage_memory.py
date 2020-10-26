@@ -20,7 +20,7 @@ class MemoryStorage(BaseStorage):
         del self._data[key]
 
     async def keys(self, prefix: str) -> Tuple[str, ...]:
-        return tuple(self._data)
+        return tuple(k for k in self._data if k.startswith(prefix))
 
     async def reset_all(self) -> None:
         self._data = {}
