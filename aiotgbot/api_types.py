@@ -157,44 +157,44 @@ _TelegramType = TypeVar('_TelegramType', bound=BaseTelegram)
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class ResponseParameters(BaseTelegram):
-    migrate_to_chat_id: Optional[int]
-    retry_after: Optional[int]
+    migrate_to_chat_id: Optional[int] = None
+    retry_after: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class APIResponse(BaseTelegram):
     ok: bool
     result: Any
-    error_code: Optional[int]
-    description: Optional[str]
-    parameters: Optional[ResponseParameters]
+    error_code: Optional[int] = None
+    description: Optional[str] = None
+    parameters: Optional[ResponseParameters] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Update(BaseTelegram):
     update_id: int
-    message: Optional['Message']
-    edited_message: Optional['Message']
-    channel_post: Optional['Message']
-    edited_channel_post: Optional['Message']
-    inline_query: Optional['InlineQuery']
-    chosen_inline_result: Optional['ChosenInlineResult']
-    callback_query: Optional['CallbackQuery']
-    shipping_query: Optional['ShippingQuery']
-    pre_checkout_query: Optional['PreCheckoutQuery']
-    poll: Optional['Poll']
-    poll_answer: Optional['PollAnswer']
+    message: Optional['Message'] = None
+    edited_message: Optional['Message'] = None
+    channel_post: Optional['Message'] = None
+    edited_channel_post: Optional['Message'] = None
+    inline_query: Optional['InlineQuery'] = None
+    chosen_inline_result: Optional['ChosenInlineResult'] = None
+    callback_query: Optional['CallbackQuery'] = None
+    shipping_query: Optional['ShippingQuery'] = None
+    pre_checkout_query: Optional['PreCheckoutQuery'] = None
+    poll: Optional['Poll'] = None
+    poll_answer: Optional['PollAnswer'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class WebhookInfo(BaseTelegram):
-    url: Optional[str]
-    has_custom_certificate: Optional[bool]
-    pending_update_count: Optional[int]
-    last_error_date: Optional[int]
-    last_error_message: Optional[str]
-    max_connections: Optional[int]
     allowed_updates: Tuple[str, ...]
+    url: Optional[str] = None
+    has_custom_certificate: Optional[bool] = None
+    pending_update_count: Optional[int] = None
+    last_error_date: Optional[int] = None
+    last_error_message: Optional[str] = None
+    max_connections: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -202,83 +202,83 @@ class User(BaseTelegram):
     id: int
     is_bot: bool
     first_name: str
-    last_name: Optional[str]
-    username: Optional[str]
-    language_code: Optional[str]
-    can_join_groups: Optional[bool]
-    can_read_all_group_messages: Optional[bool]
-    supports_inline_queries: Optional[bool]
+    last_name: Optional[str] = None
+    username: Optional[str] = None
+    language_code: Optional[str] = None
+    can_join_groups: Optional[bool] = None
+    can_read_all_group_messages: Optional[bool] = None
+    supports_inline_queries: Optional[bool] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Chat(BaseTelegram):
     id: int
     type: str
-    title: Optional[str]
-    username: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    photo: Optional['ChatPhoto']
-    description: Optional[str]
-    invite_link: Optional[str]
-    pinned_message: Optional['Message']
-    permissions: Optional['ChatPermissions']
-    slow_mode_delay: Optional[int]
-    sticker_set_name: Optional[str]
-    can_set_sticker_set: Optional[bool]
+    title: Optional[str] = None
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    photo: Optional['ChatPhoto'] = None
+    description: Optional[str] = None
+    invite_link: Optional[str] = None
+    pinned_message: Optional['Message'] = None
+    permissions: Optional['ChatPermissions'] = None
+    slow_mode_delay: Optional[int] = None
+    sticker_set_name: Optional[str] = None
+    can_set_sticker_set: Optional[bool] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Message(BaseTelegram):
     message_id: int
-    from_: Optional[User]
     date: int
     chat: Chat
-    forward_from: Optional[User]
-    forward_from_chat: Optional[Chat]
-    forward_from_message_id: Optional[int]
-    forward_signature: Optional[str]
-    forward_sender_name: Optional[str]
-    forward_date: Optional[int]
-    reply_to_message: Optional['Message']
-    via_bot: Optional[User]
-    edit_date: Optional[int]
-    media_group_id: Optional[str]
-    author_signature: Optional[str]
-    text: Optional[str]
-    entities: Optional[Tuple['MessageEntity', ...]]
-    caption_entities: Optional[Tuple['MessageEntity', ...]]
-    audio: Optional['Audio']
-    document: Optional['Document']
-    animation: Optional['Animation']
-    game: Optional['Game']
-    photo: Optional[Tuple['PhotoSize', ...]]
-    sticker: Optional['Sticker']
-    video: Optional['Video']
-    voice: Optional['Voice']
-    video_note: Optional['VideoNote']
-    caption: Optional[str]
-    contact: Optional['Contact']
-    dice: Optional['Dice']
-    location: Optional['Location']
-    venue: Optional['Venue']
-    poll: Optional['Poll']
-    new_chat_members: Optional[Tuple[User, ...]]
-    left_chat_member: Optional[User]
-    new_chat_title: Optional[str]
-    new_chat_photo: Optional[Tuple['PhotoSize', ...]]
-    delete_chat_photo: Optional[bool]
-    group_chat_created: Optional[bool]
-    supergroup_chat_created: Optional[bool]
-    channel_chat_created: Optional[bool]
-    migrate_to_chat_id: Optional[int]
-    migrate_from_chat_id: Optional[int]
-    pinned_message: Optional['Message']
-    invoice: Optional['Invoice']
-    successful_payment: Optional['SuccessfulPayment']
-    connected_website: Optional[str]
-    passport_data: Optional['PassportData']
-    reply_markup: Optional['InlineKeyboardMarkup']
+    from_: Optional[User] = None
+    forward_from: Optional[User] = None
+    forward_from_chat: Optional[Chat] = None
+    forward_from_message_id: Optional[int] = None
+    forward_signature: Optional[str] = None
+    forward_sender_name: Optional[str] = None
+    forward_date: Optional[int] = None
+    reply_to_message: Optional['Message'] = None
+    via_bot: Optional[User] = None
+    edit_date: Optional[int] = None
+    media_group_id: Optional[str] = None
+    author_signature: Optional[str] = None
+    text: Optional[str] = None
+    entities: Optional[Tuple['MessageEntity', ...]] = None
+    caption_entities: Optional[Tuple['MessageEntity', ...]] = None
+    audio: Optional['Audio'] = None
+    document: Optional['Document'] = None
+    animation: Optional['Animation'] = None
+    game: Optional['Game'] = None
+    photo: Optional[Tuple['PhotoSize', ...]] = None
+    sticker: Optional['Sticker'] = None
+    video: Optional['Video'] = None
+    voice: Optional['Voice'] = None
+    video_note: Optional['VideoNote'] = None
+    caption: Optional[str] = None
+    contact: Optional['Contact'] = None
+    dice: Optional['Dice'] = None
+    location: Optional['Location'] = None
+    venue: Optional['Venue'] = None
+    poll: Optional['Poll'] = None
+    new_chat_members: Optional[Tuple[User, ...]] = None
+    left_chat_member: Optional[User] = None
+    new_chat_title: Optional[str] = None
+    new_chat_photo: Optional[Tuple['PhotoSize', ...]] = None
+    delete_chat_photo: Optional[bool] = None
+    group_chat_created: Optional[bool] = None
+    supergroup_chat_created: Optional[bool] = None
+    channel_chat_created: Optional[bool] = None
+    migrate_to_chat_id: Optional[int] = None
+    migrate_from_chat_id: Optional[int] = None
+    pinned_message: Optional['Message'] = None
+    invoice: Optional['Invoice'] = None
+    successful_payment: Optional['SuccessfulPayment'] = None
+    connected_website: Optional[str] = None
+    passport_data: Optional['PassportData'] = None
+    reply_markup: Optional['InlineKeyboardMarkup'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -286,9 +286,9 @@ class MessageEntity(BaseTelegram):
     type: str
     offset: int
     length: int
-    url: Optional[str]
-    user: Optional[User]
-    language: Optional[str]
+    url: Optional[str] = None
+    user: Optional[User] = None
+    language: Optional[str] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -305,21 +305,21 @@ class Audio(BaseTelegram):
     file_id: str
     file_unique_id: str
     duration: int
-    performer: Optional[str]
-    title: Optional[str]
-    mime_type: Optional[str]
-    file_size: Optional[int]
-    thumb: Optional[PhotoSize]
+    performer: Optional[str] = None
+    title: Optional[str] = None
+    mime_type: Optional[str] = None
+    file_size: Optional[int] = None
+    thumb: Optional[PhotoSize] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Document(BaseTelegram):
     file_id: str
     file_unique_id: str
-    thumb: Optional[PhotoSize]
-    file_name: Optional[str]
-    mime_type: Optional[str]
-    file_size: Optional[int]
+    thumb: Optional[PhotoSize] = None
+    file_name: Optional[str] = None
+    mime_type: Optional[str] = None
+    file_size: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -329,19 +329,19 @@ class Video(BaseTelegram):
     width: int
     height: int
     duration: int
-    thumb: Optional[PhotoSize]
-    mime_type: Optional[str]
-    file_size: Optional[int]
+    thumb: Optional[PhotoSize] = None
+    mime_type: Optional[str] = None
+    file_size: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Animation(BaseTelegram):
     file_id: str
     file_unique_id: str
-    thumb: Optional[PhotoSize]
-    file_name: Optional[str]
-    mime_type: Optional[str]
-    file_size: Optional[int]
+    thumb: Optional[PhotoSize] = None
+    file_name: Optional[str] = None
+    mime_type: Optional[str] = None
+    file_size: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -349,8 +349,8 @@ class Voice(BaseTelegram):
     file_id: str
     file_unique_id: str
     duration: int
-    mime_type: Optional[str]
-    file_size: Optional[int]
+    mime_type: Optional[str] = None
+    file_size: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -359,17 +359,17 @@ class VideoNote(BaseTelegram):
     file_unique_id: str
     length: int
     duration: int
-    thumb: Optional[PhotoSize]
-    file_size: Optional[int]
+    thumb: Optional[PhotoSize] = None
+    file_size: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class Contact(BaseTelegram):
     phone_number: str
     first_name: str
-    last_name: Optional[str]
-    user_id: Optional[int]
-    vcard: Optional[int]
+    last_name: Optional[str] = None
+    user_id: Optional[int] = None
+    vcard: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -389,8 +389,8 @@ class Venue(BaseTelegram):
     location: Location
     title: str
     address: str
-    foursquare_id: Optional[str]
-    foursquare_type: Optional[str]
+    foursquare_id: Optional[str] = None
+    foursquare_type: Optional[str] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -415,11 +415,11 @@ class Poll(BaseTelegram):
     is_anonymous: bool
     type_: PollType
     allows_multiple_answers: bool
-    correct_option_id: Optional[int]
-    explanation: Optional[str]
     explanation_entities: Tuple[MessageEntity, ...]
-    open_period: Optional[int]
-    close_date: Optional[int]
+    correct_option_id: Optional[int] = None
+    explanation: Optional[str] = None
+    open_period: Optional[int] = None
+    close_date: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -432,8 +432,8 @@ class UserProfilePhotos(BaseTelegram):
 class File(BaseTelegram):
     file_id: str
     file_unique_id: str
-    file_size: Optional[int]
-    file_path: Optional[str]
+    file_size: Optional[int] = None
+    file_path: Optional[str] = None
 
 
 ReplyMarkup = Union['InlineKeyboardMarkup',
@@ -489,8 +489,8 @@ class InlineKeyboardButton(BaseTelegram):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class LoginUrl(BaseTelegram):
     url: str
-    forward_text: Optional[str]
-    bot_username: Optional[str]
+    forward_text: Optional[str] = None
+    bot_username: Optional[str] = None
     request_write_access: Optional[bool] = None
 
 
@@ -498,17 +498,17 @@ class LoginUrl(BaseTelegram):
 class CallbackQuery(BaseTelegram):
     id: str
     from_: User
-    message: Optional[Message]
-    inline_message_id: Optional[str]
     chat_instance: str
-    data: Optional[str]
-    game_short_name: Optional[str]
+    message: Optional[Message] = None
+    inline_message_id: Optional[str] = None
+    data: Optional[str] = None
+    game_short_name: Optional[str] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class ForceReply(BaseTelegram):
     force_reply: bool
-    selective: Optional[bool]
+    selective: Optional[bool] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -524,22 +524,22 @@ class ChatMember(BaseTelegram):
     user: User
     status: str
     custom_title: str
-    until_date: Optional[int]
-    can_be_edited: Optional[bool]
-    can_change_info: Optional[bool]
-    can_post_messages: Optional[bool]
-    can_edit_messages: Optional[bool]
-    can_delete_messages: Optional[bool]
-    can_invite_users: Optional[bool]
-    can_restrict_members: Optional[bool]
-    can_pin_messages: Optional[bool]
-    can_promote_members: Optional[bool]
-    is_member: Optional[bool]
-    can_send_messages: Optional[bool]
-    can_send_media_messages: Optional[bool]
-    can_send_other_messages: Optional[bool]
-    can_add_web_page_previews: Optional[bool]
-    can_send_polls: Optional[bool]
+    until_date: Optional[int] = None
+    can_be_edited: Optional[bool] = None
+    can_change_info: Optional[bool] = None
+    can_post_messages: Optional[bool] = None
+    can_edit_messages: Optional[bool] = None
+    can_delete_messages: Optional[bool] = None
+    can_invite_users: Optional[bool] = None
+    can_restrict_members: Optional[bool] = None
+    can_pin_messages: Optional[bool] = None
+    can_promote_members: Optional[bool] = None
+    is_member: Optional[bool] = None
+    can_send_messages: Optional[bool] = None
+    can_send_media_messages: Optional[bool] = None
+    can_send_other_messages: Optional[bool] = None
+    can_add_web_page_previews: Optional[bool] = None
+    can_send_polls: Optional[bool] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -571,54 +571,54 @@ InputMedia = Union['InputMediaAnimation',
 class InputMediaPhoto(BaseTelegram):
     type: str
     media: str
-    caption: Optional[str]
-    parse_mode: Optional[str]
+    caption: Optional[str] = None
+    parse_mode: Optional[str] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class InputMediaVideo(BaseTelegram):
     type: str
     media: str
-    thumb: Optional[str]
-    caption: Optional[str]
-    parse_mode: Optional[str]
-    width: Optional[int]
-    height: Optional[int]
-    duration: Optional[int]
-    supports_streaming: Optional[bool]
+    thumb: Optional[str] = None
+    caption: Optional[str] = None
+    parse_mode: Optional[str] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+    duration: Optional[int] = None
+    supports_streaming: Optional[bool] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class InputMediaAnimation(BaseTelegram):
     type: str
     media: str
-    thumb: Optional[str]
-    caption: Optional[str]
-    parse_mode: Optional[str]
-    width: Optional[int]
-    height: Optional[int]
-    duration: Optional[int]
+    thumb: Optional[str] = None
+    caption: Optional[str] = None
+    parse_mode: Optional[str] = None
+    width: Optional[int] = None
+    height: Optional[int] = None
+    duration: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class InputMediaAudio(BaseTelegram):
     type: str
     media: str
-    thumb: Optional[str]
-    caption: Optional[str]
-    parse_mode: Optional[str]
-    duration: Optional[int]
-    performer: Optional[str]
-    title: Optional[str]
+    thumb: Optional[str] = None
+    caption: Optional[str] = None
+    parse_mode: Optional[str] = None
+    duration: Optional[int] = None
+    performer: Optional[str] = None
+    title: Optional[str] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class InputMediaDocument(BaseTelegram):
     type: str
     media: str
-    thumb: Optional[str]
-    caption: Optional[str]
-    parse_mode: Optional[str]
+    thumb: Optional[str] = None
+    caption: Optional[str] = None
+    parse_mode: Optional[str] = None
 
 
 InputFile = Union[BinaryIO, StreamFile]
@@ -631,11 +631,11 @@ class Sticker(BaseTelegram):
     width: int
     height: int
     is_animated: bool
-    thumb: Optional[PhotoSize]
-    emoji: Optional[str]
-    set_name: Optional[str]
-    mask_position: Optional['MaskPosition']
-    file_size: Optional[int]
+    thumb: Optional[PhotoSize] = None
+    emoji: Optional[str] = None
+    set_name: Optional[str] = None
+    mask_position: Optional['MaskPosition'] = None
+    file_size: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -645,7 +645,7 @@ class StickerSet(BaseTelegram):
     is_animated: bool
     contains_masks: bool
     stickers: Tuple[Sticker, ...]
-    thumb: Optional[PhotoSize]
+    thumb: Optional[PhotoSize] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -660,9 +660,9 @@ class MaskPosition(BaseTelegram):
 class InlineQuery(BaseTelegram):
     id: str
     from_: User
-    location: Optional[Location]
     query: str
     offset: str
+    location: Optional[Location] = None
 
 
 InlineQueryResult = Union['InlineQueryResultCachedAudio',
@@ -693,13 +693,13 @@ class InlineQueryResultArticle(BaseTelegram):
     id: str
     title: str
     input_message_content: 'InputMessageContent'
-    reply_markup: Optional[InlineKeyboardMarkup]
-    url: Optional[str]
-    hide_url: Optional[bool]
-    description: Optional[str]
-    thumb_url: Optional[str]
-    thumb_width: Optional[int]
-    thumb_height: Optional[int]
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    url: Optional[str] = None
+    hide_url: Optional[bool] = None
+    description: Optional[str] = None
+    thumb_url: Optional[str] = None
+    thumb_width: Optional[int] = None
+    thumb_height: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -708,13 +708,13 @@ class InlineQueryResultPhoto(BaseTelegram):
     td: str
     photo_url: str
     thumb_url: str
-    photo_width: Optional[int]
-    photo_height: Optional[int]
-    title: Optional[str]
-    description: Optional[str]
-    caption: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    photo_width: Optional[int] = None
+    photo_height: Optional[int] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    caption: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -722,13 +722,13 @@ class InlineQueryResultGif(BaseTelegram):
     type: str
     id: str
     gif_url: str
-    gif_width: Optional[int]
-    gif_height: Optional[int]
     thumb_url: str
-    title: Optional[str]
-    caption: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    gif_width: Optional[int] = None
+    gif_height: Optional[int] = None
+    title: Optional[str] = None
+    caption: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -736,13 +736,13 @@ class InlineQueryResultMpeg4Gif(BaseTelegram):
     type: str
     id: str
     mpeg4_url: str
-    mpeg4_width: Optional[int]
-    mpeg4_height: Optional[int]
     thumb_url: str
-    title: Optional[str]
-    caption: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    mpeg4_width: Optional[int] = None
+    mpeg4_height: Optional[int] = None
+    title: Optional[str] = None
+    caption: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -753,13 +753,13 @@ class InlineQueryResultVideo(BaseTelegram):
     mime_type: str
     thumb_url: str
     title: str
-    caption: Optional[str]
-    video_width: Optional[int]
-    video_height: Optional[int]
-    video_duration: Optional[int]
-    description: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    caption: Optional[str] = None
+    video_width: Optional[int] = None
+    video_height: Optional[int] = None
+    video_duration: Optional[int] = None
+    description: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -768,11 +768,11 @@ class InlineQueryResultAudio(BaseTelegram):
     id: str
     audio_url: str
     title: str
-    caption: Optional[str]
-    performer: Optional[str]
-    audio_duration: Optional[int]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    caption: Optional[str] = None
+    performer: Optional[str] = None
+    audio_duration: Optional[int] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -781,10 +781,10 @@ class InlineQueryResultVoice(BaseTelegram):
     id: str
     voice_url: str
     title: str
-    caption: Optional[str]
-    voice_duration: Optional[int]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    caption: Optional[str] = None
+    voice_duration: Optional[int] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -792,15 +792,15 @@ class InlineQueryResultDocument(BaseTelegram):
     type: str
     id: str
     title: str
-    caption: Optional[str]
     document_url: str
     mime_type: str
-    description: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
-    thumb_url: Optional[str]
-    thumb_width: Optional[int]
-    thumb_height: Optional[int]
+    caption: Optional[str] = None
+    description: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
+    thumb_url: Optional[str] = None
+    thumb_width: Optional[int] = None
+    thumb_height: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -810,11 +810,11 @@ class InlineQueryResultLocation(BaseTelegram):
     latitude: float
     longitude: float
     title: str
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
-    thumb_url: Optional[str]
-    thumb_width: Optional[int]
-    thumb_height: Optional[int]
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
+    thumb_url: Optional[str] = None
+    thumb_width: Optional[int] = None
+    thumb_height: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -825,13 +825,13 @@ class InlineQueryResultVenue(BaseTelegram):
     longitude: float
     title: str
     address: str
-    foursquare_id: Optional[str]
-    foursquare_type: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
-    thumb_url: Optional[str]
-    thumb_width: Optional[int]
-    thumb_height: Optional[int]
+    foursquare_id: Optional[str] = None
+    foursquare_type: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
+    thumb_url: Optional[str] = None
+    thumb_width: Optional[int] = None
+    thumb_height: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -840,13 +840,13 @@ class InlineQueryResultContact(BaseTelegram):
     id: str
     phone_number: str
     first_name: str
-    last_name: Optional[str]
-    vcard: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
-    thumb_url: Optional[str]
-    thumb_width: Optional[int]
-    thumb_height: Optional[int]
+    last_name: Optional[str] = None
+    vcard: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
+    thumb_url: Optional[str] = None
+    thumb_width: Optional[int] = None
+    thumb_height: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -854,7 +854,7 @@ class InlineQueryResultGame(BaseTelegram):
     type: str
     id: str
     game_short_name: str
-    reply_markup: Optional[InlineKeyboardMarkup]
+    reply_markup: Optional[InlineKeyboardMarkup] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -862,11 +862,11 @@ class InlineQueryResultCachedPhoto(BaseTelegram):
     type: str
     id: str
     photofileid: str
-    title: Optional[str]
-    description: Optional[str]
-    caption: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    title: Optional[str] = None
+    description: Optional[str] = None
+    caption: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -874,10 +874,10 @@ class InlineQueryResultCachedGif(BaseTelegram):
     type: str
     id: str
     gif_file_id: str
-    title: Optional[str]
-    caption: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    title: Optional[str] = None
+    caption: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -885,10 +885,10 @@ class InlineQueryResultCachedMpeg4Gif(BaseTelegram):
     type: str
     id: str
     mpeg4_file_id: str
-    title: Optional[str]
-    caption: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    title: Optional[str] = None
+    caption: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -896,8 +896,8 @@ class InlineQueryResultCachedSticker(BaseTelegram):
     type: str
     id: str
     sticker_file_id: str
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -906,10 +906,10 @@ class InlineQueryResultCachedDocument(BaseTelegram):
     id: str
     title: str
     document_file_id: str
-    description: Optional[str]
-    caption: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    description: Optional[str] = None
+    caption: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -918,10 +918,10 @@ class InlineQueryResultCachedVideo(BaseTelegram):
     id: str
     video_file_id: str
     title: str
-    description: Optional[str]
-    caption: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    description: Optional[str] = None
+    caption: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -930,9 +930,9 @@ class InlineQueryResultCachedVoice(BaseTelegram):
     id: str
     voice_file_id: str
     title: str
-    caption: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    caption: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -940,9 +940,9 @@ class InlineQueryResultCachedAudio(BaseTelegram):
     type: str
     id: str
     audio_file_id: str
-    caption: Optional[str]
-    reply_markup: Optional[InlineKeyboardMarkup]
-    input_message_content: Optional['InputMessageContent']
+    caption: Optional[str] = None
+    reply_markup: Optional[InlineKeyboardMarkup] = None
+    input_message_content: Optional['InputMessageContent'] = None
 
 
 InputMessageContent = Union['InputTextMessageContent',
@@ -955,7 +955,7 @@ InputMessageContent = Union['InputTextMessageContent',
 class InputTextMessageContent(BaseTelegram):
     message_text: str
     parse_mode: str
-    disable_web_page_preview: Optional[bool]
+    disable_web_page_preview: Optional[bool] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -970,25 +970,25 @@ class InputVenueMessageContent(BaseTelegram):
     longitude: float
     title: str
     address: str
-    foursquare_id: Optional[str]
-    foursquare_type: Optional[str]
+    foursquare_id: Optional[str] = None
+    foursquare_type: Optional[str] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class InputContactMessageContent(BaseTelegram):
     phone_number: str
     first_name: str
-    last_name: Optional[str]
-    vcard: Optional[str]
+    last_name: Optional[str] = None
+    vcard: Optional[str] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class ChosenInlineResult(BaseTelegram):
     result_id: str
     from_: User
-    location: Optional[Location]
-    inline_message_id: Optional[str]
     query: str
+    location: Optional[Location] = None
+    inline_message_id: Optional[str] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -1018,10 +1018,10 @@ class ShippingAddress(BaseTelegram):
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class OrderInfo(BaseTelegram):
-    name: Optional[str]
-    phone_number: Optional[str]
-    email: Optional[str]
-    shipping_address: Optional[ShippingAddress]
+    name: Optional[str] = None
+    phone_number: Optional[str] = None
+    email: Optional[str] = None
+    shipping_address: Optional[ShippingAddress] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -1036,10 +1036,10 @@ class SuccessfulPayment(BaseTelegram):
     currency: str
     total_amount: int
     invoice_payload: str
-    shipping_option_id: Optional[str]
-    order_info: Optional[OrderInfo]
     telegram_payment_charge_id: str
     provider_payment_charge_id: str
+    shipping_option_id: Optional[str] = None
+    order_info: Optional[OrderInfo] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -1057,8 +1057,8 @@ class PreCheckoutQuery(BaseTelegram):
     currency: str
     total_amount: int
     invoice_payload: str
-    shipping_option_id: Optional[str]
-    order_info: Optional[OrderInfo]
+    shipping_option_id: Optional[str] = None
+    order_info: Optional[OrderInfo] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -1078,15 +1078,15 @@ class PassportFile(BaseTelegram):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class EncryptedPassportElement(BaseTelegram):
     type: str
-    data: Optional[str]
-    phone_number: Optional[str]
-    email: Optional[str]
-    files: Optional[Tuple[PassportFile, ...]]
-    front_side: Optional[PassportFile]
-    reverse_side: Optional[PassportFile]
-    selfie: Optional[PassportFile]
-    translation: Optional[Tuple[PassportFile, ...]]
-    hash: Optional[str]
+    data: Optional[str] = None
+    phone_number: Optional[str] = None
+    email: Optional[str] = None
+    files: Optional[Tuple[PassportFile, ...]] = None
+    front_side: Optional[PassportFile] = None
+    reverse_side: Optional[PassportFile] = None
+    selfie: Optional[PassportFile] = None
+    translation: Optional[Tuple[PassportFile, ...]] = None
+    hash: Optional[str] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -1185,9 +1185,9 @@ class Game(BaseTelegram):
     title: str
     description: str
     photo: Tuple[PhotoSize, ...]
-    text: Optional[str]
-    text_entities: Optional[Tuple[MessageEntity, ...]]
-    animation: Optional['Animation']
+    text: Optional[str] = None
+    text_entities: Optional[Tuple[MessageEntity, ...]] = None
+    animation: Optional['Animation'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
