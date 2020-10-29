@@ -3,7 +3,7 @@ import json
 from contextlib import asynccontextmanager, suppress
 from functools import partial
 from html import escape
-from typing import Any, AsyncGenerator, Dict, Final, Optional, Tuple
+from typing import AsyncGenerator, Dict, Final, Hashable, Optional, Tuple
 
 from aiotgbot.api_types import MessageEntity
 from aiotgbot.constants import MessageEntityType
@@ -15,10 +15,10 @@ class KeyLock:
     __slots__ = ('_keys',)
 
     def __init__(self) -> None:
-        self._keys: Dict[Any, asyncio.Event] = {}
+        self._keys: Final[Dict[Hashable, asyncio.Event]] = {}
 
     @asynccontextmanager
-    async def acquire(self, key: Any) -> AsyncGenerator[None, None]:
+    async def acquire(self, key: Hashable) -> AsyncGenerator[None, None]:
         while key in self._keys:
             await self._keys[key].wait()
         self._keys[key] = asyncio.Event()
@@ -33,12 +33,12 @@ class FreqLimit:
                  '_clean_event', '_clean_task')
 
     def __init__(self, interval: float, clean_interval: float = 0) -> None:
-        self._interval: Final = interval
-        self._clean_interval: Final = (clean_interval if clean_interval > 0
-                                       else interval)
-        self._events: Dict[Any, asyncio.Event] = {}
-        self._ts: Dict[Any, float] = {}
-        self._clean_event = asyncio.Event()
+        self._interval: Final[float] = interval
+        self._clean_interval: Final[float] = (
+            clean_interval if clean_interval > 0 else interval)
+        self._events: Final[Dict[Hashable, asyncio.Event]] = {}
+        self._ts: Final[Dict[Hashable, float]] = {}
+        self._clean_event: Final = asyncio.Event()
         self._clean_task: Optional[asyncio.Task] = None
 
     async def reset(self) -> None:
@@ -47,12 +47,12 @@ class FreqLimit:
             with suppress(asyncio.CancelledError):
                 await self._clean_task
             self._clean_task = None
-        self._events = {}
-        self._ts = {}
+        self._events.clear()
+        self._ts.clear()
         self._clean_event.clear()
 
     @asynccontextmanager
-    async def acquire(self, key) -> AsyncGenerator[None, None]:
+    async def acquire(self, key: Hashable) -> AsyncGenerator[None, None]:
         loop = asyncio.get_running_loop()
         if self._clean_task is None:
             self._clean_task = loop.create_task(self._clean())
@@ -79,14 +79,16 @@ class FreqLimit:
     async def _clean(self) -> None:
         loop = asyncio.get_running_loop()
         while True:
-            if not self._events:
+            if len(self._events) == 0:
                 await self._clean_event.wait()
                 self._clean_event.clear()
-            self._events = {key: event for key, event in self._events.items()
-                            if not event.is_set() or loop.time() -
-                            self._ts[key] < self._clean_interval}
-            self._ts = {key: ts for key, ts in self._ts.items()
-                        if key in self._events}
+            for key, event in self._events.copy().items():
+                age = loop.time() - self._ts[key]
+                if event.is_set() and age >= self._clean_interval:
+                    del self._events[key]
+            for key in self._ts.copy().keys():
+                if key not in self._events:
+                    del self._ts[key]
             await asyncio.sleep(self._clean_interval)
 
 
