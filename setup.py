@@ -31,7 +31,7 @@ setup(
     packages=['aiotgbot'],
     python_requires='>=3.8',
     install_requires=['aiohttp', 'aiojobs', 'attrs', 'backoff'],
-    tests_require=['pytest', 'pytest-asyncio'],
+    tests_require=['pytest', 'pytest-asyncio', 'hypothesis'],
     extras_require={'sqlite': ['aiosqlite']},
     description='Asynchronous library for Telegram bot API'
 )

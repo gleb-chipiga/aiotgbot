@@ -1,6 +1,7 @@
 .env
 .idea
 .mypy_cache
+.hypothesis
 .pytest_cache
 aiotgbot/init.py
 aiotgbot.egg-info
