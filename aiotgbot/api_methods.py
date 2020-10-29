@@ -1,6 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Iterable, Optional, Tuple, Union
+from typing import Dict, Final, Iterable, Optional, Tuple, Union
 
 from .api_types import (APIResponse, BaseTelegram, BotCommand, Chat,
                         ChatMember, ChatPermissions, File, GameHighScore,
@@ -11,10 +11,10 @@ from .api_types import (APIResponse, BaseTelegram, BotCommand, Chat,
                         ShippingOption, StickerSet, Update, User,
                         UserProfilePhotos, WebhookInfo)
 from .constants import (ChatAction, DiceEmoji, ParseMode, PollType,
-                        RequestMethod)
+                        RequestMethod, UpdateType)
 from .utils import json_dumps
 
-api_logger = logging.getLogger('aiotgbot.api')
+api_logger: Final[logging.Logger] = logging.getLogger('aiotgbot.api')
 
 
 def _to_json(value: Optional[BaseTelegram]) -> Optional[str]:
@@ -60,7 +60,7 @@ class ApiMethods(ABC):
         self, offset: Optional[int] = None,
         limit: Optional[int] = None,
         timeout: Optional[int] = None,
-        allowed_updates: Optional[Iterable[str]] = None
+        allowed_updates: Optional[Iterable[UpdateType]] = None
     ) -> Tuple[Update, ...]:
         api_logger.debug(f'Get updates offset: {offset}, limit: {limit}, '
                          f'timeout: {timeout}, '
@@ -76,7 +76,7 @@ class ApiMethods(ABC):
         self, url: Optional[str] = None,
         certificate: Optional[InputFile] = None,
         max_connections: Optional[int] = None,
-        allowed_updates: Optional[Iterable[str]] = None
+        allowed_updates: Optional[Iterable[UpdateType]] = None
     ) -> bool:
         api_logger.debug('Set webhook')
         response = await self._request(

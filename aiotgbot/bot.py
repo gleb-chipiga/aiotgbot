@@ -30,8 +30,8 @@ MESSAGE_INTERVAL: Final[float] = 1 / 30
 CHAT_INTERVAL: Final[float] = 1
 GROUP_INTERVAL: Final[float] = 3
 
-bot_logger = logging.getLogger('aiotgbot.bot')
-response_logger = logging.getLogger('aiotgbot.response')
+bot_logger: Final[logging.Logger] = logging.getLogger('aiotgbot.bot')
+response_logger: Final[logging.Logger] = logging.getLogger('aiotgbot.response')
 
 EventHandler = Callable[['Bot'], Awaitable[None]]
 

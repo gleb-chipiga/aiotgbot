@@ -8,7 +8,7 @@ from typing import AsyncGenerator, Dict, Final, Hashable, Optional, Tuple
 from aiotgbot.api_types import MessageEntity
 from aiotgbot.constants import MessageEntityType
 
-json_dumps = partial(json.dumps, ensure_ascii=False)
+json_dumps: Final = partial(json.dumps, ensure_ascii=False)
 
 
 class KeyLock:
