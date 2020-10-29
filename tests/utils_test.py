@@ -4,7 +4,7 @@ from random import uniform
 
 import pytest
 from hypothesis import given
-from hypothesis.strategies import builds, integers, text
+from hypothesis.strategies import builds, floats, integers, text
 
 from aiotgbot.api_types import MessageEntity, User
 from aiotgbot.constants import MessageEntityType
@@ -42,6 +42,20 @@ async def test_key_lock():
     assert .11 < intervals[2][2] < .21
     assert intervals[0][1] < intervals[1][0]
     assert intervals[1][1] < intervals[2][0]
+
+
+@given(interval=floats(max_value=0))
+def test_freq_limit_interval(interval):
+    with pytest.raises(RuntimeError, match='Interval must be greater than 0'):
+        FreqLimit(interval)
+
+
+@given(interval=floats(min_value=0, exclude_min=True),
+       clean_interval=floats(max_value=0, exclude_max=True))
+def test_freq_limit_clean_interval(interval, clean_interval):
+    with pytest.raises(RuntimeError, match='Clean interval must be greater '
+                                           'than or equal to 0'):
+        FreqLimit(interval, clean_interval)
 
 
 @pytest.mark.asyncio

@@ -33,6 +33,11 @@ class FreqLimit:
                  '_clean_event', '_clean_task')
 
     def __init__(self, interval: float, clean_interval: float = 0) -> None:
+        if interval <= 0:
+            raise RuntimeError('Interval must be greater than 0')
+        if clean_interval < 0:
+            raise RuntimeError('Clean interval must be greater than '
+                               'or equal to 0')
         self._interval: Final[float] = interval
         self._clean_interval: Final[float] = (
             clean_interval if clean_interval > 0 else interval)
