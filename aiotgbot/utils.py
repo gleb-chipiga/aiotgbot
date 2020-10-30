@@ -57,7 +57,9 @@ class FreqLimit:
         self._clean_event.clear()
 
     @asynccontextmanager
-    async def acquire(self, key: Hashable) -> AsyncGenerator[None, None]:
+    async def acquire(
+        self, key: Hashable = None
+    ) -> AsyncGenerator[None, None]:
         loop = asyncio.get_running_loop()
         if self._clean_task is None:
             self._clean_task = loop.create_task(self._clean())
