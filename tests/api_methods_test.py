@@ -1,13 +1,13 @@
-from typing import Optional, Union
+from typing import Union
 from unittest.mock import Mock, call
 
 import pytest
 
-from aiotgbot.api_methods import (ApiMethods, ParamsType, _parse_mode_to_str,
+from aiotgbot.api_methods import (ApiMethods, ParamType, _parse_mode_to_str,
                                   _strs_to_json, _to_json)
 from aiotgbot.api_types import (APIResponse, Chat, File, KeyboardButton,
                                 Message, ReplyKeyboardMarkup, Update, User)
-from aiotgbot.constants import ChatAction, ParseMode, RequestMethod
+from aiotgbot.constants import ChatAction, ParseMode, RequestMethod, UpdateType
 from aiotgbot.utils import json_dumps
 
 
@@ -40,16 +40,15 @@ def bot():
         safe_request_mock = Mock()
 
         async def _request(self, http_method: RequestMethod, api_method: str,
-                           params: Optional[ParamsType] = None) -> APIResponse:
-            return self.request_mock(http_method, api_method, params)
+                           **params: ParamType) -> APIResponse:
+            return self.request_mock(http_method, api_method, **params)
 
         async def _safe_request(
             self, http_method: RequestMethod, api_method: str,
-            chat_id: Union[int, str],
-            params: Optional[ParamsType] = None
+            chat_id: Union[int, str], **params: ParamType
         ) -> APIResponse:
             return self.safe_request_mock(http_method, api_method, chat_id,
-                                          params)
+                                          **params)
 
     return Bot()
 
@@ -77,13 +76,16 @@ async def test_api_methods_get_updates(bot):
     update = Update.from_dict({'update_id': 1})
     bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': [{'update_id': 1}]})
-    assert await bot.get_updates(offset=0, limit=10, timeout=15,
-                                 allowed_updates=['message']) == (update,)
+    assert await bot.get_updates(
+        offset=0, limit=10, timeout=15,
+        allowed_updates=[UpdateType.MESSAGE]) == (update,)
     assert bot.request_mock.call_args_list == [call(
         RequestMethod.GET,
         'getUpdates',
-        {'offset': 0, 'limit': 10, 'timeout': 15,
-         'allowed_updates': '["message"]'}
+        offset=0,
+        limit=10,
+        timeout=15,
+        allowed_updates='["message"]'
     )]
 
 
@@ -94,7 +96,7 @@ async def test_api_methods_get_me(bot):
         {'ok': True, 'result': user.to_dict()})
     assert await bot.get_me() == user
     assert bot.request_mock.call_args_list == [call(
-        RequestMethod.GET, 'getMe', None
+        RequestMethod.GET, 'getMe'
     )]
 
 
@@ -115,10 +117,12 @@ async def test_api_methods_send_message(bot, make_msg, reply_kb):
         RequestMethod.POST,
         'sendMessage',
         1,
-        {'text': 'Hello!', 'parse_mode': 'HTML',
-         'disable_web_page_preview': True, 'disable_notification': None,
-         'reply_to_message_id': 111,
-         'reply_markup': json_dumps(reply_kb.to_dict())}
+        text='Hello!',
+        parse_mode='HTML',
+        disable_web_page_preview=True,
+        disable_notification=None,
+        reply_to_message_id=111,
+        reply_markup=json_dumps(reply_kb.to_dict())
     )]
 
 
@@ -136,12 +140,13 @@ async def test_api_methods_send_photo(bot, make_msg, reply_kb):
     ) == message
     assert bot.safe_request_mock.call_args_list == [call(
         RequestMethod.POST,
-        'sendPhoto',
-        1,
-        {'photo': 'some photo', 'caption': None, 'parse_mode': 'HTML',
-         'disable_notification': None,
-         'reply_to_message_id': 111,
-         'reply_markup': json_dumps(reply_kb.to_dict())}
+        'sendPhoto', 1,
+        photo='some photo',
+        caption=None,
+        parse_mode='HTML',
+        disable_notification=None,
+        reply_to_message_id=111,
+        reply_markup=json_dumps(reply_kb.to_dict())
     )]
 
 
@@ -159,7 +164,9 @@ async def test_api_methods_forward_message(bot, make_msg):
         RequestMethod.POST,
         'forwardMessage',
         1,
-        {'from_chat_id': 2, 'message_id': 9, 'disable_notification': None}
+        from_chat_id=2,
+        message_id=9,
+        disable_notification=None
     )]
 
 
@@ -175,7 +182,7 @@ async def test_api_methods_send_chat_action(bot):
         RequestMethod.POST,
         'sendChatAction',
         1,
-        {'action': ChatAction.TYPING.value}
+        action=ChatAction.TYPING.value
     )]
 
 
@@ -193,7 +200,7 @@ async def test_api_methods_get_file(bot):
     assert bot.request_mock.call_args_list == [call(
         RequestMethod.GET,
         'getFile',
-        {'file_id': '1'}
+        file_id='1'
     )]
 
 
@@ -205,7 +212,7 @@ async def test_api_methods_leave_chat(bot):
     assert bot.request_mock.call_args_list == [call(
         RequestMethod.POST,
         'leaveChat',
-        {'chat_id': 1}
+        chat_id=1
     )]
 
 
@@ -219,9 +226,7 @@ async def test_api_methods_get_chat(bot):
         {'ok': True, 'result': chat.to_dict()})
     assert await bot.get_chat(chat_id=1)
     assert bot.request_mock.call_args_list == [call(
-        RequestMethod.GET,
-        'getChat',
-        {'chat_id': 1}
+        RequestMethod.GET, 'getChat', chat_id=1
     )]
 
 
@@ -237,11 +242,11 @@ async def test_api_methods_answer_callback_query(bot):
     assert bot.request_mock.call_args_list == [call(
         RequestMethod.POST,
         'answerCallbackQuery',
-        {'callback_query_id': '1',
-         'text': 'message',
-         'show_alert': True,
-         'url': None,
-         'cache_time': None}
+        callback_query_id='1',
+        text='message',
+        show_alert=True,
+        url=None,
+        cache_time=None
     )]
 
 
@@ -258,11 +263,11 @@ async def test_api_methods_edit_message_text(bot, make_msg):
     assert bot.request_mock.call_args_list == [call(
         RequestMethod.POST,
         'editMessageText',
-        {'text': 'text2',
-         'chat_id': 1,
-         'message_id': 1,
-         'inline_message_id': None,
-         'parse_mode': None,
-         'disable_web_page_preview': None,
-         'reply_markup': None}
+        text='text2',
+        chat_id=1,
+        message_id=1,
+        inline_message_id=None,
+        parse_mode=None,
+        disable_web_page_preview=None,
+        reply_markup=None
     )]

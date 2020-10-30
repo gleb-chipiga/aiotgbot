@@ -12,7 +12,7 @@ import aiojobs  # type: ignore
 import attr
 import backoff  # type: ignore
 
-from .api_methods import ApiMethods, ParamsType
+from .api_methods import ApiMethods, ParamType
 from .api_types import APIResponse, StreamFile, Update, User
 from .bot_update import BotUpdate, Context
 from .constants import ChatType, RequestMethod
@@ -198,27 +198,28 @@ class Bot(MutableMapping[str, Any], ApiMethods):
             self,
             http_method: RequestMethod,
             api_method: str,
-            params: Optional[ParamsType] = None
+            **params: ParamType
     ) -> APIResponse:
-        data: Optional[ParamsType] = None
-        if params is not None:
-            data = {name: str(value) if isinstance(value, int) else value
-                    for name, value in params.items()
-                    if value is not None}
+        data = {
+            name: str(value) if isinstance(value, (int,  float)) else value
+            for name, value in params.items() if value is not None
+        }
         bot_logger.debug('Request %s %s %s', http_method, api_method, data)
-
         if http_method == RequestMethod.GET:
-            request = partial(self.client.get, params=data)
+            if len(data) > 0:
+                assert all(isinstance(value, str) for value in data.values())
+                request = partial(self.client.get, params=data)
+            else:
+                request = partial(self.client.get)
         else:
             form_data = aiohttp.FormData()
-            if data is not None:
-                for name, value in data.items():
-                    if isinstance(value, StreamFile):
-                        form_data.add_field(name, value.content,
-                                            content_type=value.content_type,
-                                            filename=value.filename)
-                    else:
-                        form_data.add_field(name, value)
+            for name, value in data.items():
+                if isinstance(value, StreamFile):
+                    form_data.add_field(name, value.content,
+                                        content_type=value.content_type,
+                                        filename=value.filename)
+                else:
+                    form_data.add_field(name, value)
             request = partial(self.client.post, data=form_data)
 
         url = TG_API_URL.format(token=self._token, method=api_method)
@@ -237,16 +238,12 @@ class Bot(MutableMapping[str, Any], ApiMethods):
             http_method: RequestMethod,
             api_method: str,
             chat_id: Union[int, str],
-            params: Optional[ParamsType] = None
+            **params: ParamType
     ) -> APIResponse:
-        if params is not None:
-            params = {'chat_id': chat_id, **params}
-            retry_allowed = all(not isinstance(param, StreamFile)
-                                for param in params.values())
-        else:
-            retry_allowed = True
-        request = partial(self._request, http_method=http_method,
-                          api_method=api_method, params=params)
+        retry_allowed = all(not isinstance(param, StreamFile)
+                            for param in params.values())
+        request = partial(self._request, http_method, api_method,
+                          chat_id=chat_id, **params)
 
         assert self._message_limit is not None, 'Message limit not initialized'
         assert self._group_limit is not None, 'Group limit not initialized'
@@ -271,6 +268,8 @@ class Bot(MutableMapping[str, Any], ApiMethods):
                 if retry_allowed:
                     await asyncio.sleep(retry_after.retry_after)
                 else:
+                    bot_logger.error('RetryAfter error during '
+                                     'retry not allowed')
                     raise
 
     @backoff.on_exception(backoff.expo, TelegramError)
