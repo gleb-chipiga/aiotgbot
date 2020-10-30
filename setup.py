@@ -10,7 +10,7 @@ version = re.findall(r"^__version__ = '([^']+)'\r?$", txt, re.M)[0]
 setup(
     name='aiotgbot',
     version=version,
-    # url='',
+    url='https://github.com/gleb-chipiga/aiotgbot',
     license='MIT',
     author='Gleb Chipiga',
     # author_email='',
@@ -29,7 +29,7 @@ setup(
         'Framework :: AsyncIO',
     ],
     packages=['aiotgbot'],
-    python_requires='>=3.8',
+    python_requires='>=3.8,<3.10',
     install_requires=['aiohttp', 'aiojobs', 'attrs', 'backoff'],
     tests_require=['pytest', 'pytest-asyncio', 'hypothesis'],
     extras_require={'sqlite': ['aiosqlite']},
