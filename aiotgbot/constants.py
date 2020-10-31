@@ -119,3 +119,12 @@ class DiceEmoji(str, Enum):
     DICE = '🎲'
     DARTS = '🎯'
     BASKETBALL = '🏀'
+
+
+@unique
+class InputMediaType(str, Enum):
+    PHOTO = 'photo'
+    VIDEO = 'video'
+    ANIMATION = 'animation'
+    AUDIO = 'audio'
+    DOCUMENT = 'document'

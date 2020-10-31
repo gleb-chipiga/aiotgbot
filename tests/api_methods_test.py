@@ -1,3 +1,4 @@
+from io import BytesIO
 from typing import Union
 from unittest.mock import Mock, call
 
@@ -5,8 +6,9 @@ import pytest
 
 from aiotgbot.api_methods import (ApiMethods, ParamType, _parse_mode_to_str,
                                   _strs_to_json, _to_json)
-from aiotgbot.api_types import (APIResponse, Chat, File, KeyboardButton,
-                                Message, ReplyKeyboardMarkup, Update, User)
+from aiotgbot.api_types import (APIResponse, Chat, File, InputMediaPhoto,
+                                KeyboardButton, Message, ReplyKeyboardMarkup,
+                                Update, User)
 from aiotgbot.constants import ChatAction, ParseMode, RequestMethod, UpdateType
 from aiotgbot.utils import json_dumps
 
@@ -270,4 +272,69 @@ async def test_api_methods_edit_message_text(bot, make_msg):
         parse_mode=None,
         disable_web_page_preview=None,
         reply_markup=None
+    )]
+
+
+@pytest.mark.asyncio
+async def test_send_media_group(bot, make_msg):
+    file0 = BytesIO(b'bytes1')
+    file1 = BytesIO(b'bytes2')
+    file2 = BytesIO(b'bytes3')
+
+    bot.safe_request_mock.return_value = APIResponse.from_dict({
+        'ok': True,
+        'result': [make_msg().to_dict(), make_msg().to_dict(),
+                   make_msg().to_dict()]
+    })
+
+    await bot.send_media_group(
+        1,
+        media=(
+            InputMediaPhoto(media=file0, caption='f1'),
+            InputMediaPhoto(media=file1, caption='f2'),
+            InputMediaPhoto(media=file2, caption='f3')
+        )
+    )
+
+    assert bot.safe_request_mock.call_args_list == [call(
+        RequestMethod.POST,
+        'sendMediaGroup',
+        1,
+        media=json_dumps([
+            InputMediaPhoto(media='attach://attachment0',
+                            caption='f1').to_dict(),
+            InputMediaPhoto(media='attach://attachment1',
+                            caption='f2').to_dict(),
+            InputMediaPhoto(media='attach://attachment2',
+                            caption='f3').to_dict()
+        ]),
+        disable_notification=None,
+        reply_to_message_id=None,
+        attachment0=file0,
+        attachment1=file1,
+        attachment2=file2
+    )]
+
+
+@pytest.mark.asyncio
+async def test_edit_message_media(bot, make_msg):
+    file = BytesIO(b'bytes1')
+    bot.request_mock.return_value = APIResponse.from_dict({
+        'ok': True,
+        'result': make_msg().to_dict()
+    })
+    await bot.edit_message_media(
+        1,
+        media=InputMediaPhoto(media=file, caption='f1')
+    )
+    assert bot.request_mock.call_args_list == [call(
+        RequestMethod.POST,
+        'editMessageMedia',
+        chat_id=1,
+        message_id=None,
+        inline_message_id=None,
+        media=json_dumps(InputMediaPhoto(media='attach://attachment0',
+                         caption='f1').to_dict()),
+        reply_markup=None,
+        attachment0=file
     )]

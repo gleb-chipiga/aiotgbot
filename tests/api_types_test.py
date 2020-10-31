@@ -1,3 +1,4 @@
+from io import BytesIO
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import attr
@@ -5,8 +6,11 @@ import pytest
 
 from aiotgbot.api_types import (BaseTelegram, CallbackQuery,
                                 ChosenInlineResult, DataMappingError,
-                                InlineQuery, KeyboardButtonPollType, Message,
-                                Poll, PreCheckoutQuery, ShippingQuery,
+                                InlineQuery, InputMedia, InputMediaAnimation,
+                                InputMediaAudio, InputMediaDocument,
+                                InputMediaPhoto, InputMediaVideo,
+                                KeyboardButtonPollType, Message, Poll,
+                                PreCheckoutQuery, ShippingQuery,
                                 _is_attr_union, _is_optional, _is_tuple,
                                 _is_union)
 
@@ -241,3 +245,18 @@ def test_base():
 def test_fixed_hints(_str, _type, in_keys, in_fields):
     assert (_str in [k for k, f, t in _type.get_type_hints()]) is in_keys
     assert (_str in [f for k, f, t in _type.get_type_hints()]) is in_fields
+
+
+@pytest.mark.parametrize('type_', (
+    InputMedia,
+    InputMediaPhoto,
+    InputMediaVideo,
+    InputMediaAnimation,
+    InputMediaAudio,
+    InputMediaDocument,
+))
+def test_input_media_serialization(type_: Any):
+    input_media = type_(media=BytesIO(b'bytes'))
+    with pytest.raises(TypeError, match='To serialize this object, the media '
+                                        'attribute type must be a string'):
+        input_media.to_dict()

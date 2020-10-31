@@ -1,6 +1,9 @@
 import logging
 from abc import ABC, abstractmethod
-from typing import Dict, Final, Iterable, Optional, Tuple, Union
+from itertools import count
+from typing import Final, Iterable, Optional, Tuple, Union
+
+import attr
 
 from .api_types import (APIResponse, BaseTelegram, BotCommand, Chat,
                         ChatMember, ChatPermissions, File, GameHighScore,
@@ -293,17 +296,27 @@ class ApiMethods(ABC):
         self, chat_id: Union[int, str],
         media: Iterable[Union[InputMediaPhoto, InputMediaVideo]],
         disable_notification: Optional[bool] = None,
-        reply_to_message_id: Optional[int] = None,
-        attachments: Dict[str, InputFile] = {}
+        reply_to_message_id: Optional[int] = None
     ) -> Tuple[Message, ...]:
         api_logger.debug('Send media group to "%s"', chat_id)
+        attached_media = []
+        attachments = {}
+        counter = count()
+        for item in media:
+            if isinstance(item.media, str):
+                attached_media.append(item)
+            else:
+                attachment_name = f'attachment{next(counter)}'
+                attachments[attachment_name] = item.media
+                attached_media.append(attr.evolve(
+                    item, media=f'attach://{attachment_name}'))
         response = await self._safe_request(
             RequestMethod.POST, 'sendMediaGroup', chat_id,
-            media=json_dumps(tuple(item.to_dict() for item in media)),
+            media=json_dumps(tuple(item.to_dict() for item in attached_media)),
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id, **attachments
         )
-
+        print(response.result)
         return tuple(Message.from_dict(item) for item in response.result)
 
     async def send_location(
@@ -766,8 +779,7 @@ class ApiMethods(ABC):
         message_id: Optional[int] = None,
         inline_message_id: Optional[str] = None,
         media: InputMedia = None,
-        reply_markup: Optional[InlineKeyboardMarkup] = None,
-        attachments: Dict[str, InputFile] = {}
+        reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Union[Message, bool]:
         if inline_message_id is None:
             api_logger.debug('Edit message %s in "%s" media',
@@ -775,12 +787,16 @@ class ApiMethods(ABC):
         else:
             api_logger.debug('Edit inline message "%s" media',
                              inline_message_id)
+        attachments = {}
+        if media is not None and not isinstance(media.media, str):
+            attachment_name = 'attachment0'
+            attachments[attachment_name] = media.media
+            media = attr.evolve(media, media=f'attach://{attachment_name}')
         response = await self._request(
             RequestMethod.POST, 'editMessageMedia', chat_id=chat_id,
             message_id=message_id, inline_message_id=inline_message_id,
             media=_to_json(media), reply_markup=_to_json(reply_markup),
             **attachments)
-
         if isinstance(response.result, bool):
             return response.result
         else:

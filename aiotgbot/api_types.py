@@ -4,7 +4,7 @@ from typing import (Any, AsyncIterator, BinaryIO, Dict, Generator, Iterable,
 
 import attr
 
-from aiotgbot.constants import PollType
+from aiotgbot.constants import InputMediaType, PollType
 
 
 class DataMappingError(BaseException):
@@ -44,7 +44,7 @@ _FieldType = Union[int, str, bool, float, Tuple, List, 'BaseTelegram']
 _HintsGenerator = Generator[Tuple[str, str, Any], None, None]
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(slots=True)
 class BaseTelegram:
 
     def to_dict(self) -> Dict[str, Any]:
@@ -560,28 +560,31 @@ class BotCommand(BaseTelegram):
     description: str
 
 
-InputMedia = Union['InputMediaAnimation',
-                   'InputMediaDocument',
-                   'InputMediaAudio',
-                   'InputMediaPhoto',
-                   'InputMediaVideo']
+InputFile = Union[BinaryIO, StreamFile]
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
-class InputMediaPhoto(BaseTelegram):
-    type: str
-    media: str
+class InputMedia(BaseTelegram):
+    media: Union[str, InputFile]
     caption: Optional[str] = None
     parse_mode: Optional[str] = None
 
+    def to_dict(self) -> Dict[str, Any]:
+        if not isinstance(self.media, str):
+            raise TypeError('To serialize this object, the media attribute '
+                            'type must be a string')
+        return super().to_dict()
+
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
-class InputMediaVideo(BaseTelegram):
-    type: str
-    media: str
+class InputMediaPhoto(InputMedia):
+    type: str = attr.ib(default=InputMediaType.PHOTO, init=False)
+
+
+@attr.s(slots=True, frozen=True, auto_attribs=True)
+class InputMediaVideo(InputMedia):
+    type: str = attr.ib(default=InputMediaType.VIDEO, init=False)
     thumb: Optional[str] = None
-    caption: Optional[str] = None
-    parse_mode: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None
     duration: Optional[int] = None
@@ -589,39 +592,27 @@ class InputMediaVideo(BaseTelegram):
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
-class InputMediaAnimation(BaseTelegram):
-    type: str
-    media: str
+class InputMediaAnimation(InputMedia):
+    type: str = attr.ib(default=InputMediaType.ANIMATION, init=False)
     thumb: Optional[str] = None
-    caption: Optional[str] = None
-    parse_mode: Optional[str] = None
     width: Optional[int] = None
     height: Optional[int] = None
     duration: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
-class InputMediaAudio(BaseTelegram):
-    type: str
-    media: str
+class InputMediaAudio(InputMedia):
+    type: str = attr.ib(default=InputMediaType.AUDIO, init=False)
     thumb: Optional[str] = None
-    caption: Optional[str] = None
-    parse_mode: Optional[str] = None
     duration: Optional[int] = None
     performer: Optional[str] = None
     title: Optional[str] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
-class InputMediaDocument(BaseTelegram):
-    type: str
-    media: str
+class InputMediaDocument(InputMedia):
+    type: str = attr.ib(default=InputMediaType.DOCUMENT, init=False)
     thumb: Optional[str] = None
-    caption: Optional[str] = None
-    parse_mode: Optional[str] = None
-
-
-InputFile = Union[BinaryIO, StreamFile]
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
