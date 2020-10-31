@@ -29,6 +29,7 @@ setup(
         'Framework :: AsyncIO',
     ],
     packages=['aiotgbot'],
+    package_data={'aiotgbot': ['py.typed']},
     python_requires='>=3.8,<3.10',
     install_requires=['aiohttp', 'aiojobs', 'attrs', 'backoff'],
     tests_require=['pytest', 'pytest-asyncio', 'hypothesis'],
