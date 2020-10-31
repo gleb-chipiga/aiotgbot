@@ -214,11 +214,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         else:
             form_data = aiohttp.FormData()
             for name, value in data.items():
-                if isinstance(value, StreamFile):
-                    form_data.add_field(name, value.content,
-                                        content_type=value.content_type,
-                                        filename=value.name)
-                elif isinstance(value, LocalFile):
+                if isinstance(value, (StreamFile, LocalFile)):
                     form_data.add_field(name, value.content,
                                         content_type=value.content_type,
                                         filename=value.name)
