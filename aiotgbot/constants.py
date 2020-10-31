@@ -128,3 +128,37 @@ class InputMediaType(str, Enum):
     ANIMATION = 'animation'
     AUDIO = 'audio'
     DOCUMENT = 'document'
+
+
+@unique
+class InlineQueryResultType(str, Enum):
+    ARTICLE = 'article'
+    PHOTO = 'photo'
+    GIF = 'gif'
+    MPEG4_GIF = 'mpeg4_gif'
+    VIDEO = 'video'
+    AUDIO = 'audio'
+    VOICE = 'voice'
+    DOCUMENT = 'document'
+    LOCATION = 'location'
+    VENUE = 'venue'
+    CONTACT = 'contact'
+    GAME = 'game'
+    STICKER = 'sticker'
+
+
+@unique
+class PassportElementType(str, Enum):
+    PERSONAL_DETAILS = 'personal_details'
+    PASSPORT = 'passport'
+    DRIVER_LICENSE = 'driver_license'
+    IDENTITY_CARD = 'identity_card'
+    INTERNAL_PASSPORT = 'internal_passport'
+    ADDRESS = 'address'
+    UTILITY_BILL = 'utility_bill'
+    BANK_STATEMENT = 'bank_statement'
+    RENTAL_AGREEMENT = 'rental_agreement'
+    PASSPORT_REGISTRATION = 'passport_registration'
+    TEMPORARY_REGISTRATION = 'temporary_registration'
+    PHONE_NUMBER = 'phone_number'
+    EMAIL = 'email'
