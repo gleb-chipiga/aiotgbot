@@ -3,8 +3,9 @@ __version__ = '0.3.0.dev1'
 from .api_types import (BaseTelegram, CallbackQuery, Chat, ChosenInlineResult,
                         Contact, File, InlineKeyboardButton,
                         InlineKeyboardMarkup, InlineQuery, KeyboardButton,
-                        Message, PreCheckoutQuery, ReplyKeyboardMarkup,
-                        ReplyKeyboardRemove, ShippingQuery, User)
+                        LocalFile, Message, PreCheckoutQuery,
+                        ReplyKeyboardMarkup, ReplyKeyboardRemove,
+                        ShippingQuery, User)
 from .bot import BaseFilter, Bot, StreamFile
 from .bot_update import BotUpdate
 from .constants import (ChatAction, ChatType, ContentType, ParseMode, PollType,
@@ -38,6 +39,7 @@ __all__ = (
 
     'BaseFilter',
     'Bot',
+    'LocalFile',
     'StreamFile',
 
     'BotUpdate',
