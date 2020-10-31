@@ -13,7 +13,7 @@ import attr
 import backoff  # type: ignore
 
 from .api_methods import ApiMethods, ParamType
-from .api_types import APIResponse, StreamFile, Update, User
+from .api_types import APIResponse, LocalFile, StreamFile, Update, User
 from .bot_update import BotUpdate, Context
 from .constants import ChatType, RequestMethod
 from .exceptions import (BadGateway, BotBlocked, BotKicked, MigrateToChat,
@@ -217,7 +217,11 @@ class Bot(MutableMapping[str, Any], ApiMethods):
                 if isinstance(value, StreamFile):
                     form_data.add_field(name, value.content,
                                         content_type=value.content_type,
-                                        filename=value.filename)
+                                        filename=value.name)
+                elif isinstance(value, LocalFile):
+                    form_data.add_field(name, value.content,
+                                        content_type=value.content_type,
+                                        filename=value.name)
                 else:
                     form_data.add_field(name, value)
             request = partial(self.client.post, data=form_data)

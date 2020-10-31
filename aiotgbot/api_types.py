@@ -1,6 +1,9 @@
-from typing import (Any, AsyncIterator, BinaryIO, Dict, Generator, Iterable,
-                    List, Optional, Set, Tuple, Type, TypeVar, Union, cast,
-                    get_args, get_origin, get_type_hints)
+import asyncio
+from io import BufferedReader
+from pathlib import Path
+from typing import (Any, AsyncIterator, Dict, Final, Generator, Iterable, List,
+                    Optional, Set, Tuple, Type, TypeVar, Union, cast, get_args,
+                    get_origin, get_type_hints)
 
 import attr
 
@@ -14,8 +17,40 @@ class DataMappingError(BaseException):
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class StreamFile:
     content: AsyncIterator[bytes]
-    filename: str
+    name: str
     content_type: Optional[str] = None
+
+
+class LocalFile:
+    __slots__ = ('_path', '_content_type')
+
+    def __init__(
+        self, path: Union[str, Path], content_type: Optional[str] = None,
+    ) -> None:
+        self._path: Final[Path] = (path if isinstance(path, Path)
+                                   else Path(path))
+        self._content_type: Final[Optional[str]] = content_type
+
+    @property
+    def name(self) -> str:
+        return self._path.name
+
+    @property
+    def content_type(self) -> Optional[str]:
+        return self._content_type
+
+    @property
+    async def content(self) -> AsyncIterator[bytes]:
+        loop = asyncio.get_running_loop()
+        reader = cast(BufferedReader, await loop.run_in_executor(
+            None, self._path.open, 'rb'))
+        try:
+            chunk = await loop.run_in_executor(None, reader.read, 2 ** 16)
+            while len(chunk) > 0:
+                yield chunk
+                chunk = await loop.run_in_executor(None, reader.read, 2 ** 16)
+        finally:
+            await loop.run_in_executor(None, reader.close)
 
 
 def _is_tuple(_type: Any) -> bool:
@@ -560,7 +595,7 @@ class BotCommand(BaseTelegram):
     description: str
 
 
-InputFile = Union[BinaryIO, StreamFile]
+InputFile = Union[LocalFile, StreamFile]
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)

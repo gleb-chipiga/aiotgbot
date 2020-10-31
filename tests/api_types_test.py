@@ -1,4 +1,5 @@
 from io import BytesIO
+from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import attr
@@ -9,8 +10,8 @@ from aiotgbot.api_types import (BaseTelegram, CallbackQuery,
                                 InlineQuery, InputMedia, InputMediaAnimation,
                                 InputMediaAudio, InputMediaDocument,
                                 InputMediaPhoto, InputMediaVideo,
-                                KeyboardButtonPollType, Message, Poll,
-                                PreCheckoutQuery, ShippingQuery,
+                                KeyboardButtonPollType, LocalFile, Message,
+                                Poll, PreCheckoutQuery, ShippingQuery,
                                 _is_attr_union, _is_optional, _is_tuple,
                                 _is_union)
 
@@ -260,3 +261,24 @@ def test_input_media_serialization(type_: Any):
     with pytest.raises(TypeError, match='To serialize this object, the media '
                                         'attribute type must be a string'):
         input_media.to_dict()
+
+
+@pytest.mark.parametrize('count', (
+    2 ** 10,
+    2 ** 16
+))
+@pytest.mark.asyncio
+async def test_local_file(count):
+    with TemporaryDirectory() as tmpdirname:
+        file_name = f'{tmpdirname}/file.tmp'
+        with open(file_name, 'wb') as writer:
+            for _ in range(count):
+                writer.write(b'bytes')
+
+        file = LocalFile(file_name)
+        assert file.name == 'file.tmp'
+        content = b''
+        async for chunk in file.content:
+            content += chunk
+
+        assert content == b'bytes' * count
