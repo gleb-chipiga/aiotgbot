@@ -7,7 +7,7 @@ from typing import (Any, AsyncIterator, Dict, Final, Generator, Iterable, List,
 
 import attr
 
-from aiotgbot.constants import InputMediaType, PollType
+from aiotgbot.constants import InputMediaType, ParseMode, PollType
 
 
 class DataMappingError(BaseException):
@@ -227,6 +227,7 @@ class WebhookInfo(BaseTelegram):
     url: Optional[str] = None
     has_custom_certificate: Optional[bool] = None
     pending_update_count: Optional[int] = None
+    ip_address: Optional[str] = None
     last_error_date: Optional[int] = None
     last_error_message: Optional[str] = None
     max_connections: Optional[int] = None
@@ -254,6 +255,7 @@ class Chat(BaseTelegram):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     photo: Optional['ChatPhoto'] = None
+    bio: Optional[str] = None
     description: Optional[str] = None
     invite_link: Optional[str] = None
     pinned_message: Optional['Message'] = None
@@ -261,6 +263,8 @@ class Chat(BaseTelegram):
     slow_mode_delay: Optional[int] = None
     sticker_set_name: Optional[str] = None
     can_set_sticker_set: Optional[bool] = None
+    linked_chat_id: Optional[int] = None
+    location: Optional['ChatLocation'] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -269,6 +273,7 @@ class Message(BaseTelegram):
     date: int
     chat: Chat
     from_: Optional[User] = None
+    sender_chat: Optional[Chat] = None
     forward_from: Optional[User] = None
     forward_from_chat: Optional[Chat] = None
     forward_from_message_id: Optional[int] = None
@@ -313,6 +318,7 @@ class Message(BaseTelegram):
     successful_payment: Optional['SuccessfulPayment'] = None
     connected_website: Optional[str] = None
     passport_data: Optional['PassportData'] = None
+    proximity_alert_triggered: Optional['ProximityAlertTriggered'] = None
     reply_markup: Optional['InlineKeyboardMarkup'] = None
 
 
@@ -342,6 +348,7 @@ class Audio(BaseTelegram):
     duration: int
     performer: Optional[str] = None
     title: Optional[str] = None
+    file_name: Optional[str] = None
     mime_type: Optional[str] = None
     file_size: Optional[int] = None
     thumb: Optional[PhotoSize] = None
@@ -365,6 +372,7 @@ class Video(BaseTelegram):
     height: int
     duration: int
     thumb: Optional[PhotoSize] = None
+    file_name: Optional[str] = None
     mime_type: Optional[str] = None
     file_size: Optional[int] = None
 
@@ -417,6 +425,10 @@ class Dice(BaseTelegram):
 class Location(BaseTelegram):
     longitude: float
     latitude: float
+    horizontal_accuracy: Optional[float] = None
+    live_period: Optional[int] = None
+    heading: Optional[int] = None
+    proximity_alert_radius: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -426,6 +438,15 @@ class Venue(BaseTelegram):
     address: str
     foursquare_id: Optional[str] = None
     foursquare_type: Optional[str] = None
+    google_place_id: Optional[str] = None
+    google_place_type: Optional[str] = None
+
+
+@attr.s(slots=True, frozen=True, auto_attribs=True)
+class ProximityAlertTriggered(BaseTelegram):
+    traveler: User
+    watcher: User
+    distance: int
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -559,6 +580,7 @@ class ChatMember(BaseTelegram):
     user: User
     status: str
     custom_title: str
+    is_anonymous: Optional[bool] = None
     until_date: Optional[int] = None
     can_be_edited: Optional[bool] = None
     can_change_info: Optional[bool] = None
@@ -590,6 +612,12 @@ class ChatPermissions(BaseTelegram):
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
+class ChatLocation(BaseTelegram):
+    location: Location
+    address: str
+
+
+@attr.s(slots=True, frozen=True, auto_attribs=True)
 class BotCommand(BaseTelegram):
     command: str
     description: str
@@ -603,6 +631,7 @@ class InputMedia(BaseTelegram):
     media: Union[str, InputFile]
     caption: Optional[str] = None
     parse_mode: Optional[str] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
 
     def to_dict(self) -> Dict[str, Any]:
         if not isinstance(self.media, str):
@@ -648,6 +677,7 @@ class InputMediaAudio(InputMedia):
 class InputMediaDocument(InputMedia):
     type: str = attr.ib(default=InputMediaType.DOCUMENT, init=False)
     thumb: Optional[str] = None
+    disable_content_type_detection: Optional[bool] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -739,6 +769,8 @@ class InlineQueryResultPhoto(BaseTelegram):
     title: Optional[str] = None
     description: Optional[str] = None
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
 
@@ -753,6 +785,8 @@ class InlineQueryResultGif(BaseTelegram):
     gif_height: Optional[int] = None
     title: Optional[str] = None
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
 
@@ -767,6 +801,8 @@ class InlineQueryResultMpeg4Gif(BaseTelegram):
     mpeg4_height: Optional[int] = None
     title: Optional[str] = None
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
 
@@ -780,6 +816,8 @@ class InlineQueryResultVideo(BaseTelegram):
     thumb_url: str
     title: str
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     video_width: Optional[int] = None
     video_height: Optional[int] = None
     video_duration: Optional[int] = None
@@ -795,6 +833,8 @@ class InlineQueryResultAudio(BaseTelegram):
     audio_url: str
     title: str
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     performer: Optional[str] = None
     audio_duration: Optional[int] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
@@ -808,6 +848,8 @@ class InlineQueryResultVoice(BaseTelegram):
     voice_url: str
     title: str
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     voice_duration: Optional[int] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
@@ -821,6 +863,8 @@ class InlineQueryResultDocument(BaseTelegram):
     document_url: str
     mime_type: str
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     description: Optional[str] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
@@ -836,6 +880,10 @@ class InlineQueryResultLocation(BaseTelegram):
     latitude: float
     longitude: float
     title: str
+    horizontal_accuracy: Optional[float] = None
+    live_period: Optional[int] = None
+    heading: Optional[int] = None
+    proximity_alert_radius: Optional[int] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
     thumb_url: Optional[str] = None
@@ -853,6 +901,8 @@ class InlineQueryResultVenue(BaseTelegram):
     address: str
     foursquare_id: Optional[str] = None
     foursquare_type: Optional[str] = None
+    google_place_id: Optional[str] = None
+    google_place_type: Optional[str] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
     thumb_url: Optional[str] = None
@@ -891,6 +941,8 @@ class InlineQueryResultCachedPhoto(BaseTelegram):
     title: Optional[str] = None
     description: Optional[str] = None
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
 
@@ -902,6 +954,8 @@ class InlineQueryResultCachedGif(BaseTelegram):
     gif_file_id: str
     title: Optional[str] = None
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
 
@@ -913,6 +967,8 @@ class InlineQueryResultCachedMpeg4Gif(BaseTelegram):
     mpeg4_file_id: str
     title: Optional[str] = None
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
 
@@ -934,6 +990,8 @@ class InlineQueryResultCachedDocument(BaseTelegram):
     document_file_id: str
     description: Optional[str] = None
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
 
@@ -946,6 +1004,8 @@ class InlineQueryResultCachedVideo(BaseTelegram):
     title: str
     description: Optional[str] = None
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
 
@@ -957,6 +1017,8 @@ class InlineQueryResultCachedVoice(BaseTelegram):
     voice_file_id: str
     title: str
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
 
@@ -967,6 +1029,8 @@ class InlineQueryResultCachedAudio(BaseTelegram):
     id: str
     audio_file_id: str
     caption: Optional[str] = None
+    parse_mode: Optional[ParseMode] = None
+    caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
     input_message_content: Optional['InputMessageContent'] = None
 
@@ -980,7 +1044,8 @@ InputMessageContent = Union['InputTextMessageContent',
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class InputTextMessageContent(BaseTelegram):
     message_text: str
-    parse_mode: str
+    parse_mode: Optional[ParseMode] = None
+    entities: Optional[Iterable[MessageEntity]] = None
     disable_web_page_preview: Optional[bool] = None
 
 
@@ -988,6 +1053,10 @@ class InputTextMessageContent(BaseTelegram):
 class InputLocationMessageContent(BaseTelegram):
     latitude: float
     longitude: float
+    horizontal_accuracy: Optional[float] = None
+    live_period: Optional[int] = None
+    heading: Optional[int] = None
+    proximity_alert_radius: Optional[int] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -998,6 +1067,8 @@ class InputVenueMessageContent(BaseTelegram):
     address: str
     foursquare_id: Optional[str] = None
     foursquare_type: Optional[str] = None
+    google_place_id: Optional[str] = None
+    google_place_type: Optional[str] = None
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)

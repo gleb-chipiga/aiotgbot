@@ -119,6 +119,8 @@ class DiceEmoji(str, Enum):
     DICE = '🎲'
     DARTS = '🎯'
     BASKETBALL = '🏀'
+    FOOTBALL = '⚽'
+    SLOT_MACHINE = '🎰'
 
 
 @unique

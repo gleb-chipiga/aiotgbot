@@ -121,9 +121,11 @@ async def test_api_methods_send_message(bot, make_msg, reply_kb):
         1,
         text='Hello!',
         parse_mode='HTML',
+        entities=None,
         disable_web_page_preview=True,
         disable_notification=None,
         reply_to_message_id=111,
+        allow_sending_without_reply=None,
         reply_markup=json_dumps(reply_kb.to_dict())
     )]
 
@@ -146,8 +148,10 @@ async def test_api_methods_send_photo(bot, make_msg, reply_kb):
         photo='some photo',
         caption=None,
         parse_mode='HTML',
+        caption_entities=None,
         disable_notification=None,
         reply_to_message_id=111,
+        allow_sending_without_reply=None,
         reply_markup=json_dumps(reply_kb.to_dict())
     )]
 
@@ -270,6 +274,7 @@ async def test_api_methods_edit_message_text(bot, make_msg):
         message_id=1,
         inline_message_id=None,
         parse_mode=None,
+        entities=None,
         disable_web_page_preview=None,
         reply_markup=None
     )]
@@ -310,6 +315,7 @@ async def test_send_media_group(bot, make_msg):
         ]),
         disable_notification=None,
         reply_to_message_id=None,
+        allow_sending_without_reply=None,
         attachment0=file0,
         attachment1=file1,
         attachment2=file2

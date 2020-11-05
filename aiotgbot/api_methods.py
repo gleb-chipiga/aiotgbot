@@ -8,8 +8,9 @@ import attr
 from .api_types import (APIResponse, BaseTelegram, BotCommand, Chat,
                         ChatMember, ChatPermissions, File, GameHighScore,
                         InlineKeyboardMarkup, InlineQueryResult, InputFile,
-                        InputMedia, InputMediaPhoto, InputMediaVideo,
-                        LabeledPrice, MaskPosition, Message,
+                        InputMedia, InputMediaAudio, InputMediaDocument,
+                        InputMediaPhoto, InputMediaVideo, LabeledPrice,
+                        MaskPosition, Message, MessageEntity,
                         PassportElementError, Poll, ReplyMarkup,
                         ShippingOption, StickerSet, Update, User,
                         UserProfilePhotos, WebhookInfo)
@@ -20,8 +21,15 @@ from .utils import json_dumps
 api_logger: Final[logging.Logger] = logging.getLogger('aiotgbot.api')
 
 
-def _to_json(value: Optional[BaseTelegram]) -> Optional[str]:
-    return json_dumps(value.to_dict()) if value is not None else None
+def _to_json(
+    value: Union[BaseTelegram, Iterable[BaseTelegram], None]
+) -> Optional[str]:
+    if value is None:
+        return None
+    elif isinstance(value, Iterable):
+        return json_dumps(tuple(item.to_dict() for item in value))
+    else:
+        return json_dumps(value.to_dict())
 
 
 def _strs_to_json(value: Optional[Iterable[str]]) -> Optional[str]:
@@ -69,20 +77,27 @@ class ApiMethods(ABC):
     async def set_webhook(
         self, url: Optional[str] = None,
         certificate: Optional[InputFile] = None,
+        ip_address: Optional[str] = None,
         max_connections: Optional[int] = None,
-        allowed_updates: Optional[Iterable[UpdateType]] = None
+        allowed_updates: Optional[Iterable[UpdateType]] = None,
+        drop_pending_updates: Optional[bool] = None
     ) -> bool:
         api_logger.debug('Set webhook')
         response = await self._request(
             RequestMethod.POST, 'setWebhook', url=url, certificate=certificate,
-            max_connections=max_connections,
-            allowed_updates=_strs_to_json(allowed_updates))
+            ip_address=ip_address, max_connections=max_connections,
+            allowed_updates=_strs_to_json(allowed_updates),
+            drop_pending_updates=drop_pending_updates)
 
         return response.result
 
-    async def delete_webhook(self) -> bool:
+    async def delete_webhook(
+        self, drop_pending_updates: Optional[bool]
+    ) -> bool:
         api_logger.debug('Delete webhook')
-        response = await self._request(RequestMethod.POST, 'deleteWebhook')
+        response = await self._request(
+            RequestMethod.POST, 'deleteWebhook',
+            drop_pending_updates=drop_pending_updates)
         return response.result
 
     async def get_webhook_info(self) -> WebhookInfo:
@@ -96,21 +111,35 @@ class ApiMethods(ABC):
         response = await self._request(RequestMethod.GET, 'getMe')
         return User.from_dict(response.result)
 
+    async def log_out(self) -> bool:
+        api_logger.debug('Log out')
+        response = await self._request(RequestMethod.POST, 'logOut')
+        return response.result
+
+    async def close(self) -> bool:
+        api_logger.debug('Close')
+        response = await self._request(RequestMethod.POST, 'close')
+        return response.result
+
     async def send_message(
         self, chat_id: Union[int, str], text: str,
         parse_mode: Optional[ParseMode] = None,
+        entities: Optional[Iterable[MessageEntity]] = None,
         disable_web_page_preview: Optional[bool] = None,
         disable_notification: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
         api_logger.debug('Send message "%s" to chat "%s"', text, chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendMessage', chat_id, text=text,
             parse_mode=_parse_mode_to_str(parse_mode),
+            entities=_to_json(entities),
             disable_web_page_preview=disable_web_page_preview,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
@@ -128,21 +157,48 @@ class ApiMethods(ABC):
 
         return Message.from_dict(response.result)
 
+    async def copy_message(
+        self, chat_id: Union[int, str], from_chat_id: Union[int, str],
+        message_id: int, caption: Optional[str] = None,
+        parse_mode: Optional[ParseMode] = None,
+        caption_entities: Optional[Iterable[MessageEntity]] = None,
+        disable_notification: Optional[bool] = None,
+        reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
+        reply_markup: Optional[ReplyMarkup] = None
+    ) -> Message:
+        api_logger.debug('Copy message %s to "%s" from "%s"', message_id,
+                         chat_id, from_chat_id)
+        response = await self._safe_request(
+            RequestMethod.POST, 'copyMessage', chat_id,
+            from_chat_id=from_chat_id, message_id=message_id,
+            parse_mode=parse_mode, caption_entities=_to_json(caption_entities),
+            caption=caption, disable_notification=disable_notification,
+            reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
+            reply_markup=_to_json(reply_markup))
+
+        return Message.from_dict(response.result)
+
     async def send_photo(
         self, chat_id: Union[int, str],
         photo: Union[InputFile, str],
         caption: Optional[str] = None,
         parse_mode: Optional[ParseMode] = None,
+        caption_entities: Optional[Iterable[MessageEntity]] = None,
         disable_notification: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
         api_logger.debug('Send photo to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendPhoto', chat_id, photo=photo,
             caption=caption, parse_mode=_parse_mode_to_str(parse_mode),
+            caption_entities=_to_json(caption_entities),
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
@@ -152,22 +208,26 @@ class ApiMethods(ABC):
         audio: Union[InputFile, str],
         caption: Optional[str] = None,
         parse_mode: Optional[ParseMode] = None,
+        caption_entities: Optional[Iterable[MessageEntity]] = None,
         disable_notification: Optional[bool] = None,
         duration: Optional[int] = None,
         performer: Optional[str] = None,
         title: Optional[str] = None,
         thumb: Optional[Union[InputFile, str]] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
         api_logger.debug('Send audio to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendAudio', chat_id, audio=audio,
             caption=caption, parse_mode=_parse_mode_to_str(parse_mode),
+            caption_entities=_to_json(caption_entities),
             disable_notification=disable_notification,
             duration=duration, performer=performer,
             title=title, thumb=thumb,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
@@ -178,11 +238,14 @@ class ApiMethods(ABC):
         thumb: Optional[Union[InputFile, str]],
         caption: Optional[str] = None,
         parse_mode: Optional[ParseMode] = None,
+        caption_entities: Optional[Iterable[MessageEntity]] = None,
+        disable_content_type_detection: Optional[bool] = None,
         disable_notification: Optional[bool] = None,
         duration: Optional[int] = None,
         performer: Optional[str] = None,
         title: Optional[str] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
         api_logger.debug('Send document to "%s"', chat_id)
@@ -190,9 +253,12 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'sendDocument', chat_id,
             document=document, thumb=thumb, caption=caption,
             parse_mode=_parse_mode_to_str(parse_mode),
+            caption_entities=_to_json(caption_entities),
+            disable_content_type_detection=disable_content_type_detection,
             disable_notification=disable_notification,
             duration=duration, performer=performer, title=title,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
@@ -206,9 +272,11 @@ class ApiMethods(ABC):
         thumb: Optional[Union[InputFile, str]] = None,
         caption: Optional[str] = None,
         parse_mode: Optional[ParseMode] = None,
+        caption_entities: Optional[Iterable[MessageEntity]] = None,
         supports_streaming: Optional[bool] = None,
         disable_notification: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
         api_logger.debug('Send video to "%s"', chat_id)
@@ -217,9 +285,11 @@ class ApiMethods(ABC):
             video=video, duration=duration, width=width,
             height=height, thumb=thumb, caption=caption,
             parse_mode=_parse_mode_to_str(parse_mode),
+            caption_entities=_to_json(caption_entities),
             supports_streaming=supports_streaming,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
@@ -233,8 +303,10 @@ class ApiMethods(ABC):
         thumb: Optional[Union[InputFile, str]] = None,
         caption: Optional[str] = None,
         parse_mode: Optional[ParseMode] = None,
+        caption_entities: Optional[Iterable[MessageEntity]] = None,
         disable_notification: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
         api_logger.debug('Send animation to "%s"', chat_id)
@@ -243,8 +315,10 @@ class ApiMethods(ABC):
             animation=animation, duration=duration, width=width,
             height=height, thumb=thumb, caption=caption,
             parse_mode=_parse_mode_to_str(parse_mode),
+            caption_entities=_to_json(caption_entities),
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
@@ -254,9 +328,11 @@ class ApiMethods(ABC):
         voice: Union[InputFile, str],
         caption: Optional[str] = None,
         parse_mode: Optional[ParseMode] = None,
+        caption_entities: Optional[Iterable[MessageEntity]] = None,
         duration: Optional[int] = None,
         disable_notification: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
         api_logger.debug('Send voice to "%s"', chat_id)
@@ -264,9 +340,11 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'sendVoice', chat_id,
             voice=voice, caption=caption,
             parse_mode=_parse_mode_to_str(parse_mode),
+            caption_entities=_to_json(caption_entities),
             duration=duration,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
@@ -279,6 +357,7 @@ class ApiMethods(ABC):
         thumb: Optional[Union[InputFile, str]] = None,
         disable_notification: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
         api_logger.debug('Send video not to "%s"', chat_id)
@@ -288,15 +367,18 @@ class ApiMethods(ABC):
             length=length, thumb=thumb,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
 
     async def send_media_group(
         self, chat_id: Union[int, str],
-        media: Iterable[Union[InputMediaPhoto, InputMediaVideo]],
+        media: Iterable[Union[InputMediaAudio, InputMediaDocument,
+                              InputMediaPhoto, InputMediaVideo]],
         disable_notification: Optional[bool] = None,
-        reply_to_message_id: Optional[int] = None
+        reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None
     ) -> Tuple[Message, ...]:
         api_logger.debug('Send media group to "%s"', chat_id)
         attached_media = []
@@ -314,28 +396,37 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'sendMediaGroup', chat_id,
             media=json_dumps(tuple(item.to_dict() for item in attached_media)),
             disable_notification=disable_notification,
-            reply_to_message_id=reply_to_message_id, **attachments
+            reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
+            **attachments
         )
-        print(response.result)
+
         return tuple(Message.from_dict(item) for item in response.result)
 
     async def send_location(
         self, chat_id: Union[int, str],
         latitude: float,
         longitude: float,
+        horizontal_accuracy: Optional[float] = None,
         live_period: Optional[int] = None,
+        heading: Optional[int] = None,
+        proximity_alert_radius: Optional[int] = None,
         length: Optional[int] = None,
         disable_notification: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
         api_logger.debug('Send location to "%s"', chat_id)
         response = await self._safe_request(
-            RequestMethod.POST, 'editMessageLiveLocation', chat_id,
+            RequestMethod.POST, 'sendLocation', chat_id,
             latitude=latitude, longitude=longitude,
-            live_period=live_period, length=length,
+            horizontal_accuracy=horizontal_accuracy,
+            live_period=live_period, heading=heading,
+            proximity_alert_radius=proximity_alert_radius, length=length,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
@@ -344,6 +435,9 @@ class ApiMethods(ABC):
         self,
         latitude: float,
         longitude: float,
+        horizontal_accuracy: Optional[float] = None,
+        heading: Optional[int] = None,
+        proximity_alert_radius: Optional[int] = None,
         chat_id: Optional[Union[int, str]] = None,
         message_id: Optional[int] = None,
         inline_message_id: Optional[str] = None,
@@ -355,6 +449,8 @@ class ApiMethods(ABC):
             chat_id=chat_id, message_id=message_id,
             inline_message_id=inline_message_id,
             latitude=latitude, longitude=longitude,
+            horizontal_accuracy=horizontal_accuracy, heading=heading,
+            proximity_alert_radius=proximity_alert_radius,
             reply_markup=_to_json(reply_markup))
 
         if isinstance(response.result, bool):
@@ -390,6 +486,7 @@ class ApiMethods(ABC):
         foursquare_type: Optional[str] = None,
         disable_notification: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
         api_logger.debug('Send venue to "%s"', chat_id)
@@ -400,6 +497,7 @@ class ApiMethods(ABC):
             foursquare_type=foursquare_type,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
@@ -412,6 +510,7 @@ class ApiMethods(ABC):
         vcard: Optional[str] = None,
         disable_notification: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
         api_logger.debug('Send contact to "%s"', chat_id)
@@ -421,23 +520,28 @@ class ApiMethods(ABC):
             last_name=last_name, vcard=vcard,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
 
-    async def send_poll(self, chat_id: Union[int, str], question: str,
-                        options: Iterable[str], is_anonymous: Optional[bool],
-                        type_: Optional[PollType] = None,
-                        allows_multiple_answers: Optional[bool] = None,
-                        correct_option_id: Optional[bool] = None,
-                        is_closed: Optional[bool] = None,
-                        explanation: Optional[str] = None,
-                        explanation_parse_mode: Optional[ParseMode] = None,
-                        open_period: Optional[int] = None,
-                        close_date: Optional[int] = None,
-                        disable_notification: Optional[bool] = None,
-                        reply_to_message_id: Optional[int] = None,
-                        reply_markup: Optional[ReplyMarkup] = None) -> Message:
+    async def send_poll(
+        self, chat_id: Union[int, str], question: str,
+        options: Iterable[str], is_anonymous: Optional[bool],
+        type_: Optional[PollType] = None,
+        allows_multiple_answers: Optional[bool] = None,
+        correct_option_id: Optional[bool] = None,
+        is_closed: Optional[bool] = None,
+        explanation: Optional[str] = None,
+        explanation_parse_mode: Optional[ParseMode] = None,
+        explanation_entities: Optional[Iterable[MessageEntity]] = None,
+        open_period: Optional[int] = None,
+        close_date: Optional[int] = None,
+        disable_notification: Optional[bool] = None,
+        reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
+        reply_markup: Optional[ReplyMarkup] = None
+    ) -> Message:
         api_logger.debug('Send poll to chat "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendPoll', chat_id,
@@ -447,9 +551,11 @@ class ApiMethods(ABC):
             correct_option_id=correct_option_id,
             is_closed=is_closed, explanation=explanation,
             explanation_parse_mode=explanation_parse_mode,
+            explanation_entities=_to_json(explanation_entities),
             open_period=open_period, close_date=close_date,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return response.result
@@ -458,6 +564,7 @@ class ApiMethods(ABC):
                         emoji: Optional[DiceEmoji] = None,
                         disable_notification: Optional[bool] = None,
                         reply_to_message_id: Optional[int] = None,
+                        allow_sending_without_reply: Optional[bool] = None,
                         reply_markup: Optional[ReplyMarkup] = None) -> Message:
         api_logger.debug('Send dice "%s" to chat "%s"', emoji, chat_id)
         response = await self._safe_request(
@@ -465,6 +572,7 @@ class ApiMethods(ABC):
             emoji=_dice_emoji_to_str(emoji),
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return response.result
@@ -504,11 +612,12 @@ class ApiMethods(ABC):
 
         return response.result
 
-    async def unban_chat_member(self, chat_id: Union[int, str],
-                                user_id: int) -> bool:
+    async def unban_chat_member(self, chat_id: Union[int, str], user_id: int,
+                                only_if_banned: Optional[bool] = None) -> bool:
         api_logger.debug('Unban member %s in "%s"', user_id, chat_id)
         response = await self._request(RequestMethod.POST, 'unbanChatMember',
-                                       chat_id=chat_id, user_id=user_id)
+                                       chat_id=chat_id, user_id=user_id,
+                                       only_if_banned=only_if_banned)
 
         return response.result
 
@@ -529,6 +638,7 @@ class ApiMethods(ABC):
     async def promote_chat_member(
         self, chat_id: Union[int, str],
         user_id: int,
+        is_anonymous: Optional[int] = None,
         can_change_info: Optional[int] = None,
         can_post_messages: Optional[bool] = None,
         can_edit_messages: Optional[bool] = None,
@@ -541,7 +651,7 @@ class ApiMethods(ABC):
         api_logger.debug('Promote member %s in "%s"', user_id, chat_id)
         response = await self._request(
             RequestMethod.POST, 'promoteChatMember',
-            chat_id=chat_id, user_id=user_id,
+            chat_id=chat_id, user_id=user_id, is_anonymous=is_anonymous,
             can_change_info=can_change_info,
             can_post_messages=can_post_messages,
             can_edit_messages=can_edit_messages,
@@ -630,10 +740,19 @@ class ApiMethods(ABC):
 
         return response.result
 
-    async def unpin_chat_message(self, chat_id: Union[int, str]) -> bool:
-        api_logger.debug('Unpin message in chat "%s"', chat_id)
+    async def unpin_chat_message(self, chat_id: Union[int, str],
+                                 message_id: Optional[int]) -> bool:
+        api_logger.debug('Unpin message "%s" in chat "%s"',
+                         message_id, chat_id)
         response = await self._request(RequestMethod.POST, 'unpinChatMessage',
-                                       chat_id=chat_id)
+                                       chat_id=chat_id, message_id=message_id)
+
+        return response.result
+
+    async def unpin_all_chat_messages(self, chat_id: Union[int, str]) -> bool:
+        api_logger.debug('Unpin all messages in chat "%s"', chat_id)
+        response = await self._request(RequestMethod.POST,
+                                       'unpinAllChatMessages', chat_id=chat_id)
 
         return response.result
 
@@ -726,6 +845,7 @@ class ApiMethods(ABC):
         message_id: Optional[int] = None,
         inline_message_id: Optional[str] = None,
         parse_mode: Optional[ParseMode] = None,
+        entities: Optional[Iterable[MessageEntity]] = None,
         disable_web_page_preview: Optional[bool] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Union[Message, bool]:
@@ -740,6 +860,7 @@ class ApiMethods(ABC):
             chat_id=chat_id, message_id=message_id,
             inline_message_id=inline_message_id, text=text,
             parse_mode=_parse_mode_to_str(parse_mode),
+            entities=_to_json(entities),
             disable_web_page_preview=disable_web_page_preview,
             reply_markup=_to_json(reply_markup))
 
@@ -754,6 +875,7 @@ class ApiMethods(ABC):
         inline_message_id: Optional[str] = None,
         caption: Optional[str] = None,
         parse_mode: Optional[ParseMode] = None,
+        caption_entities: Optional[Iterable[MessageEntity]] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Union[Message, bool]:
         if inline_message_id is None:
@@ -767,6 +889,7 @@ class ApiMethods(ABC):
             chat_id=chat_id, message_id=message_id,
             inline_message_id=inline_message_id,
             caption=caption, parse_mode=_parse_mode_to_str(parse_mode),
+            caption_entities=_to_json(caption_entities),
             reply_markup=_to_json(reply_markup))
 
         if isinstance(response.result, bool):
@@ -851,6 +974,7 @@ class ApiMethods(ABC):
         sticker: Union[InputFile, str],
         disable_notification: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
         api_logger.debug('Send sticker to "%s"', chat_id)
@@ -859,6 +983,7 @@ class ApiMethods(ABC):
             chat_id=chat_id, sticker=sticker,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
@@ -970,6 +1095,7 @@ class ApiMethods(ABC):
         is_flexible: Optional[bool] = None,
         disable_notification: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Message:
         api_logger.debug('Send invoice to %s', chat_id)
@@ -989,6 +1115,7 @@ class ApiMethods(ABC):
             is_flexible=is_flexible,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
@@ -1041,6 +1168,7 @@ class ApiMethods(ABC):
         self, chat_id: int, game_short_name: str,
         disable_notification: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
+        allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Message:
         api_logger.debug('Send game "%s" to %s', chat_id, game_short_name)
@@ -1049,6 +1177,7 @@ class ApiMethods(ABC):
             game_short_name=game_short_name,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
+            allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
         return Message.from_dict(response.result)
