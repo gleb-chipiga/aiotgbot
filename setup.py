@@ -1,10 +1,9 @@
-import pathlib
 import re
+from pathlib import Path
 
 from setuptools import setup  # type: ignore
 
-root = pathlib.Path(__file__).parent
-txt = (root / 'aiotgbot' / '__init__.py').read_text('utf-8')
+txt = (Path(__file__).parent / 'aiotgbot' / '__init__.py').read_text('utf-8')
 version = re.findall(r"^__version__ = '([^']+)'\r?$", txt, re.M)[0]
 
 setup(
