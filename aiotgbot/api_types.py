@@ -323,6 +323,11 @@ class Message(BaseTelegram):
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
+class MessageId(BaseTelegram):
+    message_id: int
+
+
+@attr.s(slots=True, frozen=True, auto_attribs=True)
 class MessageEntity(BaseTelegram):
     type: str
     offset: int

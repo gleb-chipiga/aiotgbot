@@ -10,7 +10,7 @@ from .api_types import (APIResponse, BaseTelegram, BotCommand, Chat,
                         InlineKeyboardMarkup, InlineQueryResult, InputFile,
                         InputMedia, InputMediaAudio, InputMediaDocument,
                         InputMediaPhoto, InputMediaVideo, LabeledPrice,
-                        MaskPosition, Message, MessageEntity,
+                        MaskPosition, Message, MessageEntity, MessageId,
                         PassportElementError, Poll, ReplyMarkup,
                         ShippingOption, StickerSet, Update, User,
                         UserProfilePhotos, WebhookInfo)
@@ -166,7 +166,7 @@ class ApiMethods(ABC):
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
-    ) -> Message:
+    ) -> MessageId:
         api_logger.debug('Copy message %s to "%s" from "%s"', message_id,
                          chat_id, from_chat_id)
         response = await self._safe_request(
@@ -178,7 +178,7 @@ class ApiMethods(ABC):
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
-        return Message.from_dict(response.result)
+        return MessageId.from_dict(response.result)
 
     async def send_photo(
         self, chat_id: Union[int, str],
