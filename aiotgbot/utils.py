@@ -2,11 +2,7 @@ import asyncio
 import json
 from contextlib import asynccontextmanager, suppress
 from functools import partial
-from html import escape
-from typing import AsyncGenerator, Dict, Final, Hashable, Optional, Tuple
-
-from aiotgbot.api_types import MessageEntity
-from aiotgbot.constants import MessageEntityType
+from typing import AsyncGenerator, Dict, Final, Hashable, Optional
 
 json_dumps: Final = partial(json.dumps, ensure_ascii=False)
 
@@ -97,80 +93,3 @@ class FreqLimit:
                 if key not in self._events:
                     del self._ts[key]
             await asyncio.sleep(self._clean_interval)
-
-
-def _entity_tag(text: str, entity: MessageEntity) -> Optional[str]:
-    if entity.type == MessageEntityType.BOLD:
-        tag = f'<b>{text}</b>'
-    elif entity.type == MessageEntityType.ITALIC:
-        tag = f'<i>{text}</i>'
-    elif entity.type == MessageEntityType.UNDERLINE:
-        tag = f'<u>{text}</u>'
-    elif entity.type == MessageEntityType.STRIKETHROUGH:
-        tag = f'<s>{text}</s>'
-    elif entity.type == MessageEntityType.CODE:
-        tag = f'<code>{text}</code>'
-    elif entity.type == MessageEntityType.PRE and entity.language is not None:
-        code_tag = f'<code class="language-{entity.language}">{text}</code>'
-        tag = f'<pre>{code_tag}</pre>'
-    elif entity.type == MessageEntityType.PRE:
-        tag = f'<pre><code>{text}</code></pre>'
-    elif entity.type == MessageEntityType.EMAIL:
-        tag = f'<a href="mailto:{text}">{text}</a>'
-    elif entity.type == MessageEntityType.URL:
-        tag = f'<a href="{text}">{text}</a>'
-    elif entity.type == MessageEntityType.TEXT_LINK:
-        assert entity.url is not None
-        tag = f'<a href="{escape(entity.url)}">{text}</a>'
-    elif entity.type == MessageEntityType.TEXT_MENTION:
-        assert entity.user is not None
-        tag = f'<a href="tg://user?id={entity.user.id}">{text}</a>'
-    else:
-        return None
-
-    return tag
-
-
-_MessageEntities = Tuple[MessageEntity, ...]
-
-
-def _message_to_html(text: str, entities: Optional[_MessageEntities],
-                     offset: int = 0, length: Optional[int] = None) -> str:
-    if len(text) == 0:
-        return text
-    elif entities is None or len(entities) == 0:
-        return escape(text)
-
-    utf16 = text.encode('utf-16-le')
-    if length is None:
-        length = len(utf16)
-    result = ''
-    last_offset = 0
-    for index, entity in enumerate(entities):
-        if entity.offset >= offset + length:
-            break
-        relative_offset = entity.offset - offset
-        if relative_offset > last_offset:
-            part = utf16[last_offset * 2:relative_offset * 2]
-            result += escape(part.decode('utf-16-le'))
-        elif relative_offset < last_offset:
-            continue
-        part = utf16[relative_offset * 2:(relative_offset + entity.length) * 2]
-        entity_text = _message_to_html(
-            part.decode('utf-16-le'), entities[index + 1:],
-            entity.offset, entity.length
-        )
-        tag = _entity_tag(entity_text, entity)
-        if tag is not None:
-            last_offset = relative_offset + entity.length
-            result += tag
-        else:
-            last_offset = relative_offset
-    part = utf16[last_offset * 2:]
-    result += escape(part.decode('utf-16-le'))
-
-    return result
-
-
-def message_to_html(text: str, entities: Optional[_MessageEntities]) -> str:
-    return _message_to_html(text, entities)

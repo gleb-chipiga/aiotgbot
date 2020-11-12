@@ -17,7 +17,6 @@ from .filters import (CallbackQueryDataFilter, CommandsFilter,
                       PrivateChatFilter, StateFilter, UpdateTypeFilter)
 from .handler_table import HandlerTable
 from .storage import BaseStorage
-from .utils import message_to_html
 
 __all__ = (
     'BaseTelegram',
@@ -70,7 +69,5 @@ __all__ = (
 
     'HandlerTable',
 
-    'BaseStorage',
-
-    'message_to_html'
+    'BaseStorage'
 )
