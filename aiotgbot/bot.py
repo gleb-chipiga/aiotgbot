@@ -8,9 +8,9 @@ from typing import (Any, Awaitable, Callable, Dict, Final, Iterator,
                     MutableMapping, Optional, Protocol, Tuple, Union)
 
 import aiohttp
-import aiojobs  # type: ignore
+import aiojobs
 import attr
-import backoff  # type: ignore
+import backoff
 
 from .api_methods import ApiMethods, ParamType
 from .api_types import APIResponse, LocalFile, StreamFile, Update, User
@@ -116,7 +116,6 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         loop.add_signal_handler(SIGTERM, self.stop_polling)
 
         self._scheduler = await aiojobs.create_scheduler(
-            close_timeout=None,
             exception_handler=self._scheduler_exception_handler)
 
         self._polling_started = True
