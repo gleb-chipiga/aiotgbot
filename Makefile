@@ -28,4 +28,4 @@ clean:
 	rm .coverage
 	rm -rf aiotgbot.egg-info
 	rm -rf dist
-	rm -rf buld
+	rm -rf build
