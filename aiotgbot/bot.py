@@ -5,12 +5,13 @@ from functools import partial
 from http import HTTPStatus
 from signal import SIGINT, SIGTERM
 from typing import (Any, Awaitable, Callable, Dict, Final, Iterator,
-                    MutableMapping, Optional, Protocol, Tuple, Union)
+                    MutableMapping, Optional, Tuple, Union)
 
 import aiohttp
 import aiojobs
 import attr
 import backoff
+from aiojobs_protocols import SchedulerProtocol
 
 from .api_methods import ApiMethods, ParamType
 from .api_types import APIResponse, LocalFile, StreamFile, Update, User
@@ -36,11 +37,6 @@ response_logger: Final[logging.Logger] = logging.getLogger('aiotgbot.response')
 EventHandler = Callable[['Bot'], Awaitable[None]]
 
 
-class _SchedulerProtocol(Protocol):
-    async def spawn(self, coro: Awaitable[Any]) -> Any: ...
-    async def close(self) -> None: ...
-
-
 class Bot(MutableMapping[str, Any], ApiMethods):
 
     def __init__(self, token: str, handler_table: 'AbstractHandlerTable',
@@ -53,7 +49,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         self._message_limit: Optional[FreqLimit] = None
         self._chat_limit: Optional[FreqLimit] = None
         self._group_limit: Optional[FreqLimit] = None
-        self._scheduler: Optional[_SchedulerProtocol] = None
+        self._scheduler: Optional[SchedulerProtocol] = None
         self._updates_offset: int = 0
         self._me: Optional[User] = None
         self._on_shutdown: Optional[EventHandler] = None
