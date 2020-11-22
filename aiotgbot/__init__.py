@@ -19,6 +19,7 @@ from .handler_table import HandlerTable
 from .storage import BaseStorage
 
 __all__ = (
+    '__version__',
     'BaseTelegram',
     'CallbackQuery',
     'Chat',
