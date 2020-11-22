@@ -584,7 +584,7 @@ class ChatPhoto(BaseTelegram):
 class ChatMember(BaseTelegram):
     user: User
     status: str
-    custom_title: str
+    custom_title: Optional[str] = None
     is_anonymous: Optional[bool] = None
     until_date: Optional[int] = None
     can_be_edited: Optional[bool] = None
