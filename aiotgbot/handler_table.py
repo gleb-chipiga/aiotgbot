@@ -1,4 +1,5 @@
-from typing import Callable, Iterable, List, Optional
+import re
+from typing import Callable, Iterable, List, Optional, Union
 
 from .bot import (AbstractHandlerTable, BaseFilter, Bot, Handler,
                   HandlerCallable)
@@ -22,7 +23,7 @@ class HandlerTable(AbstractHandlerTable):
         state: Optional[str] = None,
         commands: Optional[Iterable[str]] = None,
         content_types: Optional[Iterable[ContentType]] = None,
-        text_match: Optional[str] = None,
+        text_match: Union[str, re.Pattern, None] = None,
         filters: Optional[Iterable[BaseFilter]] = None
     ) -> None:
         update_type_filter = UpdateTypeFilter(UpdateType.MESSAGE)
@@ -33,8 +34,10 @@ class HandlerTable(AbstractHandlerTable):
             handler_filters.append(CommandsFilter(tuple(commands)))
         if content_types is not None:
             handler_filters.append(ContentTypeFilter(tuple(content_types)))
-        if text_match is not None:
+        if isinstance(text_match, re.Pattern):
             handler_filters.append(MessageTextFilter(text_match))
+        elif isinstance(text_match, str):
+            handler_filters.append(MessageTextFilter(re.compile(text_match)))
         if filters is not None:
             handler_filters.extend(filters)
         self._handlers.append(Handler(handler, tuple(handler_filters)))
@@ -172,15 +175,18 @@ class HandlerTable(AbstractHandlerTable):
     def callback_query_handler(
             self, handler: HandlerCallable,
             state: Optional[str] = None,
-            data_match: Optional[str] = None,
+            data_match: Union[str, re.Pattern, None] = None,
             filters: Optional[Iterable[BaseFilter]] = None
     ) -> None:
         update_type_filter = UpdateTypeFilter(UpdateType.CALLBACK_QUERY)
         handler_filters: List[BaseFilter] = [update_type_filter]
         if state is not None:
             handler_filters.append(StateFilter(state))
-        if data_match is not None:
+        if isinstance(data_match, re.Pattern):
             handler_filters.append(CallbackQueryDataFilter(data_match))
+        elif isinstance(data_match, str):
+            handler_filters.append(CallbackQueryDataFilter(
+                re.compile(data_match)))
         if filters is not None:
             handler_filters.extend(filters)
         self._handlers.append(Handler(handler, tuple(handler_filters)))

@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from aiotgbot import Bot, HandlerTable
@@ -100,7 +102,7 @@ async def test_content_types_filter(bot, make_msg, make_bot_update, payload):
 
 @pytest.mark.asyncio
 async def test_message_text_filter(bot, make_msg, make_bot_update):
-    _filter = MessageTextFilter(r'\d{2}\.\d{2}')
+    _filter = MessageTextFilter(re.compile(r'\d{2}\.\d{2}'))
     assert await _filter.check(bot, make_bot_update(
         None, Context({}), message=make_msg(text='01.02')))
     assert not await _filter.check(bot, make_bot_update(None, Context({}),
@@ -109,7 +111,7 @@ async def test_message_text_filter(bot, make_msg, make_bot_update):
 
 @pytest.mark.asyncio
 async def test_callback_query_data_filter(bot, make_bot_update):
-    _filter = CallbackQueryDataFilter(r'\d{2}\.\d{2}')
+    _filter = CallbackQueryDataFilter(re.compile(r'\d{2}\.\d{2}'))
     user = {'id': 1, 'is_bot': False, 'first_name': '2'}
     cq = CallbackQuery.from_dict({'id': '1', 'from': user, 'data': '01.02',
                                   'chat_instance': '1'})

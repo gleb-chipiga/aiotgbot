@@ -60,23 +60,23 @@ class ContentTypeFilter(BaseFilter):
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class MessageTextFilter(BaseFilter):
-    pattern: str
+    pattern: re.Pattern
 
     async def check(self, bot: Bot, update: BotUpdate) -> bool:
         return (update.message is not None and
                 update.message.text is not None and
-                re.match(self.pattern, update.message.text) is not None)
+                self.pattern.match(update.message.text) is not None)
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
 class CallbackQueryDataFilter(BaseFilter):
-    pattern: str
+    pattern: re.Pattern
 
     async def check(self, bot: Bot, update: BotUpdate) -> bool:
 
         return (update.callback_query is not None and
                 update.callback_query.data is not None and
-                re.match(self.pattern, update.callback_query.data) is not None)
+                self.pattern.match(update.callback_query.data) is not None)
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)

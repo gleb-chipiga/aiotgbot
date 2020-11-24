@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from aiotgbot.api_types import Message, Update
@@ -31,7 +33,7 @@ def test_handler_table_message_handler():
         StateFilter('state1'),
         CommandsFilter(('command1',)),
         ContentTypeFilter((ContentType.CONTACT,)),
-        MessageTextFilter('pattern'),
+        MessageTextFilter(re.compile('pattern')),
         PrivateChatFilter()
     ))]
 
@@ -50,7 +52,7 @@ def test_handler_table_message():
         StateFilter('state1'),
         CommandsFilter(('command1',)),
         ContentTypeFilter((ContentType.CONTACT,)),
-        MessageTextFilter('pattern'),
+        MessageTextFilter(re.compile('pattern')),
         PrivateChatFilter()
     ))]
 
@@ -212,7 +214,7 @@ def test_handler_callback_query_handler():
     assert ht._handlers == [Handler(func, filters=(
         UpdateTypeFilter(UpdateType.CALLBACK_QUERY),
         StateFilter('state1'),
-        CallbackQueryDataFilter('pattern'),
+        CallbackQueryDataFilter(re.compile('pattern')),
         GroupChatFilter()
     ))]
 
@@ -228,7 +230,7 @@ def test_handler_callback_query():
     assert ht._handlers == [Handler(func, filters=(
         UpdateTypeFilter(UpdateType.CALLBACK_QUERY),
         StateFilter('state1'),
-        CallbackQueryDataFilter('pattern'),
+        CallbackQueryDataFilter(re.compile('pattern')),
         GroupChatFilter()
     ))]
 
