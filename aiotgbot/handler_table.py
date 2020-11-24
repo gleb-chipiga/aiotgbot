@@ -46,7 +46,7 @@ class HandlerTable(AbstractHandlerTable):
         self, state: Optional[str] = None,
         commands: Optional[Iterable[str]] = None,
         content_types: Optional[Iterable[ContentType]] = None,
-        text_match: Optional[str] = None,
+        text_match: Union[str, re.Pattern, None] = None,
         filters: Optional[Iterable[BaseFilter]] = None
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
@@ -193,7 +193,7 @@ class HandlerTable(AbstractHandlerTable):
 
     def callback_query(
             self, state: Optional[str] = None,
-            data_match: Optional[str] = None,
+            data_match: Union[str, re.Pattern, None] = None,
             filters: Optional[Iterable[BaseFilter]] = None
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
