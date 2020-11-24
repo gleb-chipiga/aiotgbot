@@ -7,6 +7,16 @@ from typing import AsyncGenerator, Dict, Final, Hashable, Optional
 json_dumps: Final = partial(json.dumps, ensure_ascii=False)
 
 
+def get_python_version() -> str:
+    from sys import version_info as version
+    return f'{version.major}.{version.minor}.{version.micro}'
+
+
+def get_software() -> str:
+    from . import __version__
+    return f'Python/{get_python_version()} aiotgbot/{__version__}'
+
+
 class KeyLock:
     __slots__ = ('_keys',)
 

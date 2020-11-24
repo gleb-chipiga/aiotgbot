@@ -10,7 +10,7 @@ from aiotgbot.api_types import (APIResponse, Chat, File, InputMediaPhoto,
                                 KeyboardButton, Message, ReplyKeyboardMarkup,
                                 Update, User)
 from aiotgbot.constants import ChatAction, ParseMode, RequestMethod, UpdateType
-from aiotgbot.utils import json_dumps
+from aiotgbot.helpers import json_dumps
 
 
 @pytest.fixture

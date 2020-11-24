@@ -5,7 +5,7 @@ import pytest
 from hypothesis import given
 from hypothesis.strategies import floats
 
-from aiotgbot.utils import FreqLimit, KeyLock
+from aiotgbot.helpers import FreqLimit, KeyLock
 
 
 @pytest.mark.asyncio

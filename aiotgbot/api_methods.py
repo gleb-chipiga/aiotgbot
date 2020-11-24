@@ -16,7 +16,7 @@ from .api_types import (APIResponse, BaseTelegram, BotCommand, Chat,
                         UserProfilePhotos, WebhookInfo)
 from .constants import (ChatAction, DiceEmoji, ParseMode, PollType,
                         RequestMethod, UpdateType)
-from .utils import json_dumps
+from .helpers import json_dumps
 
 api_logger: Final[logging.Logger] = logging.getLogger('aiotgbot.api')
 

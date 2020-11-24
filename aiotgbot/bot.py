@@ -19,9 +19,10 @@ from .bot_update import BotUpdate, Context
 from .constants import ChatType, RequestMethod
 from .exceptions import (BadGateway, BotBlocked, BotKicked, MigrateToChat,
                          RestartingTelegram, RetryAfter, TelegramError)
+from .helpers import FreqLimit, KeyLock, get_software, json_dumps
 from .storage import BaseStorage
-from .utils import FreqLimit, KeyLock, json_dumps
 
+SOFTWARE: Final[str] = get_software()
 TG_API_URL: Final[str] = 'https://api.telegram.org/bot{token}/{method}'
 TG_FILE_URL: Final[str] = 'https://api.telegram.org/file/bot{token}/{path}'
 TG_GET_UPDATES_TIMEOUT: Final[int] = 60
@@ -88,8 +89,11 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         loop = asyncio.get_running_loop()
 
         connector = aiohttp.TCPConnector(keepalive_timeout=60)
-        self._client = aiohttp.ClientSession(connector=connector,
-                                             json_serialize=json_dumps)
+        self._client = aiohttp.ClientSession(
+            connector=connector,
+            json_serialize=json_dumps,
+            headers={'User-Agent': SOFTWARE}
+        )
 
         self._context_lock = KeyLock()
         self._message_limit = FreqLimit(MESSAGE_INTERVAL)

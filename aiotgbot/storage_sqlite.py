@@ -6,8 +6,8 @@ from typing import Dict, Final, List, Optional, Tuple, Union
 
 import aiosqlite
 
+from .helpers import json_dumps
 from .storage import BaseStorage
-from .utils import json_dumps
 
 JsonType = Union[int, float, str, bool, Dict, List]
 
