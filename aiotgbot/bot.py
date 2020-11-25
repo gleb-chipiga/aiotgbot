@@ -20,7 +20,7 @@ from .constants import ChatType, RequestMethod
 from .exceptions import (BadGateway, BotBlocked, BotKicked, MigrateToChat,
                          RestartingTelegram, RetryAfter, TelegramError)
 from .helpers import FreqLimit, KeyLock, get_software, json_dumps
-from .storage import BaseStorage
+from .storage import StorageProtocol
 
 SOFTWARE: Final[str] = get_software()
 TG_API_URL: Final[str] = 'https://api.telegram.org/bot{token}/{method}'
@@ -41,10 +41,10 @@ EventHandler = Callable[['Bot'], Awaitable[None]]
 class Bot(MutableMapping[str, Any], ApiMethods):
 
     def __init__(self, token: str, handler_table: 'AbstractHandlerTable',
-                 storage: BaseStorage) -> None:
+                 storage: StorageProtocol) -> None:
         self._token: Final[str] = token
         self._handler_table: Final[AbstractHandlerTable] = handler_table
-        self._storage: Final[BaseStorage] = storage
+        self._storage: Final[StorageProtocol] = storage
         self._client: Optional[aiohttp.ClientSession] = None
         self._context_lock: Optional[KeyLock] = None
         self._message_limit: Optional[FreqLimit] = None
@@ -74,7 +74,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         return iter(self._data)
 
     @property
-    def storage(self) -> BaseStorage:
+    def storage(self) -> StorageProtocol:
         return self._storage
 
     @property
@@ -336,7 +336,9 @@ class Bot(MutableMapping[str, Any], ApiMethods):
 
         async with self._context_lock.acquire(state_key):
             state = await self._storage.get(state_key)
+            assert isinstance(state, str)
             context_dict = await self._storage.get(context_key)
+            assert isinstance(context_dict, dict)
             context = Context(context_dict if context_dict is not None else {})
             bot_update = BotUpdate(state, context, update)
             handler = await self._handler_table.get_handler(self, bot_update)

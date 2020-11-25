@@ -16,7 +16,7 @@ from .filters import (CallbackQueryDataFilter, CommandsFilter,
                       ContentTypeFilter, GroupChatFilter, MessageTextFilter,
                       PrivateChatFilter, StateFilter, UpdateTypeFilter)
 from .handler_table import HandlerTable
-from .storage import BaseStorage
+from .storage import StorageProtocol
 
 __all__ = (
     '__version__',
@@ -70,5 +70,5 @@ __all__ = (
 
     'HandlerTable',
 
-    'BaseStorage'
+    'StorageProtocol'
 )
