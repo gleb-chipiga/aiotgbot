@@ -14,7 +14,7 @@ HandlerDecorator = Callable[[HandlerCallable], HandlerCallable]
 
 
 class HandlerTable:
-    __slots__ = ('_handlers',)
+    __slots__ = '_handlers'
 
     def __init__(self) -> None:
         self._handlers: Final[FrozenList[Handler]] = FrozenList()

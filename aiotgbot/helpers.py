@@ -18,7 +18,7 @@ def get_software() -> str:
 
 
 class KeyLock:
-    __slots__ = ('_keys',)
+    __slots__ = '_keys'
 
     def __init__(self) -> None:
         self._keys: Final[Dict[Hashable, asyncio.Event]] = {}
