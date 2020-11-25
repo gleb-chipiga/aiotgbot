@@ -80,4 +80,4 @@ async def test_freq_limit():
     assert freq_limit._events.keys() == freq_limit._ts.keys()
     await asyncio.sleep(.2)
     assert not freq_limit._events
-    await freq_limit.reset()
+    await freq_limit.clear()

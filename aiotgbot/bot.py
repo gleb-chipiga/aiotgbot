@@ -151,9 +151,9 @@ class Bot(MutableMapping[str, Any], ApiMethods):
 
         await self._client.close()
         await self._storage.close()
-        await self._message_limit.reset()
-        await self._chat_limit.reset()
-        await self._group_limit.reset()
+        await self._message_limit.clear()
+        await self._chat_limit.clear()
+        await self._group_limit.clear()
 
     def file_url(self, path: str) -> str:
         return TG_FILE_URL.format(token=self._token, path=path)

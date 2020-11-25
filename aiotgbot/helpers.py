@@ -52,7 +52,7 @@ class FreqLimit:
         self._clean_event: Final = asyncio.Event()
         self._clean_task: Optional[asyncio.Task] = None
 
-    async def reset(self) -> None:
+    async def clear(self) -> None:
         if self._clean_task is not None:
             self._clean_task.cancel()
             with suppress(asyncio.CancelledError):
