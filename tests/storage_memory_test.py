@@ -19,13 +19,26 @@ async def test_sqlite_storage():
         ('key2', {'key3': 'value3'})
     ]
 
+    items2 = []
+    async for item in storage.iterate('key1'):
+        items2.append(item)
+    assert items2 == [('key1', {'key2': 'value2'})]
+
+    items3 = []
+    async for item in storage.iterate():
+        items3.append(item)
+    assert items3 == [
+        ('key1', {'key2': 'value2'}),
+        ('key2', {'key3': 'value3'})
+    ]
+
     assert await storage.delete('key1') is None
     assert await storage.get('key2') == {'key3': 'value3'}
     assert await storage.clear() is None
 
-    items2 = []
+    items4 = []
     async for item in storage.iterate():
-        items2.append(item)
-    assert items2 == []
+        items4.append(item)
+    assert items4 == []
 
     assert await storage.close() is None
