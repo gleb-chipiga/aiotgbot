@@ -1,6 +1,8 @@
 import re
 from typing import Callable, Final, Iterable, List, Optional, Union
 
+from frozenlist import FrozenList
+
 from .bot import Bot, FilterProtocol, Handler, HandlerCallable
 from .bot_update import BotUpdate
 from .constants import ContentType, UpdateType
@@ -15,7 +17,14 @@ class HandlerTable:
     __slots__ = ('_handlers',)
 
     def __init__(self) -> None:
-        self._handlers: Final[List[Handler]] = []
+        self._handlers: Final[FrozenList[Handler]] = FrozenList()
+
+    def freeze(self) -> None:
+        self._handlers.freeze()
+
+    @property
+    def frozen(self) -> bool:
+        return self._handlers.frozen
 
     async def get_handler(self, bot: Bot,
                           update: BotUpdate) -> Optional[HandlerCallable]:

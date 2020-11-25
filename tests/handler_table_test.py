@@ -19,6 +19,24 @@ def test_handler_table_protocol() -> None:
     assert isinstance(ht, HandlerTableProtocol)
 
 
+def test_freeze():
+    async def func(bot, update): ...
+
+    ht = HandlerTable()
+    assert not ht.frozen
+    ht.message_handler(func, state='state1', commands=['command1'],
+                       content_types=[ContentType.CONTACT],
+                       text_match='pattern',
+                       filters=[PrivateChatFilter()])
+    assert ht.freeze() is None
+    assert ht.frozen
+    with pytest.raises(RuntimeError, match='Cannot modify frozen list.'):
+        ht.message_handler(func, state='state1', commands=['command1'],
+                           content_types=[ContentType.CONTACT],
+                           text_match='pattern',
+                           filters=[PrivateChatFilter()])
+
+
 def test_handler_table_message_handler():
     async def func(bot, update): ...
 

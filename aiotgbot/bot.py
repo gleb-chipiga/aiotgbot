@@ -59,6 +59,9 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         self._polling_started: bool = False
         self._data: Dict[str, Any] = {}
 
+        if not self._handler_table.frozen:
+            self._handler_table.freeze()
+
     def __getitem__(self, key: str) -> Any:
         return self._data[key]
 
@@ -328,6 +331,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
                               str(chat_id) if chat_id is not None else '')
 
     async def _handle_update(self, update: Update) -> None:
+        assert self._handler_table.frozen
         bot_logger.debug('Dispatch update "%s"', update.update_id)
         update_state = self._update_state(update)
         state_key = f'{STATE_PREFIX}|{update_state}'
@@ -374,6 +378,11 @@ class Handler:
 
 @runtime_checkable
 class HandlerTableProtocol(Protocol):
+
+    def freeze(self) -> None: ...
+
+    @property
+    def frozen(self) -> bool: ...  # noqa
 
     @abstractmethod
     async def get_handler(

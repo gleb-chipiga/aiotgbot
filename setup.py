@@ -32,7 +32,7 @@ setup(
     package_data={'aiotgbot': ['py.typed']},
     python_requires='>=3.8,<3.10',
     install_requires=['aiohttp', 'aiojobs', 'aiojobs-stubs>=0.2.2.post1',
-                      'attrs', 'backoff'],
+                      'attrs', 'backoff', 'frozenlist'],
     tests_require=['pytest', 'pytest-asyncio', 'hypothesis'],
     extras_require={'sqlite': ['aiosqlite']}
 )
