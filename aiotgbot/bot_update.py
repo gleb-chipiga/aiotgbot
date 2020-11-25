@@ -25,8 +25,8 @@ class Context(MutableMapping[str, Any]):
     def __iter__(self) -> Iterator[str]:
         return iter(self._data)
 
-    def reset(self) -> None:
-        self._data = {}
+    def clear(self) -> None:
+        self._data.clear()
 
     def to_dict(self) -> Dict[str, Any]:
         return self._data

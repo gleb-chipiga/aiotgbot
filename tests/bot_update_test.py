@@ -93,9 +93,9 @@ def test_context_iter(ctx):
     assert tuple(ctx) == ('key1', 'key2', 'key3')
 
 
-def test_context_reset(ctx):
+def test_context_clear(ctx):
     assert ctx.to_dict() == {'key1': 'str1', 'key2': 'str2', 'key3': 4}
-    ctx.reset()
+    ctx.clear()
     assert ctx.to_dict() == {}
 
 
