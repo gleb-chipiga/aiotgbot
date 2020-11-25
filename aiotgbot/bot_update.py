@@ -35,9 +35,9 @@ class Context(MutableMapping[str, Any]):
 class BotUpdate(MutableMapping[str, Any]):
     __slots__ = ('_state', '_context', '_update', '_data')
 
-    def __init__(self, state: str, context: Context,
+    def __init__(self, state: Optional[str], context: Context,
                  update: Update) -> None:
-        self._state: str = state
+        self._state: Optional[str] = state
         self._context: Final[Context] = context
         self._update: Final[Update] = update
         self._data: Final[Dict[str, Any]] = {}

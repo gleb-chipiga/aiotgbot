@@ -332,16 +332,14 @@ class Bot(MutableMapping[str, Any], ApiMethods):
 
     async def _handle_update(self, update: Update) -> None:
         assert self._handler_table.frozen
+        assert self._context_lock is not None, 'Context lock not initialized'
         bot_logger.debug('Dispatch update "%s"', update.update_id)
         update_state = self._update_state(update)
         state_key = f'{STATE_PREFIX}|{update_state}'
         context_key = f'{CONTEXT_PREFIX}|{update_state}'
-
-        assert self._context_lock is not None, 'Context lock not initialized'
-
         async with self._context_lock.acquire(state_key):
             state = await self._storage.get(state_key)
-            assert isinstance(state, str)
+            assert isinstance(state, str) or state is None
             context_dict = await self._storage.get(context_key)
             assert isinstance(context_dict, dict)
             context = Context(context_dict if context_dict is not None else {})
