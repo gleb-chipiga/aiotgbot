@@ -2,7 +2,7 @@ import asyncio
 import json
 from enum import Enum
 from pathlib import Path
-from typing import AsyncIterator, Final, Optional, Tuple, Union
+from typing import Any, AsyncIterator, Dict, Final, Optional, Tuple, Union
 
 import aiosqlite
 
@@ -20,10 +20,10 @@ class SQLiteStorage(StorageProtocol):
 
     def __init__(self, database: Union[str, Path],
                  isolation_level: Optional[IsolationLevel] = None,
-                 **kwargs) -> None:
+                 **kwargs: Any) -> None:
         self._database: Final[Union[str, Path]] = database
         self._isolation_level: Final = isolation_level
-        self._kwargs: Final = kwargs
+        self._kwargs: Final[Dict[str, Any]] = kwargs
         self._connection_lock: Optional[asyncio.Lock] = None
         self._connection: Optional[aiosqlite.Connection] = None
 
