@@ -1,11 +1,12 @@
 import asyncio
 import logging
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from functools import partial
 from http import HTTPStatus
 from signal import SIGINT, SIGTERM
 from typing import (Any, Awaitable, Callable, Dict, Final, Iterator,
-                    MutableMapping, Optional, Tuple, Union)
+                    MutableMapping, Optional, Protocol, Tuple, Union,
+                    runtime_checkable)
 
 import aiohttp
 import aiojobs
@@ -40,10 +41,10 @@ EventHandler = Callable[['Bot'], Awaitable[None]]
 
 class Bot(MutableMapping[str, Any], ApiMethods):
 
-    def __init__(self, token: str, handler_table: 'AbstractHandlerTable',
+    def __init__(self, token: str, handler_table: 'HandlerTableProtocol',
                  storage: StorageProtocol) -> None:
         self._token: Final[str] = token
-        self._handler_table: Final[AbstractHandlerTable] = handler_table
+        self._handler_table: Final['HandlerTableProtocol'] = handler_table
         self._storage: Final[StorageProtocol] = storage
         self._client: Optional[aiohttp.ClientSession] = None
         self._context_lock: Optional[KeyLock] = None
@@ -358,7 +359,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
 
 
 HandlerCallable = Callable[[Bot, BotUpdate], Awaitable[None]]
-FiltersType = Tuple['BaseFilter', ...]
+FiltersType = Tuple['FilterProtocol', ...]
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -371,15 +372,17 @@ class Handler:
                     for _filter in self.filters])
 
 
-class AbstractHandlerTable(ABC):
+@runtime_checkable
+class HandlerTableProtocol(Protocol):
 
     @abstractmethod
-    async def get_handler(self, bot: Bot,
-                          update: BotUpdate) -> Optional[HandlerCallable]: ...
+    async def get_handler(
+        self, bot: Bot, update: BotUpdate
+    ) -> Optional[HandlerCallable]: ...
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
-class BaseFilter(ABC):
+@runtime_checkable
+class FilterProtocol(Protocol):
 
     @abstractmethod
     async def check(self, bot: Bot, update: BotUpdate) -> bool: ...

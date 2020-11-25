@@ -1,11 +1,17 @@
 import pytest
 
+from aiotgbot import StorageProtocol
 from aiotgbot.storage_memory import MemoryStorage
 
 
+def test_storage_protocol() -> None:
+    storage: StorageProtocol = MemoryStorage()
+    assert isinstance(storage, StorageProtocol)
+
+
 @pytest.mark.asyncio
-async def test_sqlite_storage():
-    storage = MemoryStorage()
+async def test_sqlite_storage() -> None:
+    storage: StorageProtocol = MemoryStorage()
     assert await storage.set('key1', {'key2': 'value2'}) is None
     assert await storage.get('key1') == {'key2': 'value2'}
     assert await storage.get('key2') is None

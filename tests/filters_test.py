@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from aiotgbot import Bot, HandlerTable
+from aiotgbot import Bot, FilterProtocol, HandlerTable
 from aiotgbot.api_types import CallbackQuery, Message, Update
 from aiotgbot.bot_update import BotUpdate, Context
 from aiotgbot.constants import ContentType, UpdateType
@@ -53,6 +53,11 @@ def make_bot_update():
     return _make_bot_update
 
 
+def test_update_type_filter_protocol() -> None:
+    _filter: FilterProtocol = UpdateTypeFilter(UpdateType.CHANNEL_POST)
+    assert isinstance(_filter, FilterProtocol)
+
+
 @pytest.mark.asyncio
 async def test_update_type_filter(bot, make_bot_update):
     _filter = UpdateTypeFilter(UpdateType.CHANNEL_POST)
@@ -62,11 +67,21 @@ async def test_update_type_filter(bot, make_bot_update):
         None, Context({}), update_id=1))
 
 
+def test_state_filter_protocol() -> None:
+    _filter: FilterProtocol = StateFilter('state1')
+    assert isinstance(_filter, FilterProtocol)
+
+
 @pytest.mark.asyncio
 async def test_state_filter(bot, make_bot_update):
     _filter = StateFilter('state1')
     assert await _filter.check(bot, make_bot_update('state1', Context({})))
     assert not await _filter.check(bot, make_bot_update('state2', Context({})))
+
+
+def test_commands_filter_protocol() -> None:
+    _filter: FilterProtocol = CommandsFilter(('command1',))
+    assert isinstance(_filter, FilterProtocol)
 
 
 @pytest.mark.asyncio
@@ -77,6 +92,11 @@ async def test_commands_filter(bot, make_msg, make_bot_update):
     assert not await _filter.check(bot, make_bot_update(
         None, Context({}), message=make_msg(text='/command2')))
     assert not await _filter.check(bot, make_bot_update(None, Context({})))
+
+
+def test_content_types_filter_protocol() -> None:
+    _filter: FilterProtocol = ContentTypeFilter((ContentType.TEXT,))
+    assert isinstance(_filter, FilterProtocol)
 
 
 @pytest.mark.asyncio
@@ -100,6 +120,11 @@ async def test_content_types_filter(bot, make_msg, make_bot_update, payload):
         None, Context({}), **{payload: make_msg(text='text1')}))
 
 
+def test_message_text_filter_protocol() -> None:
+    _filter: FilterProtocol = MessageTextFilter(re.compile(r'\d{2}\.\d{2}'))
+    assert isinstance(_filter, FilterProtocol)
+
+
 @pytest.mark.asyncio
 async def test_message_text_filter(bot, make_msg, make_bot_update):
     _filter = MessageTextFilter(re.compile(r'\d{2}\.\d{2}'))
@@ -107,6 +132,12 @@ async def test_message_text_filter(bot, make_msg, make_bot_update):
         None, Context({}), message=make_msg(text='01.02')))
     assert not await _filter.check(bot, make_bot_update(None, Context({}),
                                                         message=make_msg()))
+
+
+def test_callback_query_data_filter_protocol() -> None:
+    _filter: FilterProtocol = CallbackQueryDataFilter(
+        re.compile(r'\d{2}\.\d{2}'))
+    assert isinstance(_filter, FilterProtocol)
 
 
 @pytest.mark.asyncio
@@ -123,18 +154,28 @@ async def test_callback_query_data_filter(bot, make_bot_update):
                                                         callback_query=cq))
 
 
+def test_private_chat_filter_protocol() -> None:
+    _filter: FilterProtocol = PrivateChatFilter()
+    assert isinstance(_filter, FilterProtocol)
+
+
 @pytest.mark.asyncio
 async def test_private_chat_filter(bot, make_msg, make_bot_update):
-    _filter = PrivateChatFilter()
+    _filter: FilterProtocol = PrivateChatFilter()
     assert await _filter.check(bot, make_bot_update(None, Context({}),
                                                     message=make_msg()))
     assert not await _filter.check(bot, make_bot_update(
         None, Context({}), message=make_msg(chat={'id': 1, 'type': 'group'})))
 
 
+def test_group_chat_filter_protocol() -> None:
+    _filter: FilterProtocol = GroupChatFilter()
+    assert isinstance(_filter, FilterProtocol)
+
+
 @pytest.mark.asyncio
-async def test_group_chat_filter(bot, make_msg, make_bot_update):
-    _filter = GroupChatFilter()
+async def test_group_chat_filter(bot: Bot, make_msg, make_bot_update):
+    _filter: FilterProtocol = GroupChatFilter()
     assert await _filter.check(bot, make_bot_update(
         None, Context({}), message=make_msg(chat={'id': 1, 'type': 'group'})))
     assert not await _filter.check(bot, make_bot_update(None, Context({}),

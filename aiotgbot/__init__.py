@@ -6,7 +6,7 @@ from .api_types import (BaseTelegram, CallbackQuery, Chat, ChosenInlineResult,
                         LocalFile, Message, PreCheckoutQuery,
                         ReplyKeyboardMarkup, ReplyKeyboardRemove,
                         ShippingQuery, User)
-from .bot import BaseFilter, Bot, StreamFile
+from .bot import Bot, FilterProtocol, StreamFile
 from .bot_update import BotUpdate
 from .constants import (ChatAction, ChatType, ContentType, ParseMode, PollType,
                         UpdateType)
@@ -37,7 +37,7 @@ __all__ = (
     'ShippingQuery',
     'User',
 
-    'BaseFilter',
+    'FilterProtocol',
     'Bot',
     'LocalFile',
     'StreamFile',

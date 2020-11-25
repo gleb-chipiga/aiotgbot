@@ -3,7 +3,7 @@ import re
 import pytest
 
 from aiotgbot.api_types import Message, Update
-from aiotgbot.bot import Bot, Handler
+from aiotgbot.bot import Bot, Handler, HandlerTableProtocol
 from aiotgbot.bot_update import BotUpdate, Context
 from aiotgbot.constants import ContentType, UpdateType
 from aiotgbot.filters import (CallbackQueryDataFilter, CommandsFilter,
@@ -14,15 +14,16 @@ from aiotgbot.handler_table import HandlerTable
 from aiotgbot.storage_memory import MemoryStorage
 
 
-def test_handler_table_handlers():
-    ht = HandlerTable()
-    assert ht._handlers == []
+def test_handler_table_protocol() -> None:
+    ht: HandlerTableProtocol = HandlerTable()
+    assert isinstance(ht, HandlerTableProtocol)
 
 
 def test_handler_table_message_handler():
     async def func(bot, update): ...
 
     ht = HandlerTable()
+
     ht.message_handler(func, state='state1', commands=['command1'],
                        content_types=[ContentType.CONTACT],
                        text_match='pattern',

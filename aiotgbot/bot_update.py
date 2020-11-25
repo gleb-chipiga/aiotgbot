@@ -8,7 +8,7 @@ class Context(MutableMapping[str, Any]):
     __slots__ = ('_data',)
 
     def __init__(self, data: Dict[str, Any]) -> None:
-        self._data = data
+        self._data: Final[Dict[str, Any]] = data
 
     def __getitem__(self, key: str) -> Any:
         return self._data[key]
@@ -40,7 +40,7 @@ class BotUpdate(MutableMapping[str, Any]):
         self._state: str = state
         self._context: Final[Context] = context
         self._update: Final[Update] = update
-        self._data: Dict[str, Any] = {}
+        self._data: Final[Dict[str, Any]] = {}
 
     def __getitem__(self, key: str) -> Any:
         return self._data[key]
