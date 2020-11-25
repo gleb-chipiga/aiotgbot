@@ -3,7 +3,7 @@ import re
 import pytest
 
 from aiotgbot.api_types import Message, Update
-from aiotgbot.bot import Bot, Handler, HandlerTableProtocol
+from aiotgbot.bot import Bot, Handler, HandlerCallable, HandlerTableProtocol
 from aiotgbot.bot_update import BotUpdate, Context
 from aiotgbot.constants import ContentType, UpdateType
 from aiotgbot.filters import (CallbackQueryDataFilter, CommandsFilter,
@@ -14,40 +14,43 @@ from aiotgbot.handler_table import HandlerTable
 from aiotgbot.storage_memory import MemoryStorage
 
 
+@pytest.fixture
+def handler() -> HandlerCallable:
+    async def _handler(_: Bot, __: BotUpdate) -> None: ...
+
+    return _handler
+
+
 def test_handler_table_protocol() -> None:
     ht: HandlerTableProtocol = HandlerTable()
     assert isinstance(ht, HandlerTableProtocol)
 
 
-def test_freeze():
-    async def func(bot, update): ...
-
+def test_freeze(handler):
     ht = HandlerTable()
     assert not ht.frozen
-    ht.message_handler(func, state='state1', commands=['command1'],
+    ht.message_handler(handler, state='state1', commands=['command1'],
                        content_types=[ContentType.CONTACT],
                        text_match='pattern',
                        filters=[PrivateChatFilter()])
     assert ht.freeze() is None
     assert ht.frozen
     with pytest.raises(RuntimeError, match='Cannot modify frozen list.'):
-        ht.message_handler(func, state='state1', commands=['command1'],
+        ht.message_handler(handler, state='state1', commands=['command1'],
                            content_types=[ContentType.CONTACT],
                            text_match='pattern',
                            filters=[PrivateChatFilter()])
 
 
-def test_handler_table_message_handler():
-    async def func(bot, update): ...
-
+def test_handler_table_message_handler(handler):
     ht = HandlerTable()
 
-    ht.message_handler(func, state='state1', commands=['command1'],
+    ht.message_handler(handler, state='state1', commands=['command1'],
                        content_types=[ContentType.CONTACT],
                        text_match='pattern',
                        filters=[PrivateChatFilter()])
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.MESSAGE),
         StateFilter('state1'),
         CommandsFilter(('command1',)),
@@ -57,16 +60,14 @@ def test_handler_table_message_handler():
     ))]
 
 
-def test_handler_table_message():
-    async def func(bot, update): ...
-
+def test_handler_table_message(handler):
     ht = HandlerTable()
     ht.message(state='state1', commands=['command1'],
                content_types=[ContentType.CONTACT],
                text_match='pattern',
-               filters=[PrivateChatFilter()])(func)
+               filters=[PrivateChatFilter()])(handler)
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.MESSAGE),
         StateFilter('state1'),
         CommandsFilter(('command1',)),
@@ -76,44 +77,38 @@ def test_handler_table_message():
     ))]
 
 
-def test_handler_table_edited_message_handler():
-    async def func(bot, update): ...
-
+def test_handler_table_edited_message_handler(handler):
     ht = HandlerTable()
-    ht.edited_message_handler(func,
+    ht.edited_message_handler(handler,
                               state='state1',
                               filters=[GroupChatFilter()])
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.EDITED_MESSAGE),
         StateFilter('state1'),
         GroupChatFilter()
     ))]
 
 
-def test_handler_table_edited_message():
-    async def func(bot, update): ...
-
+def test_handler_table_edited_message(handler):
     ht = HandlerTable()
     ht.edited_message(state='state1',
-                      filters=[GroupChatFilter()])(func)
+                      filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.EDITED_MESSAGE),
         StateFilter('state1'),
         GroupChatFilter()
     ))]
 
 
-def test_handler_channel_post_handler():
-    async def func(bot, update): ...
-
+def test_handler_channel_post_handler(handler):
     ht = HandlerTable()
-    ht.channel_post_handler(func,
+    ht.channel_post_handler(handler,
                             state='state1',
                             filters=[GroupChatFilter()])
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.CHANNEL_POST),
         StateFilter('state1'),
         GroupChatFilter()
@@ -121,13 +116,11 @@ def test_handler_channel_post_handler():
 
 
 def test_handler_table_channel_post():
-    async def func(bot, update): ...
-
     ht = HandlerTable()
     ht.channel_post(state='state1',
-                    filters=[GroupChatFilter()])(func)
+                    filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.CHANNEL_POST),
         StateFilter('state1'),
         GroupChatFilter()
@@ -135,14 +128,12 @@ def test_handler_table_channel_post():
 
 
 def test_handler_edited_channel_post_handler():
-    async def func(bot, update): ...
-
     ht = HandlerTable()
-    ht.edited_channel_post_handler(func,
+    ht.edited_channel_post_handler(handler,
                                    state='state1',
                                    filters=[GroupChatFilter()])
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.EDITED_CHANNEL_POST),
         StateFilter('state1'),
         GroupChatFilter()
@@ -150,13 +141,11 @@ def test_handler_edited_channel_post_handler():
 
 
 def test_handler_table_edited_channel_post():
-    async def func(bot, update): ...
-
     ht = HandlerTable()
     ht.edited_channel_post(state='state1',
-                           filters=[GroupChatFilter()])(func)
+                           filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.EDITED_CHANNEL_POST),
         StateFilter('state1'),
         GroupChatFilter()
@@ -164,73 +153,63 @@ def test_handler_table_edited_channel_post():
 
 
 def test_handler_inline_query_handler():
-    async def func(bot, update): ...
-
     ht = HandlerTable()
-    ht.inline_query_handler(func,
+    ht.inline_query_handler(handler,
                             state='state1',
                             filters=[GroupChatFilter()])
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.INLINE_QUERY),
         StateFilter('state1'),
         GroupChatFilter()
     ))]
 
 
-def test_handler_table_inline_query():
-    async def func(bot, update): ...
-
+def test_handler_table_inline_query(handler):
     ht = HandlerTable()
     ht.inline_query(state='state1',
-                    filters=[GroupChatFilter()])(func)
+                    filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.INLINE_QUERY),
         StateFilter('state1'),
         GroupChatFilter()
     ))]
 
 
-def test_handler_chosen_inline_result_handler():
-    async def func(bot, update): ...
-
+def test_handler_chosen_inline_result_handler(handler):
     ht = HandlerTable()
-    ht.chosen_inline_result_handler(func,
+    ht.chosen_inline_result_handler(handler,
                                     state='state1',
                                     filters=[GroupChatFilter()])
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.CHOSEN_INLINE_RESULT),
         StateFilter('state1'),
         GroupChatFilter()
     ))]
 
 
-def test_handler_chosen_inline_result():
-    async def func(bot, update): ...
-
+def test_handler_chosen_inline_result(handler):
     ht = HandlerTable()
     ht.chosen_inline_result(state='state1',
-                            filters=[GroupChatFilter()])(func)
+                            filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.CHOSEN_INLINE_RESULT),
         StateFilter('state1'),
         GroupChatFilter()
     ))]
 
 
-def test_handler_callback_query_handler():
-    async def func(bot, update): ...
-
+def test_handler_callback_query_handler(handler):
     ht = HandlerTable()
-    ht.callback_query_handler(func,
+    ht.callback_query_handler(handler,
                               state='state1',
                               data_match='pattern',
                               filters=[GroupChatFilter()])
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.CALLBACK_QUERY),
         StateFilter('state1'),
         CallbackQueryDataFilter(re.compile('pattern')),
@@ -238,15 +217,13 @@ def test_handler_callback_query_handler():
     ))]
 
 
-def test_handler_callback_query():
-    async def func(bot, update): ...
-
+def test_handler_callback_query(handler):
     ht = HandlerTable()
     ht.callback_query(state='state1',
                       data_match='pattern',
-                      filters=[GroupChatFilter()])(func)
+                      filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.CALLBACK_QUERY),
         StateFilter('state1'),
         CallbackQueryDataFilter(re.compile('pattern')),
@@ -254,15 +231,13 @@ def test_handler_callback_query():
     ))]
 
 
-def test_handler_shipping_query_handler():
-    async def func(bot, update): ...
-
+def test_handler_shipping_query_handler(handler):
     ht = HandlerTable()
-    ht.shipping_query_handler(func,
+    ht.shipping_query_handler(handler,
                               state='state1',
                               filters=[GroupChatFilter()])
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.SHIPPING_QUERY),
         StateFilter('state1'),
         GroupChatFilter()
@@ -270,22 +245,18 @@ def test_handler_shipping_query_handler():
 
 
 def test_handler_shipping_query():
-    async def func(bot, update): ...
-
     ht = HandlerTable()
     ht.shipping_query(state='state1',
-                      filters=[GroupChatFilter()])(func)
+                      filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.SHIPPING_QUERY),
         StateFilter('state1'),
         GroupChatFilter()
     ))]
 
 
-def test_handler_pre_checkout_query_handler():
-    async def handler(bot, update): ...
-
+def test_handler_pre_checkout_query_handler(handler):
     ht = HandlerTable()
     ht.pre_checkout_query_handler(handler,
                                   state='state1',
@@ -298,14 +269,12 @@ def test_handler_pre_checkout_query_handler():
     ))]
 
 
-def test_handler_pre_checkout_query():
-    async def func(bot, update): ...
-
+def test_handler_pre_checkout_query(handler):
     ht = HandlerTable()
     ht.pre_checkout_query(state='state1',
-                          filters=[GroupChatFilter()])(func)
+                          filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [Handler(func, filters=(
+    assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.PRE_CHECKOUT_QUERY),
         StateFilter('state1'),
         GroupChatFilter()
@@ -314,10 +283,8 @@ def test_handler_pre_checkout_query():
 
 @pytest.mark.asyncio
 async def test_handler_get_handler():
-    async def func(bot, update): ...
-
     ht = HandlerTable()
-    ht.message(state='state1')(func)
+    ht.message(state='state1')(handler)
     _bot = Bot('token', HandlerTable(), MemoryStorage())
     ctx = Context({'key1': 'str1', 'key2': 'str2', 'key3': 4})
     params = {
@@ -335,6 +302,6 @@ async def test_handler_get_handler():
         'poll_answer': None
     }
     bu1 = BotUpdate('state1', ctx, Update(update_id=1, **params))
-    assert await ht.get_handler(_bot, bu1) == func
+    assert await ht.get_handler(_bot, bu1) == handler
     bu2 = BotUpdate('state2', ctx, Update(update_id=2, **params))
     assert await ht.get_handler(_bot, bu2) is None
