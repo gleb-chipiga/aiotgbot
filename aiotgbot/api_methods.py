@@ -48,6 +48,7 @@ ParamType = Union[int, float, str, InputFile, None]
 
 
 class ApiMethods(ABC):
+    __slots__ = ()
 
     @abstractmethod
     async def _request(self, http_method: RequestMethod, api_method: str,

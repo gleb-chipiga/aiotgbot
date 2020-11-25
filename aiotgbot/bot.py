@@ -40,6 +40,10 @@ EventHandler = Callable[['Bot'], Awaitable[None]]
 
 
 class Bot(MutableMapping[str, Any], ApiMethods):
+    __slots__ = ('_token', '_handler_table', '_storage', '_client',
+                 '_context_lock', '_message_limit', '_chat_limit',
+                 '_group_limit', '_scheduler', '_updates_offset', '_me',
+                 '_on_shutdown', '_poll_task', '_polling_started', '_data')
 
     def __init__(self, token: str, handler_table: 'HandlerTableProtocol',
                  storage: StorageProtocol) -> None:
