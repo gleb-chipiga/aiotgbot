@@ -38,8 +38,9 @@ class SQLiteStorage(StorageProtocol):
                     self._database, isolation_level=isolation_level,
                     **self._kwargs)
                 async with self._connection.cursor() as cursor:
-                    await cursor.execute('CREATE TABLE IF NOT EXISTS kv'
-                                         '(key TEXT PRIMARY KEY, value TEXT)')
+                    await cursor.execute(
+                        'CREATE TABLE IF NOT EXISTS kv '
+                        '(key TEXT NOT NULL PRIMARY KEY, value TEXT NOT NULL)')
         return self._connection
 
     async def close(self) -> None:
