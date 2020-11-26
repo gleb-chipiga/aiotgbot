@@ -345,7 +345,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
             state = await self._storage.get(state_key)
             assert isinstance(state, str) or state is None
             context_dict = await self._storage.get(context_key)
-            assert isinstance(context_dict, dict)
+            assert isinstance(context_dict, dict) or context_dict is None
             context = Context(context_dict if context_dict is not None else {})
             bot_update = BotUpdate(state, context, update)
             handler = await self._handler_table.get_handler(self, bot_update)
