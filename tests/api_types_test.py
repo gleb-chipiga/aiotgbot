@@ -5,15 +5,14 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import attr
 import pytest
 
+from aiotgbot import api_types
 from aiotgbot.api_types import (BaseTelegram, CallbackQuery,
                                 ChosenInlineResult, DataMappingError,
                                 InlineQuery, InputMedia, InputMediaAnimation,
                                 InputMediaAudio, InputMediaDocument,
                                 InputMediaPhoto, InputMediaVideo,
                                 KeyboardButtonPollType, LocalFile, Message,
-                                Poll, PreCheckoutQuery, ShippingQuery,
-                                _is_attr_union, _is_optional, _is_tuple,
-                                _is_union, _Telegram)
+                                Poll, PreCheckoutQuery, ShippingQuery)
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -66,7 +65,7 @@ class Class5(BaseTelegram):
     (type(None), False)
 ))
 def test_is_tuple(test: Any, expected: bool) -> None:
-    assert _is_tuple(test) is expected
+    assert api_types._is_tuple(test) is expected
 
 
 @pytest.mark.parametrize('test, expected', (
@@ -76,7 +75,7 @@ def test_is_tuple(test: Any, expected: bool) -> None:
     (type(None), False)
 ))
 def test_is_union(test: Any, expected: bool) -> None:
-    assert _is_union(test) is expected
+    assert api_types._is_union(test) is expected
 
 
 @pytest.mark.parametrize('test, expected', (
@@ -88,7 +87,7 @@ def test_is_union(test: Any, expected: bool) -> None:
     (type(None), False),
 ))
 def test_is_optional(test: Any, expected: bool) -> None:
-    assert _is_optional(test) is expected
+    assert api_types._is_optional(test) is expected
 
 
 @pytest.mark.parametrize('test, expected', (
@@ -100,7 +99,7 @@ def test_is_optional(test: Any, expected: bool) -> None:
     (type(None), False)
 ))
 def test_is_attr_union(test: Any, expected: bool) -> None:
-    assert _is_attr_union(test) is expected
+    assert api_types._is_attr_union(test) is expected
 
 
 def test_base_to_dict() -> None:
@@ -243,7 +242,7 @@ def test_base() -> None:
     ('type', KeyboardButtonPollType, True, False),
     ('type_', KeyboardButtonPollType, False, True)
 ))
-def test_fixed_hints(_str: str, _type: _Telegram, in_keys: bool,
+def test_fixed_hints(_str: str, _type: api_types._Telegram, in_keys: bool,
                      in_fields: bool) -> None:
     type_hints = BaseTelegram._get_type_hints(_type)
     assert (_str in [k for k, f, t in type_hints]) is in_keys
