@@ -38,7 +38,7 @@ class HandlerTable:
         state: Optional[str] = None,
         commands: Optional[Iterable[str]] = None,
         content_types: Optional[Iterable[ContentType]] = None,
-        text_match: Union[str, re.Pattern, None] = None,
+        text_match: Union[str, 're.Pattern[str]', None] = None,
         filters: Optional[Iterable[FilterProtocol]] = None
     ) -> None:
         update_type_filter = UpdateTypeFilter(UpdateType.MESSAGE)
@@ -61,7 +61,7 @@ class HandlerTable:
         self, state: Optional[str] = None,
         commands: Optional[Iterable[str]] = None,
         content_types: Optional[Iterable[ContentType]] = None,
-        text_match: Union[str, re.Pattern, None] = None,
+        text_match: Union[str, 're.Pattern[str]', None] = None,
         filters: Optional[Iterable[FilterProtocol]] = None
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
@@ -190,7 +190,7 @@ class HandlerTable:
     def callback_query_handler(
             self, handler: HandlerCallable,
             state: Optional[str] = None,
-            data_match: Union[str, re.Pattern, None] = None,
+            data_match: Union[str, 're.Pattern[str]', None] = None,
             filters: Optional[Iterable[FilterProtocol]] = None
     ) -> None:
         update_type_filter = UpdateTypeFilter(UpdateType.CALLBACK_QUERY)
@@ -208,7 +208,7 @@ class HandlerTable:
 
     def callback_query(
             self, state: Optional[str] = None,
-            data_match: Union[str, re.Pattern, None] = None,
+            data_match: Union[str, 're.Pattern[str]', None] = None,
             filters: Optional[Iterable[FilterProtocol]] = None
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:

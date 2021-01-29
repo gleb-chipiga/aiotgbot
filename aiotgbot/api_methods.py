@@ -89,7 +89,7 @@ class ApiMethods(ABC):
             ip_address=ip_address, max_connections=max_connections,
             allowed_updates=_strs_to_json(allowed_updates),
             drop_pending_updates=drop_pending_updates)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def delete_webhook(
@@ -99,6 +99,7 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'deleteWebhook',
             drop_pending_updates=drop_pending_updates)
+        assert isinstance(response.result, bool)
         return response.result
 
     async def get_webhook_info(self) -> WebhookInfo:
@@ -115,11 +116,13 @@ class ApiMethods(ABC):
     async def log_out(self) -> bool:
         api_logger.debug('Log out')
         response = await self._request(RequestMethod.POST, 'logOut')
+        assert isinstance(response.result, bool)
         return response.result
 
     async def close(self) -> bool:
         api_logger.debug('Close')
         response = await self._request(RequestMethod.POST, 'close')
+        assert isinstance(response.result, bool)
         return response.result
 
     async def send_message(
@@ -559,7 +562,7 @@ class ApiMethods(ABC):
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
-        return response.result
+        return Message.from_dict(response.result)
 
     async def send_dice(self, chat_id: Union[int, str],
                         emoji: Optional[DiceEmoji] = None,
@@ -576,14 +579,14 @@ class ApiMethods(ABC):
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_to_json(reply_markup))
 
-        return response.result
+        return Message.from_dict(response.result)
 
     async def send_chat_action(self, chat_id: Union[int, str],
                                action: ChatAction) -> bool:
         api_logger.debug('Send action "%s" to chat "%s"', action, chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendChatAction', chat_id, action=action.value)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def get_user_profile_photos(
@@ -610,7 +613,7 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'kickChatMember',
             chat_id=chat_id, user_id=user_id, until_date=until_date)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def unban_chat_member(self, chat_id: Union[int, str], user_id: int,
@@ -619,7 +622,7 @@ class ApiMethods(ABC):
         response = await self._request(RequestMethod.POST, 'unbanChatMember',
                                        chat_id=chat_id, user_id=user_id,
                                        only_if_banned=only_if_banned)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def restrict_chat_member(
@@ -633,7 +636,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'restrictChatMember', chat_id=chat_id,
             user_id=user_id, permissions=json_dumps(permissions.to_dict()),
             until_date=until_date)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def promote_chat_member(
@@ -661,7 +664,7 @@ class ApiMethods(ABC):
             can_restrict_members=can_restrict_members,
             can_pin_messages=can_pin_messages,
             can_promote_members=can_promote_members)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def set_chat_administrator_custom_title(
@@ -674,14 +677,14 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'setChatAdministratorCustomTitle',
             chat_id=chat_id, user_id=user_id, custom_title=custom_title)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def export_chat_invite_link(self, chat_id: Union[int, str]) -> str:
         api_logger.debug('Export chat "%s" invite link', chat_id)
         response = await self._request(
             RequestMethod.POST, 'exportChatInviteLink', chat_id=chat_id)
-
+        assert isinstance(response.result, str)
         return response.result
 
     async def set_chat_permissions(
@@ -692,7 +695,7 @@ class ApiMethods(ABC):
         response = await self._safe_request(
             RequestMethod.POST, 'setChatPermissions', chat_id,
             permissions=json_dumps(permissions.to_dict()))
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def set_chat_photo(
@@ -702,14 +705,14 @@ class ApiMethods(ABC):
         api_logger.debug('Set chat "%s" photo', chat_id)
         response = await self._safe_request(RequestMethod.POST, 'setChatPhoto',
                                             chat_id, photo=photo)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def delete_chat_photo(self, chat_id: Union[int, str]) -> bool:
         api_logger.debug('Delete chat "%s" photo', chat_id)
         response = await self._request(RequestMethod.POST, 'deleteChatPhoto',
                                        chat_id=chat_id)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def set_chat_title(self, chat_id: Union[int, str],
@@ -717,7 +720,7 @@ class ApiMethods(ABC):
         api_logger.debug('Set title "%s" for chat "%s"', title, chat_id)
         response = await self._request(RequestMethod.POST, 'setChatTitle',
                                        chat_id=chat_id, title=title)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def set_chat_description(self, chat_id: Union[int, str],
@@ -726,7 +729,7 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'setChatDescription', chat_id=chat_id,
             description=description)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def pin_chat_message(
@@ -738,7 +741,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'pinChatMessage',
             chat_id=chat_id, message_id=message_id,
             disable_notification=disable_notification)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def unpin_chat_message(self, chat_id: Union[int, str],
@@ -747,21 +750,21 @@ class ApiMethods(ABC):
                          message_id, chat_id)
         response = await self._request(RequestMethod.POST, 'unpinChatMessage',
                                        chat_id=chat_id, message_id=message_id)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def unpin_all_chat_messages(self, chat_id: Union[int, str]) -> bool:
         api_logger.debug('Unpin all messages in chat "%s"', chat_id)
         response = await self._request(RequestMethod.POST,
                                        'unpinAllChatMessages', chat_id=chat_id)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def leave_chat(self, chat_id: Union[int, str]) -> bool:
         api_logger.debug('Leave chat "%s"', chat_id)
         response = await self._request(RequestMethod.POST, 'leaveChat',
                                        chat_id=chat_id)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def get_chat(self, chat_id: Union[int, str]) -> Chat:
@@ -783,7 +786,7 @@ class ApiMethods(ABC):
         api_logger.debug('Get chat members count "%s"', chat_id)
         response = await self._request(
             RequestMethod.GET, 'getChatMembersCount', chat_id=chat_id)
-
+        assert isinstance(response.result, int)
         return response.result
 
     async def get_chat_member(self, chat_id: Union[int, str],
@@ -801,14 +804,14 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'setChatStickerSet', chat_id=chat_id,
             sticker_set_name=sticker_set_name)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def delete_chat_sticker_set(self, chat_id: Union[int, str]) -> bool:
         api_logger.debug('Delete chat "%s" sticker set', chat_id)
         response = await self._request(RequestMethod.POST,
                                        'deleteChatStickerSet', chat_id=chat_id)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def answer_callback_query(self, callback_query_id: str,
@@ -821,7 +824,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'answerCallbackQuery',
             callback_query_id=callback_query_id, text=text,
             show_alert=show_alert, url=url, cache_time=cache_time)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def set_my_commands(self, commands: Iterable[BotCommand]) -> bool:
@@ -830,7 +833,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'setMyCommands',
             commands=json_dumps(tuple(command.to_dict()
                                       for command in commands)))
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def get_my_commands(self) -> Tuple[BotCommand, ...]:
@@ -850,6 +853,12 @@ class ApiMethods(ABC):
         disable_web_page_preview: Optional[bool] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Union[Message, bool]:
+        if (
+            (chat_id is None or message_id is None) and
+            inline_message_id is None
+        ):
+            raise RuntimeError('chat_id or message_id and '
+                               'inline_message_id is None')
         if inline_message_id is None:
             api_logger.debug('Edit message %s in "%s" text',
                              message_id, chat_id)
@@ -871,7 +880,8 @@ class ApiMethods(ABC):
             return Message.from_dict(response.result)
 
     async def edit_message_caption(
-        self, chat_id: Optional[Union[int, str]] = None,
+        self,
+        chat_id: Optional[Union[int, str]] = None,
         message_id: Optional[int] = None,
         inline_message_id: Optional[str] = None,
         caption: Optional[str] = None,
@@ -879,6 +889,12 @@ class ApiMethods(ABC):
         caption_entities: Optional[Iterable[MessageEntity]] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Union[Message, bool]:
+        if (
+            (chat_id is None or message_id is None) and
+            inline_message_id is None
+        ):
+            raise RuntimeError('chat_id or message_id and '
+                               'inline_message_id is None')
         if inline_message_id is None:
             api_logger.debug('Edit message %s in "%s" caption',
                              message_id, chat_id)
@@ -899,12 +915,18 @@ class ApiMethods(ABC):
             return Message.from_dict(response.result)
 
     async def edit_message_media(
-        self, chat_id: Optional[Union[int, str]] = None,
+        self, media: InputMedia,
+        chat_id: Optional[Union[int, str]] = None,
         message_id: Optional[int] = None,
         inline_message_id: Optional[str] = None,
-        media: InputMedia = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Union[Message, bool]:
+        if (
+            (chat_id is None or message_id is None) and
+            inline_message_id is None
+        ):
+            raise RuntimeError('chat_id or message_id and '
+                               'inline_message_id is None')
         if inline_message_id is None:
             api_logger.debug('Edit message %s in "%s" media',
                              message_id, chat_id)
@@ -912,7 +934,7 @@ class ApiMethods(ABC):
             api_logger.debug('Edit inline message "%s" media',
                              inline_message_id)
         attachments = {}
-        if media is not None and not isinstance(media.media, str):
+        if not isinstance(media.media, str):
             attachment_name = 'attachment0'
             attachments[attachment_name] = media.media
             media = attr.evolve(media, media=f'attach://{attachment_name}')
@@ -932,6 +954,12 @@ class ApiMethods(ABC):
         inline_message_id: Optional[str] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Union[Message, bool]:
+        if (
+            (chat_id is None or message_id is None) and
+            inline_message_id is None
+        ):
+            raise RuntimeError('chat_id or message_id and '
+                               'inline_message_id is None')
         if inline_message_id is None:
             api_logger.debug('Edit message %s in "%s" reply markup',
                              message_id, chat_id)
@@ -950,8 +978,7 @@ class ApiMethods(ABC):
             return Message.from_dict(response.result)
 
     async def stop_poll(
-        self, chat_id: Union[int, str],
-        message_id: int = None,
+        self, chat_id: Union[int, str], message_id: int,
         reply_markup: Optional[InlineKeyboardMarkup] = None
     ) -> Poll:
         api_logger.debug('Stop poll %s in "%s"', message_id, chat_id)
@@ -960,14 +987,14 @@ class ApiMethods(ABC):
             chat_id=chat_id, message_id=message_id,
             reply_markup=_to_json(reply_markup))
 
-        return response.result
+        return Poll.from_dict(response.result)
 
     async def delete_message(self, chat_id: Optional[Union[int, str]] = None,
                              message_id: Optional[int] = None) -> bool:
         api_logger.debug('Delete message %s in "%s"', message_id, chat_id)
         response = await self._request(RequestMethod.POST, 'deleteMessage',
                                        chat_id=chat_id, message_id=message_id)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def send_sticker(
@@ -1019,7 +1046,7 @@ class ApiMethods(ABC):
             png_sticker=png_sticker, tgs_sticker=tgs_sticker,
             contains_masks=contains_masks,
             mask_position=_to_json(mask_position))
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def add_sticker_to_set(
@@ -1041,14 +1068,14 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'setStickerPositionInSet',
             sticker=sticker, position=position)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def delete_sticker_from_set(self, sticker: str) -> bool:
         api_logger.debug('Delete sticker "%s" from set', sticker)
         response = await self._request(
             RequestMethod.POST, 'deleteStickerFromSet', sticker=sticker)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def set_sticker_set_thumb(
@@ -1060,7 +1087,7 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'setStickerSetThumb',
             name=name, user_id=user_id, thumb=thumb)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def answer_inline_query(
@@ -1078,7 +1105,7 @@ class ApiMethods(ABC):
             cache_time=cache_time, is_personal=is_personal,
             next_offset=next_offset, switch_pm_text=switch_pm_text,
             switch_pm_parameter=switch_pm_parameter)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def send_invoice(
@@ -1137,7 +1164,7 @@ class ApiMethods(ABC):
             inline_query_id=inline_query_id, ok=ok,
             shipping_options=shipping_options_json,
             error_message=error_message)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def answer_pre_checkout_query(
@@ -1150,7 +1177,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'answerPreCheckoutQuery',
             pre_checkout_query_id=pre_checkout_query_id, ok=ok,
             error_message=error_message)
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def set_passport_data_errors(
@@ -1162,7 +1189,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'setPassportDataErrors',
             user_id=user_id,
             errors=json_dumps(tuple(error.to_dict() for error in errors)))
-
+        assert isinstance(response.result, bool)
         return response.result
 
     async def send_game(

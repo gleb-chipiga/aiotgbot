@@ -8,7 +8,7 @@ isort:
 flake:
 	flake8 .
 mypy:
-	mypy .
+	mypy --strict aiotgbot tests
 test:
 	python -m pytest tests
 cov:

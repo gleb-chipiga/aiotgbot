@@ -1,80 +1,97 @@
 from io import BytesIO
-from typing import Union
+from typing import Any, AsyncIterator, Callable, Union, cast
 from unittest.mock import Mock, call
 
 import pytest
 
-from aiotgbot.api_methods import (ApiMethods, ParamType, _parse_mode_to_str,
-                                  _strs_to_json, _to_json)
+from aiotgbot import api_methods
+from aiotgbot.api_methods import ApiMethods, ParamType
 from aiotgbot.api_types import (APIResponse, Chat, File, InputMediaPhoto,
                                 KeyboardButton, Message, ReplyKeyboardMarkup,
-                                Update, User)
+                                StreamFile, Update, User)
 from aiotgbot.constants import ChatAction, ParseMode, RequestMethod, UpdateType
 from aiotgbot.helpers import json_dumps
 
+_MakeMessage = Callable[..., Message]
+
 
 @pytest.fixture
-def make_msg():
-    def _make_message(**params):
+def make_message() -> _MakeMessage:
+    def _make_message(**kwargs: Any) -> Message:
         _dict = {
             'message_id': 10,
             'from': {'id': 1, 'is_bot': False, 'first_name': 'fn'},
             'date': 1100,
             'chat': {'id': 1, 'type': 'private'},
-            **params
+            **kwargs
         }
         return Message.from_dict(_dict)
-
     return _make_message
 
 
 @pytest.fixture
-def reply_kb():
+def reply_kb() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup([[
         KeyboardButton('Button')
     ]])
 
 
+async def _iter_bytes(
+    data: bytes, chunk_size: int = 2 ** 16
+) -> AsyncIterator[bytes]:
+    bytes_io = BytesIO(data)
+    while len(chunk := bytes_io.read(chunk_size)) > 0:
+        yield chunk
+
+
+def stream_file(string: str) -> StreamFile:
+    return StreamFile(content=_iter_bytes(string.encode()), name=string)
+
+
+class Bot(ApiMethods):
+
+    def __init__(self) -> None:
+        self.request_mock = Mock()
+        self.safe_request_mock = Mock()
+
+    async def _request(self, http_method: RequestMethod, api_method: str,
+                       **params: ParamType) -> APIResponse:
+        return cast(APIResponse, self.request_mock(http_method, api_method,
+                                                   **params))
+
+    async def _safe_request(
+        self, http_method: RequestMethod, api_method: str,
+        chat_id: Union[int, str], **params: ParamType
+    ) -> APIResponse:
+        return cast(APIResponse, self.safe_request_mock(
+            http_method, api_method, chat_id, **params))
+
+
 @pytest.fixture
-def bot():
-    class Bot(ApiMethods):
-        request_mock = Mock()
-        safe_request_mock = Mock()
-
-        async def _request(self, http_method: RequestMethod, api_method: str,
-                           **params: ParamType) -> APIResponse:
-            return self.request_mock(http_method, api_method, **params)
-
-        async def _safe_request(
-            self, http_method: RequestMethod, api_method: str,
-            chat_id: Union[int, str], **params: ParamType
-        ) -> APIResponse:
-            return self.safe_request_mock(http_method, api_method, chat_id,
-                                          **params)
-
+def bot() -> Bot:
     return Bot()
 
 
-def test_to_json():
+def test_to_json() -> None:
     update = Update.from_dict({'update_id': 1})
-    assert _to_json(update) == json_dumps(update.to_dict())
-    assert _to_json(None) is None
+    assert api_methods._to_json(update) == json_dumps(update.to_dict())
+    assert api_methods._to_json(None) is None
 
 
-def test_strs_to_json():
+def test_strs_to_json() -> None:
     strs = ('str1', 'str2', 'str3')
-    assert _strs_to_json(strs) == json_dumps(strs)
-    assert _strs_to_json(None) is None
+    assert api_methods._strs_to_json(strs) == json_dumps(strs)
+    assert api_methods._strs_to_json(None) is None
 
 
-def test_parse_mode_to_str():
+def test_parse_mode_to_str() -> None:
     pm = ParseMode.HTML
-    assert _parse_mode_to_str(pm) == pm.value
-    assert _parse_mode_to_str(None) is None
+    assert api_methods._parse_mode_to_str(pm) == pm.value
+    assert api_methods._parse_mode_to_str(None) is None
 
 
 @pytest.mark.asyncio
-async def test_api_methods_get_updates(bot):
+async def test_api_methods_get_updates(bot: Bot) -> None:
     update = Update.from_dict({'update_id': 1})
     bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': [{'update_id': 1}]})
@@ -92,7 +109,7 @@ async def test_api_methods_get_updates(bot):
 
 
 @pytest.mark.asyncio
-async def test_api_methods_get_me(bot):
+async def test_api_methods_get_me(bot: Bot) -> None:
     user = User.from_dict({'id': 1, 'is_bot': False, 'first_name': 'fn'})
     bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': user.to_dict()})
@@ -103,8 +120,9 @@ async def test_api_methods_get_me(bot):
 
 
 @pytest.mark.asyncio
-async def test_api_methods_send_message(bot, make_msg, reply_kb):
-    message = make_msg(text='Hello!')
+async def test_api_methods_send_message(bot: Bot, make_message: _MakeMessage,
+                                        reply_kb: ReplyKeyboardMarkup) -> None:
+    message = make_message(text='Hello!')
     bot.safe_request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': message.to_dict()})
     assert await bot.send_message(
@@ -131,8 +149,9 @@ async def test_api_methods_send_message(bot, make_msg, reply_kb):
 
 
 @pytest.mark.asyncio
-async def test_api_methods_send_photo(bot, make_msg, reply_kb):
-    message = make_msg(photo=[])
+async def test_api_methods_send_photo(bot: Bot, make_message: _MakeMessage,
+                                      reply_kb: ReplyKeyboardMarkup) -> None:
+    message = make_message(photo=[])
     bot.safe_request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': message.to_dict()})
     assert await bot.send_photo(
@@ -157,8 +176,9 @@ async def test_api_methods_send_photo(bot, make_msg, reply_kb):
 
 
 @pytest.mark.asyncio
-async def test_api_methods_forward_message(bot, make_msg):
-    message = make_msg(text='Hello!')
+async def test_api_methods_forward_message(bot: Bot,
+                                           make_message: _MakeMessage) -> None:
+    message = make_message(text='Hello!')
     bot.safe_request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': message.to_dict()})
     assert await bot.forward_message(
@@ -177,7 +197,7 @@ async def test_api_methods_forward_message(bot, make_msg):
 
 
 @pytest.mark.asyncio
-async def test_api_methods_send_chat_action(bot):
+async def test_api_methods_send_chat_action(bot: Bot) -> None:
     bot.safe_request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': True})
     assert await bot.send_chat_action(
@@ -193,7 +213,7 @@ async def test_api_methods_send_chat_action(bot):
 
 
 @pytest.mark.asyncio
-async def test_api_methods_get_file(bot):
+async def test_api_methods_get_file(bot: Bot) -> None:
     _file = File.from_dict({
         'file_id': '1',
         'file_unique_id': '2',
@@ -211,7 +231,7 @@ async def test_api_methods_get_file(bot):
 
 
 @pytest.mark.asyncio
-async def test_api_methods_leave_chat(bot):
+async def test_api_methods_leave_chat(bot: Bot) -> None:
     bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': True})
     assert await bot.leave_chat(chat_id=1)
@@ -223,7 +243,7 @@ async def test_api_methods_leave_chat(bot):
 
 
 @pytest.mark.asyncio
-async def test_api_methods_get_chat(bot):
+async def test_api_methods_get_chat(bot: Bot) -> None:
     chat = Chat.from_dict({
         'id': 1,
         'type': 'private'
@@ -237,7 +257,7 @@ async def test_api_methods_get_chat(bot):
 
 
 @pytest.mark.asyncio
-async def test_api_methods_answer_callback_query(bot):
+async def test_api_methods_answer_callback_query(bot: Bot) -> None:
     bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': True})
     assert await bot.answer_callback_query(
@@ -257,8 +277,10 @@ async def test_api_methods_answer_callback_query(bot):
 
 
 @pytest.mark.asyncio
-async def test_api_methods_edit_message_text(bot, make_msg):
-    message = make_msg(text='text2')
+async def test_api_methods_edit_message_text(
+    bot: Bot, make_message: _MakeMessage
+) -> None:
+    message = make_message(text='text2')
     bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': message.to_dict()})
     assert await bot.edit_message_text(
@@ -281,15 +303,15 @@ async def test_api_methods_edit_message_text(bot, make_msg):
 
 
 @pytest.mark.asyncio
-async def test_send_media_group(bot, make_msg):
-    file0 = BytesIO(b'bytes1')
-    file1 = BytesIO(b'bytes2')
-    file2 = BytesIO(b'bytes3')
+async def test_send_media_group(bot: Bot, make_message: _MakeMessage) -> None:
+    file0 = stream_file('bytes1')
+    file1 = stream_file('bytes2')
+    file2 = stream_file('bytes3')
 
     bot.safe_request_mock.return_value = APIResponse.from_dict({
         'ok': True,
-        'result': [make_msg().to_dict(), make_msg().to_dict(),
-                   make_msg().to_dict()]
+        'result': [make_message().to_dict(), make_message().to_dict(),
+                   make_message().to_dict()]
     })
 
     await bot.send_media_group(
@@ -323,21 +345,24 @@ async def test_send_media_group(bot, make_msg):
 
 
 @pytest.mark.asyncio
-async def test_edit_message_media(bot, make_msg):
-    file = BytesIO(b'bytes1')
+async def test_edit_message_media(
+    bot: Bot, make_message: _MakeMessage
+) -> None:
+    file = stream_file('bytes1')
     bot.request_mock.return_value = APIResponse.from_dict({
         'ok': True,
-        'result': make_msg().to_dict()
+        'result': make_message().to_dict()
     })
     await bot.edit_message_media(
-        1,
-        media=InputMediaPhoto(media=file, caption='f1')
+        media=InputMediaPhoto(media=file, caption='f1'),
+        chat_id=1,
+        message_id=1
     )
     assert bot.request_mock.call_args_list == [call(
         RequestMethod.POST,
         'editMessageMedia',
         chat_id=1,
-        message_id=None,
+        message_id=1,
         inline_message_id=None,
         media=json_dumps(InputMediaPhoto(media='attach://attachment0',
                          caption='f1').to_dict()),

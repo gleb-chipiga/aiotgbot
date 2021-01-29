@@ -1,6 +1,7 @@
 from typing import Any, AsyncIterator, Dict, Final, Tuple
 
-from aiotgbot.storage import Json, StorageProtocol
+from aiotgbot.helpers import Json
+from aiotgbot.storage import StorageProtocol
 
 
 class MemoryStorage(StorageProtocol):

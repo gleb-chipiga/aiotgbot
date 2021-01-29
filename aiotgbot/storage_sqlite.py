@@ -2,12 +2,13 @@ import asyncio
 import json
 from enum import Enum
 from pathlib import Path
-from typing import Any, AsyncIterator, Dict, Final, Optional, Tuple, Union
+from typing import (Any, AsyncIterator, Dict, Final, Optional, Tuple, Union,
+                    cast)
 
 import aiosqlite
 
-from .helpers import json_dumps
-from .storage import Json, StorageProtocol
+from .helpers import Json, json_dumps
+from .storage import StorageProtocol
 
 
 class IsolationLevel(str, Enum):
@@ -63,7 +64,7 @@ class SQLiteStorage(StorageProtocol):
             await cursor.execute('SELECT value FROM kv WHERE key = ?', (key,))
             row = await cursor.fetchone()
             if row is not None:
-                return json.loads(row[0])
+                return cast(Json, json.loads(row[0]))
             else:
                 return None
 

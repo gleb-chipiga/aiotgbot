@@ -75,7 +75,8 @@ def _is_attr_union(_type: Any) -> bool:
 
 
 _NoneType: Type[None] = type(None)
-_FieldType = Union[int, str, bool, float, Tuple, List, 'BaseTelegram']
+_FieldType = Union[int, str, bool, float, Tuple[Any, ...], List[Any],
+                   Dict[str, Any], 'BaseTelegram']
 _HintsGenerator = Generator[Tuple[str, str, Any], None, None]
 
 
@@ -100,8 +101,12 @@ class BaseTelegram:
 
         return _dict
 
+    @classmethod
+    def from_dict(cls: Type['_Telegram'], data: Dict[str, Any]) -> '_Telegram':
+        return cast(_Telegram, BaseTelegram._handle_object(cls, data))
+
     @staticmethod
-    def _to_list(value: Iterable) -> List[Any]:
+    def _to_list(value: Iterable[Any]) -> List[Any]:
         _list: List[Any] = []
         for item in value:
             if isinstance(item, (int, str, bool, float)):
@@ -115,35 +120,32 @@ class BaseTelegram:
 
         return _list
 
-    @classmethod
-    def get_type_hints(cls: Type['_TelegramType']) -> _HintsGenerator:
-        return ((field.rstrip('_'), field, _type)
-                for field, _type in get_type_hints(cls).items())
-
-    @classmethod
-    def from_dict(cls: Type['_TelegramType'],
-                  data: Dict[str, Any]) -> '_TelegramType':
-        return BaseTelegram.handle_object(cls, data)
+    @staticmethod
+    def _get_type_hints(_type: Any) -> Tuple[Tuple[str, str, Any], ...]:
+        return tuple((field.rstrip('_'), field, _type)
+                     for field, _type in get_type_hints(_type).items())
 
     @staticmethod
-    def handle_object(cls: Type['_TelegramType'],
-                      data: Dict[str, Any]) -> '_TelegramType':
-        required = set(field for field, _, _type in cls.get_type_hints()
-                       if not _is_optional(_type))
-        filled = set(key for key, value in data.items() if value is not None)
+    def _handle_object(_type: Any, data: Dict[str, Any]) -> Any:
+        assert issubclass(_type, BaseTelegram)
+        assert attr.has(_type)
+        type_hints = _type._get_type_hints(_type)
+        required = frozenset(field for field, _, _type in type_hints
+                             if not _is_optional(_type))
+        filled = frozenset(key for key, value in data.items()
+                           if value is not None)
         if not required <= filled:
             keys = ', '.join(required - filled)
             raise DataMappingError(f'Data without required keys: {keys}')
-        params = {}
-        for key, field, type_ in cls.get_type_hints():
-            params[field] = BaseTelegram.handle_field(type_, data.get(key))
+        params = {field: BaseTelegram._handle_field(_type, data.get(key))
+                  for key, field, _type in type_hints}
 
-        return cast(Any, cls)(**params)
+        return cast(Any, _type)(**params)
 
     @staticmethod
-    def handle_field(_type: Any, value: Any) -> Optional[_FieldType]:
+    def _handle_field(_type: Any, value: Any) -> Optional[_FieldType]:
         if _type in (int, str, bool, float) and isinstance(value, _type):
-            return value
+            return cast(_FieldType, value)
         elif _type in (int, str, bool, float):
             message = f'"{value}" is not instance of type "{_type.__name__}"'
             raise DataMappingError(message)
@@ -152,19 +154,19 @@ class BaseTelegram:
         elif _type is _NoneType:
             raise DataMappingError(f'"{value}" is not None')
         elif _type is Any:
-            return value
+            return cast(_FieldType, value)
         elif _is_tuple(_type) and isinstance(value, list):
-            return tuple(BaseTelegram.handle_field(get_args(_type)[0], item)
+            return tuple(BaseTelegram._handle_field(get_args(_type)[0], item)
                          for item in value)
         elif _is_list(_type) and isinstance(value, list):
-            return [BaseTelegram.handle_field(get_args(_type)[0], item)
+            return [BaseTelegram._handle_field(get_args(_type)[0], item)
                     for item in value]
         elif _is_list(_type) or _is_tuple(_type):
             raise DataMappingError(f'Data "{value}" is not list')
         elif _is_optional(_type) and value is None:
             return None
         elif _is_optional(_type) and len(get_args(_type)) == 2:
-            return BaseTelegram.handle_field(get_args(_type)[0], value)
+            return BaseTelegram._handle_field(get_args(_type)[0], value)
         elif _is_attr_union(_type) and isinstance(value, dict):
             types: List[Tuple[int, Any]] = []
             for arg_type in get_args(_type):
@@ -179,15 +181,18 @@ class BaseTelegram:
                 message = f'Data "{value}" not match any of "{arg_types}"'
                 raise DataMappingError(message)
             types = sorted(types, key=lambda t: t[0], reverse=True)
-            return BaseTelegram.handle_field(types[0][1], value)
+            return BaseTelegram._handle_field(types[0][1], value)
         elif attr.has(_type) and isinstance(value, dict):
-            return BaseTelegram.handle_object(_type, value)
+            return cast(
+                BaseTelegram,
+                BaseTelegram._handle_object(_type, value)
+            )
         else:
             message = f'Data "{value}" not match field type "{_type}"'
             raise DataMappingError(message)
 
 
-_TelegramType = TypeVar('_TelegramType', bound=BaseTelegram)
+_Telegram = TypeVar('_Telegram', bound=BaseTelegram)
 
 
 @attr.s(slots=True, auto_attribs=True)

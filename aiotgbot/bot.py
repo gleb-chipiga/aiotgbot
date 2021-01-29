@@ -59,7 +59,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         self._updates_offset: int = 0
         self._me: Optional[User] = None
         self._on_shutdown: Optional[EventHandler] = None
-        self._poll_task: Optional[asyncio.Task] = None
+        self._poll_task: Optional[asyncio.Task[None]] = None
         self._polling_started: bool = False
         self._data: Dict[str, Any] = {}
 
@@ -93,7 +93,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
             return self._client
 
     async def poll(self, on_startup: Optional[EventHandler] = None,
-                   on_shutdown: Optional[EventHandler] = None):
+                   on_shutdown: Optional[EventHandler] = None) -> None:
         loop = asyncio.get_running_loop()
 
         connector = aiohttp.TCPConnector(keepalive_timeout=60)
@@ -145,18 +145,22 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         bot_logger.info('Bot %s (%s) stop polling', self._me.first_name,
                         self._me.username)
 
-    def stop_polling(self):
+    def stop_polling(self) -> None:
         if not self._polling_started:
             raise RuntimeError('Polling not started')
+        assert self._poll_task is not None
         bot_logger.debug('Stop polling')
         self._polling_started = False
         if not self._poll_task.done():
             self._poll_task.cancel()
 
-    async def _finish_polling(self):
+    async def _finish_polling(self) -> None:
         if self._on_shutdown is not None:
             await self._on_shutdown(self)
-
+        assert self._client is not None
+        assert self._message_limit is not None
+        assert self._chat_limit is not None
+        assert self._group_limit is not None
         await self._client.close()
         await self._storage.close()
         await self._message_limit.clear()
@@ -167,7 +171,8 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         return TG_FILE_URL.format(token=self._token, path=path)
 
     @staticmethod
-    def _scheduler_exception_handler(_, context):
+    def _scheduler_exception_handler(_: SchedulerProtocol,
+                                     context: Dict[str, Any]) -> None:
         bot_logger.exception('Update handle error',
                              exc_info=context['exception'])
 

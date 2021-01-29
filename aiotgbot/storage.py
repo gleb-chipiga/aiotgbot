@@ -1,8 +1,7 @@
 from abc import abstractmethod
-from typing import (Any, AsyncIterator, Dict, List, Protocol, Tuple, Union,
-                    runtime_checkable)
+from typing import AsyncIterator, Protocol, Tuple, runtime_checkable
 
-Json = Union[str, int, float, bool, Dict[str, Any], List[Any], None]
+from aiotgbot.helpers import Json
 
 
 @runtime_checkable

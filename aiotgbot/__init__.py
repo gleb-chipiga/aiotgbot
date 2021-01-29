@@ -5,8 +5,8 @@ from .api_types import (BaseTelegram, CallbackQuery, Chat, ChosenInlineResult,
                         InlineKeyboardMarkup, InlineQuery, KeyboardButton,
                         LocalFile, Message, PreCheckoutQuery,
                         ReplyKeyboardMarkup, ReplyKeyboardRemove,
-                        ShippingQuery, User)
-from .bot import Bot, FilterProtocol, StreamFile
+                        ShippingQuery, StreamFile, User)
+from .bot import Bot, FilterProtocol
 from .bot_update import BotUpdate
 from .constants import (ChatAction, ChatType, ContentType, ParseMode, PollType,
                         UpdateType)

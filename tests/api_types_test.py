@@ -13,7 +13,7 @@ from aiotgbot.api_types import (BaseTelegram, CallbackQuery,
                                 KeyboardButtonPollType, LocalFile, Message,
                                 Poll, PreCheckoutQuery, ShippingQuery,
                                 _is_attr_union, _is_optional, _is_tuple,
-                                _is_union)
+                                _is_union, _Telegram)
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -56,7 +56,7 @@ class Class5(BaseTelegram):
     c: Class1
     d: Tuple[Class1, ...]
     e: List[List[int]]
-    f: Optional[Dict]
+    f: Optional[Dict[Any, Any]]
 
 
 @pytest.mark.parametrize('test, expected', (
@@ -65,7 +65,7 @@ class Class5(BaseTelegram):
     (int, False),
     (type(None), False)
 ))
-def test_is_tuple(test, expected):
+def test_is_tuple(test: Any, expected: bool) -> None:
     assert _is_tuple(test) is expected
 
 
@@ -75,7 +75,7 @@ def test_is_tuple(test, expected):
     (int, False),
     (type(None), False)
 ))
-def test_is_union(test, expected):
+def test_is_union(test: Any, expected: bool) -> None:
     assert _is_union(test) is expected
 
 
@@ -87,7 +87,7 @@ def test_is_union(test, expected):
     (int, False),
     (type(None), False),
 ))
-def test_is_optional(test, expected):
+def test_is_optional(test: Any, expected: bool) -> None:
     assert _is_optional(test) is expected
 
 
@@ -99,11 +99,11 @@ def test_is_optional(test, expected):
     (int, False),
     (type(None), False)
 ))
-def test_is_attr_union(test, expected):
+def test_is_attr_union(test: Any, expected: bool) -> None:
     assert _is_attr_union(test) is expected
 
 
-def test_base_to_dict():
+def test_base_to_dict() -> None:
     tc1 = Class5(
         a=1,
         b='str',
@@ -121,7 +121,7 @@ def test_base_to_dict():
     }
 
 
-def test_base_to_dict_exception():
+def test_base_to_dict_exception() -> None:
     with pytest.raises(TypeError, match='"{3: 4}" has unsupported type'):
         Class5(
             a=1,
@@ -137,71 +137,71 @@ def test_base_to_dict_exception():
             b=None,
             c=Class1(a=1, b=2, c='3'),
             d=(Class1(a=1, b=2, c='3'), Class1(a=2, b=3, c='4')),
-            e=[[1, 2], {5: 6}],
+            e=[[1, 2], {5: 6}],  # type: ignore  # wrong type for test
             f=None
         ).to_dict()
 
 
-def test_get_type_hints():
-    assert list(Class4.get_type_hints()) == [
+def test_get_type_hints() -> None:
+    assert list(BaseTelegram._get_type_hints(Class4)) == [
         ('a', 'a', int),
         ('b', 'b', Union[int, type(None)]),
         ('c', 'c_', Union[str, type(None)])
     ]
 
 
-def test_base_from_dict():
+def test_base_from_dict() -> None:
     assert (Class1.from_dict({'a': 1, 'b': 2}) ==
             Class1(a=1, b=2, c=None))
     with pytest.raises(DataMappingError):
         Class1.from_dict({'b': 2, 'c': '3'})
 
 
-def test_base_handle_object():
-    assert (BaseTelegram.handle_object(Class1, {'a': 1, 'c': 'c'}) ==
+def test_base_handle_object() -> None:
+    assert (BaseTelegram._handle_object(Class1, {'a': 1, 'c': 'c'}) ==
             Class1(a=1, b=None, c='c'))
     with pytest.raises(DataMappingError,
                        match='Data without required keys: a'):
-        BaseTelegram.handle_object(Class1, {'b': 2})
+        BaseTelegram._handle_object(Class1, {'b': 2})
 
 
-def test_base_handle_field():
-    assert BaseTelegram.handle_field(int, 1) == 1
+def test_base_handle_field() -> None:
+    assert BaseTelegram._handle_field(int, 1) == 1
     message = '"some str" is not instance of type "int"'
     with pytest.raises(DataMappingError, match=message):
-        BaseTelegram.handle_field(int, 'some str')
+        BaseTelegram._handle_field(int, 'some str')
 
-    assert BaseTelegram.handle_field(type(None), None) is None
+    assert BaseTelegram._handle_field(type(None), None) is None
     with pytest.raises(DataMappingError, match='111" is not None'):
-        BaseTelegram.handle_field(type(None), 111)
+        BaseTelegram._handle_field(type(None), 111)
 
-    assert BaseTelegram.handle_field(Tuple[str], ['str']) == ('str',)
-    assert BaseTelegram.handle_field(List[str], ['str']) == ['str']
+    assert BaseTelegram._handle_field(Tuple[str], ['str']) == ('str',)
+    assert BaseTelegram._handle_field(List[str], ['str']) == ['str']
     with pytest.raises(DataMappingError, match='Data "some str" is not list'):
-        BaseTelegram.handle_field(Tuple[str], 'some str')
+        BaseTelegram._handle_field(Tuple[str], 'some str')
 
-    assert BaseTelegram.handle_field(Any, {1: 2}) == {1: 2}
-    assert BaseTelegram.handle_field(Optional[str], None) is None
+    assert BaseTelegram._handle_field(Any, {'1': 2}) == {'1': 2}
+    assert BaseTelegram._handle_field(Optional[str], None) is None
 
-    assert (BaseTelegram.handle_field(Class1, {'a': 1}) ==
+    assert (BaseTelegram._handle_field(Class1, {'a': 1}) ==
             Class1(a=1, b=None, c=None))
 
     union: Union[Any] = Union[Class1, Class2, None]
-    assert (BaseTelegram.handle_field(union, {'a': 1}) ==
+    assert (BaseTelegram._handle_field(union, {'a': 1}) ==
             Class1(a=1, b=None, c=None))
-    assert (BaseTelegram.handle_field(union, {'a': 1, 'y': .1}) ==
+    assert (BaseTelegram._handle_field(union, {'a': 1, 'y': .1}) ==
             Class2(a=1, y=.1, z=None))
     message = ('Data "{\'a\': 1, \'ooo\': 0.1}\" not match any of '
                '"Class1, Class2, NoneType"')
     with pytest.raises(DataMappingError, match=message):
-        BaseTelegram.handle_field(union, {'a': 1, 'ooo': .1})
+        BaseTelegram._handle_field(union, {'a': 1, 'ooo': .1})
 
     message = r'Data "None" not match field type "typing\.Union\[str, int\]"'
     with pytest.raises(DataMappingError, match=message):
-        BaseTelegram.handle_field(Union[str, int], None)
+        BaseTelegram._handle_field(Union[str, int], None)
 
 
-def test_base():
+def test_base() -> None:
     t3_dict = {
         'a': 1,
         'b': 2,
@@ -243,9 +243,11 @@ def test_base():
     ('type', KeyboardButtonPollType, True, False),
     ('type_', KeyboardButtonPollType, False, True)
 ))
-def test_fixed_hints(_str, _type, in_keys, in_fields):
-    assert (_str in [k for k, f, t in _type.get_type_hints()]) is in_keys
-    assert (_str in [f for k, f, t in _type.get_type_hints()]) is in_fields
+def test_fixed_hints(_str: str, _type: _Telegram, in_keys: bool,
+                     in_fields: bool) -> None:
+    type_hints = BaseTelegram._get_type_hints(_type)
+    assert (_str in [k for k, f, t in type_hints]) is in_keys
+    assert (_str in [f for k, f, t in type_hints]) is in_fields
 
 
 @pytest.mark.parametrize('type_', (
@@ -256,7 +258,7 @@ def test_fixed_hints(_str, _type, in_keys, in_fields):
     InputMediaAudio,
     InputMediaDocument,
 ))
-def test_input_media_serialization(type_: Any):
+def test_input_media_serialization(type_: Any) -> None:
     input_media = type_(media=BytesIO(b'bytes'))
     with pytest.raises(TypeError, match='To serialize this object, the media '
                                         'attribute type must be a string'):
@@ -268,7 +270,7 @@ def test_input_media_serialization(type_: Any):
     2 ** 16
 ))
 @pytest.mark.asyncio
-async def test_local_file(count):
+async def test_local_file(count: int) -> None:
     with TemporaryDirectory() as tmpdirname:
         file_name = f'{tmpdirname}/file.tmp'
         with open(file_name, 'wb') as writer:
