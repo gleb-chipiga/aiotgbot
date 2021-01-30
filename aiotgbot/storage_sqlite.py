@@ -7,8 +7,8 @@ from typing import (Any, AsyncIterator, Dict, Final, Optional, Tuple, Union,
 
 import aiosqlite
 
-from .helpers import Json, json_dumps
-from .storage import StorageProtocol
+from .helpers import json_dumps
+from .storage import Json, StorageProtocol
 
 
 class IsolationLevel(str, Enum):

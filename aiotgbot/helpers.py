@@ -2,8 +2,7 @@ import asyncio
 import json
 from contextlib import asynccontextmanager, suppress
 from functools import partial
-from typing import (Any, AsyncGenerator, Dict, Final, Hashable, List, Optional,
-                    Union)
+from typing import AsyncGenerator, Dict, Final, Hashable, Optional
 
 json_dumps: Final = partial(json.dumps, ensure_ascii=False)
 
@@ -104,6 +103,3 @@ class FreqLimit:
                 if key not in self._events:
                     del self._ts[key]
             await asyncio.sleep(self._clean_interval)
-
-
-Json = Union[str, int, float, bool, Dict[str, Any], List[Any], None]
