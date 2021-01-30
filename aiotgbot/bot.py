@@ -178,10 +178,10 @@ class Bot(MutableMapping[str, Any], ApiMethods):
 
     @staticmethod
     def _telegram_exception(api_response: APIResponse) -> TelegramError:
+        assert api_response.error_code is not None
+        assert api_response.description is not None
         error_code = api_response.error_code
-        assert error_code is not None
         description = api_response.description
-        assert description is not None
         if (
             api_response.parameters is not None and
             api_response.parameters.retry_after is not None
@@ -287,15 +287,12 @@ class Bot(MutableMapping[str, Any], ApiMethods):
     @backoff.on_exception(backoff.expo, TelegramError)
     async def _poll(self) -> None:
         assert self._scheduler is not None, 'Scheduler not initialized'
-
         bot_logger.debug('Get updates from: %s', self._updates_offset)
         while self._polling_started:
             updates = await self.get_updates(offset=self._updates_offset,
                                              timeout=TG_GET_UPDATES_TIMEOUT)
-
             for update in updates:
                 await self._scheduler.spawn(self._handle_update(update))
-
             if len(updates) > 0:
                 self._updates_offset = updates[-1].update_id + 1
 
