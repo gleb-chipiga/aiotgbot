@@ -278,6 +278,7 @@ async def test_local_file(count: int) -> None:
 
         file = LocalFile(file_name)
         assert file.name == 'file.tmp'
+        assert file.content_type is None
         content = b''
         async for chunk in file.content:
             content += chunk

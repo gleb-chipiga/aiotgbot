@@ -47,7 +47,7 @@ def test_handler_table_message_handler(handler: HandlerCallable) -> None:
 
     ht.message_handler(handler, state='state1', commands=['command1'],
                        content_types=[ContentType.CONTACT],
-                       text_match='pattern',
+                       text_match=re.compile('pattern'),
                        filters=[PrivateChatFilter()])
 
     assert ht._handlers == [Handler(handler, filters=(
@@ -210,7 +210,7 @@ def test_handler_callback_query_handler(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.callback_query_handler(handler,
                               state='state1',
-                              data_match='pattern',
+                              data_match=re.compile('pattern'),
                               filters=[GroupChatFilter()])
 
     assert ht._handlers == [Handler(handler, filters=(
