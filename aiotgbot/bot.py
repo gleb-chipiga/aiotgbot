@@ -12,6 +12,7 @@ import aiohttp
 import aiojobs
 import attr
 import backoff
+from aiofreqlimit import FreqLimit
 from aiojobs_protocols import SchedulerProtocol
 
 from .api_methods import ApiMethods, ParamType
@@ -20,7 +21,7 @@ from .bot_update import BotUpdate, Context
 from .constants import ChatType, RequestMethod
 from .exceptions import (BadGateway, BotBlocked, BotKicked, MigrateToChat,
                          RestartingTelegram, RetryAfter, TelegramError)
-from .helpers import FreqLimit, KeyLock, get_software, json_dumps
+from .helpers import KeyLock, get_software, json_dumps
 from .storage import StorageProtocol
 
 SOFTWARE: Final[str] = get_software()
