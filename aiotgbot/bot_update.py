@@ -3,6 +3,8 @@ from typing import Any, Dict, Final, Iterator, MutableMapping, Optional
 from .api_types import (CallbackQuery, ChosenInlineResult, InlineQuery,
                         Message, PreCheckoutQuery, ShippingQuery, Update)
 
+__all__ = ('Context', 'BotUpdate')
+
 
 class Context(MutableMapping[str, Any]):
     __slots__ = '_data'

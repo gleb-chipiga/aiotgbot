@@ -2,6 +2,8 @@ from abc import abstractmethod
 from typing import (Any, AsyncIterator, Dict, List, Protocol, Tuple, Union,
                     runtime_checkable)
 
+__all__ = ('Json', 'StorageProtocol')
+
 Json = Union[str, int, float, bool, Dict[str, Any], List[Any], None]
 
 

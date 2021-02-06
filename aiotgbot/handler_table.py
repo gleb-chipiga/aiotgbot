@@ -10,6 +10,8 @@ from .filters import (CallbackQueryDataFilter, CommandsFilter,
                       ContentTypeFilter, MessageTextFilter, StateFilter,
                       UpdateTypeFilter)
 
+__all__ = ('HandlerTable',)
+
 HandlerDecorator = Callable[[HandlerCallable], HandlerCallable]
 
 

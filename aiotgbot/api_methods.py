@@ -18,6 +18,8 @@ from .constants import (ChatAction, DiceEmoji, ParseMode, PollType,
                         RequestMethod, UpdateType)
 from .helpers import json_dumps
 
+__all__ = ('ParamType', 'ApiMethods')
+
 api_logger: Final[logging.Logger] = logging.getLogger('aiotgbot.api')
 
 

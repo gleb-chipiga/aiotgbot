@@ -9,6 +9,45 @@ import attr
 
 from aiotgbot.constants import InputMediaType, ParseMode, PollType
 
+__all__ = ('DataMappingError', 'StreamFile', 'LocalFile', 'BaseTelegram',
+           'ResponseParameters', 'APIResponse', 'Update', 'WebhookInfo',
+           'User', 'Chat', 'Message', 'MessageId', 'MessageEntity',
+           'PhotoSize', 'Audio', 'Document', 'Video', 'Animation', 'Voice',
+           'VideoNote', 'Contact', 'Dice', 'Location', 'Venue',
+           'ProximityAlertTriggered', 'PollOption', 'PollAnswer', 'Poll',
+           'UserProfilePhotos', 'File', 'ReplyMarkup', 'ReplyKeyboardMarkup',
+           'KeyboardButton', 'KeyboardButtonPollType', 'ReplyKeyboardRemove',
+           'InlineKeyboardMarkup', 'InlineKeyboardButton', 'LoginUrl',
+           'CallbackQuery', 'ForceReply', 'ChatPhoto', 'ChatMember',
+           'ChatPermissions', 'ChatLocation', 'BotCommand', 'InputFile',
+           'InputMedia', 'InputMediaPhoto', 'InputMediaVideo',
+           'InputMediaAnimation', 'InputMediaAudio', 'InputMediaDocument',
+           'Sticker', 'StickerSet', 'MaskPosition', 'InlineQuery',
+           'InlineQueryResult', 'InlineQueryResultArticle',
+           'InlineQueryResultPhoto', 'InlineQueryResultGif',
+           'InlineQueryResultMpeg4Gif', 'InlineQueryResultVideo',
+           'InlineQueryResultAudio', 'InlineQueryResultVoice',
+           'InlineQueryResultDocument', 'InlineQueryResultLocation',
+           'InlineQueryResultVenue', 'InlineQueryResultContact',
+           'InlineQueryResultGame', 'InlineQueryResultCachedPhoto',
+           'InlineQueryResultCachedGif', 'InlineQueryResultCachedMpeg4Gif',
+           'InlineQueryResultCachedSticker', 'InlineQueryResultCachedDocument',
+           'InlineQueryResultCachedVideo', 'InlineQueryResultCachedVoice',
+           'InlineQueryResultCachedAudio', 'InputMessageContent',
+           'InputTextMessageContent', 'InputLocationMessageContent',
+           'InputVenueMessageContent', 'InputContactMessageContent',
+           'ChosenInlineResult', 'LabeledPrice', 'Invoice', 'ShippingAddress',
+           'OrderInfo', 'ShippingOption', 'SuccessfulPayment', 'ShippingQuery',
+           'PreCheckoutQuery', 'PassportData', 'PassportFile',
+           'EncryptedPassportElement', 'EncryptedCredentials',
+           'PassportElementError', 'PassportElementErrorDataField',
+           'PassportElementErrorFrontSide', 'PassportElementErrorReverseSide',
+           'PassportElementErrorSelfie', 'PassportElementErrorFile',
+           'PassportElementErrorFiles', 'PassportElementErrorTranslationFile',
+           'PassportElementErrorTranslationFiles',
+           'PassportElementErrorUnspecified', 'Game', 'CallbackGame',
+           'GameHighScore')
+
 
 class DataMappingError(BaseException):
     pass

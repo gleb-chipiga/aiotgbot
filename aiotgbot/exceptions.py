@@ -1,5 +1,8 @@
 from typing import Optional
 
+__all__ = ('TelegramError', 'MigrateToChat', 'RetryAfter', 'BadGateway',
+           'RestartingTelegram', 'BotBlocked', 'BotKicked')
+
 
 class TelegramError(Exception):
     pattern: Optional[str] = None
