@@ -3,20 +3,23 @@ import logging
 from abc import abstractmethod
 from functools import partial
 from http import HTTPStatus
-from signal import SIGINT, SIGTERM
 from typing import (Any, Awaitable, Callable, Dict, Final, Iterator,
                     MutableMapping, Optional, Protocol, Tuple, Union,
                     runtime_checkable)
 
 import aiohttp
+import aiohttp.web
 import aiojobs
 import attr
 import backoff
 from aiofreqlimit import FreqLimit
+from aiohttp import BaseConnector, TCPConnector
 from aiojobs_protocols import SchedulerProtocol
+from yarl import URL
 
 from .api_methods import ApiMethods, ParamType
-from .api_types import APIResponse, LocalFile, StreamFile, Update, User
+from .api_types import (APIResponse, InputFile, LocalFile, StreamFile, Update,
+                        User)
 from .bot_update import BotUpdate, Context
 from .constants import ChatType, RequestMethod
 from .exceptions import (BadGateway, BotBlocked, BotKicked, MigrateToChat,
@@ -41,31 +44,38 @@ EventHandler = Callable[['Bot'], Awaitable[None]]
 
 
 class Bot(MutableMapping[str, Any], ApiMethods):
-    __slots__ = ('_token', '_handler_table', '_storage', '_client',
-                 '_context_lock', '_message_limit', '_chat_limit',
-                 '_group_limit', '_scheduler', '_updates_offset', '_me',
-                 '_on_shutdown', '_poll_task', '_polling_started', '_data')
 
-    def __init__(self, token: str, handler_table: 'HandlerTableProtocol',
-                 storage: StorageProtocol) -> None:
+    def __init__(
+        self,
+        token: str,
+        handler_table: 'HandlerTableProtocol',
+        storage: StorageProtocol,
+        connector: Optional[BaseConnector] = None
+    ) -> None:
+        if not handler_table.frozen:
+            raise RuntimeError('Can\'t use unfrozen handler table')
         self._token: Final[str] = token
         self._handler_table: Final['HandlerTableProtocol'] = handler_table
         self._storage: Final[StorageProtocol] = storage
-        self._client: Optional[aiohttp.ClientSession] = None
-        self._context_lock: Optional[KeyLock] = None
-        self._message_limit: Optional[FreqLimit] = None
-        self._chat_limit: Optional[FreqLimit] = None
-        self._group_limit: Optional[FreqLimit] = None
+        if connector is not None:
+            _connector: BaseConnector = connector
+        else:
+            _connector = TCPConnector(keepalive_timeout=60)
+        self._client: Final[aiohttp.ClientSession] = aiohttp.ClientSession(
+            connector=_connector,
+            json_serialize=json_dumps,
+            headers={'User-Agent': SOFTWARE}
+        )
+        self._context_lock: Final[KeyLock] = KeyLock()
+        self._message_limit: Final[FreqLimit] = FreqLimit(MESSAGE_INTERVAL)
+        self._chat_limit: Final[FreqLimit] = FreqLimit(CHAT_INTERVAL)
+        self._group_limit: Final[FreqLimit] = FreqLimit(GROUP_INTERVAL)
         self._scheduler: Optional[SchedulerProtocol] = None
+        self._started: bool = False
+        self._stopped: bool = False
         self._updates_offset: int = 0
         self._me: Optional[User] = None
-        self._on_shutdown: Optional[EventHandler] = None
-        self._poll_task: Optional[asyncio.Task[None]] = None
-        self._polling_started: bool = False
-        self._data: Dict[str, Any] = {}
-
-        if not self._handler_table.frozen:
-            self._handler_table.freeze()
+        self._data: Final[Dict[str, Any]] = {}
 
     def __getitem__(self, key: str) -> Any:
         return self._data[key]
@@ -92,81 +102,6 @@ class Bot(MutableMapping[str, Any], ApiMethods):
             raise RuntimeError('Access to client during bot is not running.')
         else:
             return self._client
-
-    async def poll(self, on_startup: Optional[EventHandler] = None,
-                   on_shutdown: Optional[EventHandler] = None) -> None:
-        loop = asyncio.get_running_loop()
-
-        connector = aiohttp.TCPConnector(keepalive_timeout=60)
-        self._client = aiohttp.ClientSession(
-            connector=connector,
-            json_serialize=json_dumps,
-            headers={'User-Agent': SOFTWARE}
-        )
-
-        self._context_lock = KeyLock()
-        self._message_limit = FreqLimit(MESSAGE_INTERVAL)
-        self._chat_limit = FreqLimit(CHAT_INTERVAL)
-        self._group_limit = FreqLimit(GROUP_INTERVAL)
-
-        if on_startup is not None:
-            await on_startup(self)
-        self._on_shutdown = on_shutdown
-
-        try:
-            self._me = await self.get_me()
-        except TelegramError as exception:
-            bot_logger.error('Got Telegram error "%s" for first API request. '
-                             'Seems like token is invalid.', exception)
-            await self._finish_polling()
-            return
-
-        loop.add_signal_handler(SIGINT, self.stop_polling)
-        loop.add_signal_handler(SIGTERM, self.stop_polling)
-
-        self._scheduler = await aiojobs.create_scheduler(
-            exception_handler=self._scheduler_exception_handler)
-
-        self._polling_started = True
-        self._poll_task = loop.create_task(self._poll())
-
-        bot_logger.info('Bot %s (%s) start polling', self._me.first_name,
-                        self._me.username)
-
-        try:
-            await self._poll_task
-        except asyncio.CancelledError:
-            pass
-        except Exception as exception:
-            bot_logger.exception('Error while polling updates',
-                                 exc_info=exception)
-
-        await self._scheduler.close()
-        await self._finish_polling()
-        bot_logger.info('Bot %s (%s) stop polling', self._me.first_name,
-                        self._me.username)
-
-    def stop_polling(self) -> None:
-        if not self._polling_started:
-            raise RuntimeError('Polling not started')
-        assert self._poll_task is not None
-        bot_logger.debug('Stop polling')
-        self._polling_started = False
-        if not self._poll_task.done():
-            self._poll_task.cancel()
-
-    async def _finish_polling(self) -> None:
-        if self._on_shutdown is not None:
-            await self._on_shutdown(self)
-        assert self._client is not None
-        assert self._message_limit is not None
-        assert self._chat_limit is not None
-        assert self._group_limit is not None
-        await self._client.close()
-        await self._storage.close()
-        await self._message_limit.clear()
-        await self._chat_limit.clear()
-        await self._group_limit.clear()
 
     def file_url(self, path: str) -> str:
         return TG_FILE_URL.format(token=self._token, path=path)
@@ -258,13 +193,6 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         request = partial(self._request, http_method, api_method,
                           chat_id=chat_id, **params)
 
-        assert self._message_limit is not None, 'Message limit not initialized'
-        assert self._group_limit is not None, 'Group limit not initialized'
-        assert self._chat_limit is not None, 'Chat limit not initialized'
-
-        if not self._polling_started:
-            raise RuntimeError('Polling not started')
-
         chat = await self.get_chat(chat_id)
         while True:
             try:
@@ -284,18 +212,6 @@ class Bot(MutableMapping[str, Any], ApiMethods):
                     bot_logger.error('RetryAfter error during '
                                      'retry not allowed')
                     raise
-
-    @backoff.on_exception(backoff.expo, TelegramError)
-    async def _poll(self) -> None:
-        assert self._scheduler is not None, 'Scheduler not initialized'
-        bot_logger.debug('Get updates from: %s', self._updates_offset)
-        while self._polling_started:
-            updates = await self.get_updates(offset=self._updates_offset,
-                                             timeout=TG_GET_UPDATES_TIMEOUT)
-            for update in updates:
-                await self._scheduler.spawn(self._handle_update(update))
-            if len(updates) > 0:
-                self._updates_offset = updates[-1].update_id + 1
 
     @staticmethod
     def _update_state(update: Update) -> str:
@@ -365,6 +281,129 @@ class Bot(MutableMapping[str, Any], ApiMethods):
             else:
                 bot_logger.debug('Not found handler for update "%s". Skip.',
                                  update.update_id)
+
+    async def _start(self) -> None:
+        self._started = True
+
+        self._me = await self.get_me()
+        self._scheduler = await aiojobs.create_scheduler(
+            exception_handler=self._scheduler_exception_handler)
+
+    async def _cleanup(self) -> None:
+        assert self._client is not None
+        assert self._scheduler is not None
+        await self._scheduler.close()
+        await self._client.close()
+        await self._message_limit.clear()
+        await self._chat_limit.clear()
+        await self._group_limit.clear()
+
+    @abstractmethod
+    async def start(self) -> None: ...
+
+    @abstractmethod
+    async def stop(self) -> None: ...
+
+
+class PollBot(Bot):
+
+    def __init__(
+        self,
+        token: str,
+        handler_table: 'HandlerTableProtocol',
+        storage: StorageProtocol,
+        connector: Optional[BaseConnector] = None
+    ) -> None:
+        super().__init__(token, handler_table, storage, connector)
+        self._poll_task: Optional[asyncio.Task[None]] = None
+
+    async def start(self) -> None:
+        if self._started:
+            raise RuntimeError('Polling already started')
+        await self._start()
+        assert self._me is not None
+        self._poll_task = asyncio.create_task(self._poll_wrapper())
+        bot_logger.info('Bot %s (%s) start polling', self._me.first_name,
+                        self._me.username)
+
+    async def stop(self) -> None:
+        if not self._started:
+            raise RuntimeError('Polling not started')
+        if self._stopped:
+            raise RuntimeError('Polling already stopped')
+        assert self._poll_task is not None
+        bot_logger.debug('Stop polling')
+        self._stopped = True
+        if not self._poll_task.done():
+            self._poll_task.cancel()
+
+    async def _poll_wrapper(self) -> None:
+        assert self._me is not None
+        try:
+            await self._poll()
+        except asyncio.CancelledError:
+            pass
+        except Exception as exception:
+            bot_logger.exception('Error while polling updates',
+                                 exc_info=exception)
+        await self._cleanup()
+        bot_logger.info('Bot %s (%s) stop polling', self._me.first_name,
+                        self._me.username)
+
+    @backoff.on_exception(backoff.expo, TelegramError)
+    async def _poll(self) -> None:
+        assert self._scheduler is not None, 'Scheduler not initialized'
+        bot_logger.debug('Get updates from: %s', self._updates_offset)
+        while not self._stopped:
+            updates = await self.get_updates(offset=self._updates_offset,
+                                             timeout=TG_GET_UPDATES_TIMEOUT)
+            for update in updates:
+                await self._scheduler.spawn(self._handle_update(update))
+            if len(updates) > 0:
+                self._updates_offset = updates[-1].update_id + 1
+
+
+class ListenBot(Bot):
+
+    def __init__(
+        self,
+        token: str,
+        handler_table: 'HandlerTableProtocol',
+        storage: StorageProtocol,
+        url: Union[str, URL, None] = None,
+        certificate: Optional[InputFile] = None,
+        ip_address: Optional[str] = None,
+        connector: Optional[BaseConnector] = None
+    ) -> None:
+        super().__init__(token, handler_table, storage, connector)
+        self._url: Optional[str] = str(url) if isinstance(url, URL) else url
+        self._certificate = certificate
+        self._ip_address = ip_address
+
+    async def handler(
+        self, request: aiohttp.web.Request
+    ) -> aiohttp.web.StreamResponse:
+        if not self._started:
+            raise aiohttp.web.HTTPInternalServerError()
+        assert self._scheduler is not None
+        update = Update.from_dict(await request.json())
+        await self._scheduler.spawn(self._handle_update(update))
+        return aiohttp.web.Response()
+
+    async def start(self) -> None:
+        if self._started:
+            raise RuntimeError('Polling already started')
+        await self._start()
+        await self.set_webhook(self._url, self._certificate, self._ip_address)
+
+    async def stop(self) -> None:
+        if not self._started:
+            raise RuntimeError('Polling not started')
+        if self._stopped:
+            raise RuntimeError('Polling already stopped')
+        self._stopped = True
+        await self.delete_webhook()
+        await self._cleanup()
 
 
 HandlerCallable = Callable[[Bot, BotUpdate], Awaitable[None]]

@@ -68,7 +68,7 @@ class Bot(ApiMethods):
 
 
 @pytest.fixture
-def bot() -> Bot:
+async def bot() -> Bot:
     return Bot()
 
 

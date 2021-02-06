@@ -3,7 +3,8 @@ import re
 import pytest
 
 from aiotgbot.api_types import Message, Update
-from aiotgbot.bot import Bot, Handler, HandlerCallable, HandlerTableProtocol
+from aiotgbot.bot import (Bot, Handler, HandlerCallable, HandlerTableProtocol,
+                          PollBot)
 from aiotgbot.bot_update import BotUpdate, Context
 from aiotgbot.constants import ContentType, UpdateType
 from aiotgbot.filters import (CallbackQueryDataFilter, CommandsFilter,
@@ -289,7 +290,8 @@ def test_handler_pre_checkout_query(handler: HandlerCallable) -> None:
 async def test_handler_get_handler(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.message(state='state1')(handler)
-    _bot = Bot('token', HandlerTable(), MemoryStorage())
+    ht.freeze()
+    _bot = PollBot('token', ht, MemoryStorage())
     ctx = Context({'key1': 'str1', 'key2': 'str2', 'key3': 4})
     message = Message.from_dict({'message_id': 1, 'date': 1,
                                  'chat': {'id': 1, 'type': 'private'}})

@@ -14,6 +14,13 @@ def test_storage_protocol(tmpdir: Path) -> None:
 @pytest.mark.asyncio
 async def test_sqlite_storage(tmpdir: Path) -> None:
     storage: StorageProtocol = SQLiteStorage(tmpdir / 'test.sqlite')
+    with pytest.raises(RuntimeError, match='Not connected'):
+        await storage.set('key1', 'value1')
+    with pytest.raises(RuntimeError, match='Not connected'):
+        await storage.close()
+    assert await storage.connect() is None
+    with pytest.raises(RuntimeError, match='Already connected'):
+        await storage.connect()
     assert await storage.set('key1', {'key2': 'value2'}) is None
     assert await storage.get('key1') == {'key2': 'value2'}
     assert await storage.get('key2') is None

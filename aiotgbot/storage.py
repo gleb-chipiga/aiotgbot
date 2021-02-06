@@ -9,6 +9,9 @@ Json = Union[str, int, float, bool, Dict[str, Any], List[Any], None]
 class StorageProtocol(Protocol):
 
     @abstractmethod
+    async def connect(self) -> None: ...
+
+    @abstractmethod
     async def close(self) -> None: ...
 
     @abstractmethod

@@ -5,6 +5,7 @@ import pytest
 
 from aiotgbot import Bot, FilterProtocol, HandlerTable
 from aiotgbot.api_types import CallbackQuery, Message, Update
+from aiotgbot.bot import PollBot
 from aiotgbot.bot_update import BotUpdate, Context
 from aiotgbot.constants import ContentType, UpdateType
 from aiotgbot.filters import (CallbackQueryDataFilter, CommandsFilter,
@@ -15,8 +16,10 @@ from aiotgbot.storage_memory import MemoryStorage
 
 
 @pytest.fixture
-def bot() -> Bot:
-    return Bot('token', HandlerTable(), MemoryStorage())
+async def bot() -> Bot:
+    table = HandlerTable()
+    table.freeze()
+    return PollBot('token', table, MemoryStorage())
 
 
 _MakeMessage = Callable[..., Message]

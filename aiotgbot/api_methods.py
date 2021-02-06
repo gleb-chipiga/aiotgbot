@@ -48,7 +48,6 @@ ParamType = Union[int, float, str, InputFile, None]
 
 
 class ApiMethods(ABC):
-    __slots__ = ()
 
     @abstractmethod
     async def _request(self, http_method: RequestMethod, api_method: str,
@@ -93,7 +92,7 @@ class ApiMethods(ABC):
         return response.result
 
     async def delete_webhook(
-        self, drop_pending_updates: Optional[bool]
+        self, drop_pending_updates: Optional[bool] = None
     ) -> bool:
         api_logger.debug('Delete webhook')
         response = await self._request(

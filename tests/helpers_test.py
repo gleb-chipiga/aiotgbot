@@ -1,9 +1,10 @@
 import asyncio
-from typing import List, Tuple, cast
+from typing import AsyncIterator, List, Tuple, cast
 
 import pytest
 
-from aiotgbot.helpers import KeyLock
+from aiotgbot import helpers
+from aiotgbot.helpers import KeyLock, Runner
 
 
 @pytest.mark.asyncio
@@ -39,3 +40,76 @@ async def test_key_lock() -> None:
     assert .11 < intervals[2][2] < .21
     assert intervals[0][1] < intervals[1][0]
     assert intervals[1][1] < intervals[2][0]
+
+
+def test_runner_mapping() -> None:
+    async def _context(_runner: Runner) -> AsyncIterator[None]:
+        yield
+
+    runner = Runner(_context)
+    runner['key1'] = 'value1'
+    runner['key2'] = 'value2'
+    assert runner['key1'] == 'value1'
+    assert len(runner) == 2
+    assert tuple(runner) == ('key1', 'key2')
+    del runner['key1']
+    assert tuple(runner) == ('key2',)
+
+
+def test_runner() -> None:
+    async def _context(_runner: Runner) -> AsyncIterator[None]:
+        asyncio.get_running_loop().call_later(.01, _runner.stop)
+        yield
+
+    runner = Runner(_context)
+    runner.run()
+
+
+def test_runner_context_type_error() -> None:
+    async def _context(_runner: Runner) -> None:
+        return None
+
+    with pytest.raises(RuntimeError, match='Argument is not async generator'):
+        Runner(cast(helpers.ContextFunction, _context))
+
+
+def test_runner_context_multiple_yield_error() -> None:
+    async def _context(_runner: Runner) -> AsyncIterator[None]:
+        asyncio.get_running_loop().call_later(.01, _runner.stop)
+        yield
+        yield
+
+    with pytest.raises(RuntimeError, match='has more than one \'yield\''):
+        runner = Runner(_context)
+        runner.run()
+
+
+def test_runner_context_started_error() -> None:
+    async def _context(_runner: Runner) -> AsyncIterator[None]:
+        with pytest.raises(RuntimeError, match='Already started'):
+            _runner.run()
+        asyncio.get_running_loop().call_later(.01, _runner.stop)
+        yield
+
+    runner = Runner(_context)
+    runner.run()
+
+
+def test_runner_context_stop_started_error() -> None:
+    async def _context(_runner: Runner) -> AsyncIterator[None]:
+        yield
+
+    runner = Runner(_context)
+    with pytest.raises(RuntimeError, match='Not started'):
+        runner.stop()
+
+
+def test_runner_context_stop_stopped_error() -> None:
+    async def _context(_runner: Runner) -> AsyncIterator[None]:
+        asyncio.get_running_loop().call_later(.01, _runner.stop)
+        yield
+
+    runner = Runner(_context)
+    runner.run()
+    with pytest.raises(RuntimeError, match='Already stopped'):
+        runner.stop()
