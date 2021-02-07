@@ -6,7 +6,7 @@ from functools import partial
 from inspect import isasyncgenfunction
 from signal import SIGINT, SIGTERM
 from typing import (Any, AsyncGenerator, AsyncIterator, Callable, Dict, Final,
-                    Hashable, Iterator, Optional)
+                    Hashable, Iterator, MutableMapping, Optional)
 
 __all__ = ('json_dumps', 'get_python_version', 'get_software', 'KeyLock',
            'ContextFunction', 'Runner')
@@ -45,7 +45,7 @@ class KeyLock:
 ContextFunction = Callable[['Runner'], AsyncIterator[None]]
 
 
-class Runner:
+class Runner(MutableMapping[str, Any]):
 
     def __init__(
         self, context_function: ContextFunction, debug: bool = False
