@@ -3,13 +3,17 @@ from pathlib import Path
 
 from setuptools import setup  # type: ignore
 
-txt = (Path(__file__).parent / 'aiotgbot' / '__init__.py').read_text('utf-8')
+path = Path(__file__).parent
+txt = (path / 'aiotgbot' / '__init__.py').read_text('utf-8')
 version = re.findall(r"^__version__ = '([^']+)'\r?$", txt, re.M)[0]
+readme = (path / 'README.rst').read_text('utf-8')
 
 setup(
     name='aiotgbot',
     version=version,
     description='Asynchronous library for Telegram bot API',
+    long_description=readme,
+    long_description_content_type="text/x-rst",
     url='https://github.com/gleb-chipiga/aiotgbot',
     license='MIT',
     author='Gleb Chipiga',
