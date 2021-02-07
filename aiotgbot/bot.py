@@ -57,6 +57,12 @@ class Bot(MutableMapping[str, Any], ApiMethods):
     ) -> None:
         if not handler_table.frozen:
             raise RuntimeError('Can\'t use unfrozen handler table')
+        if not isinstance(handler_table, HandlerTableProtocol):
+            raise RuntimeError('Handler table is not HandlerTableProtocol '
+                               'instance')
+        if not isinstance(storage, StorageProtocol):
+            raise RuntimeError('Storage parameter is not StorageProtocol '
+                               'instance')
         self._token: Final[str] = token
         self._handler_table: Final['HandlerTableProtocol'] = handler_table
         self._storage: Final[StorageProtocol] = storage
