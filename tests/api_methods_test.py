@@ -3,7 +3,6 @@ from typing import Any, AsyncIterator, Callable, Union, cast
 from unittest.mock import Mock, call
 
 import pytest
-
 from aiotgbot import api_methods
 from aiotgbot.api_methods import ApiMethods, ParamType
 from aiotgbot.api_types import (APIResponse, Chat, File, InputMediaPhoto,
@@ -74,8 +73,8 @@ async def bot() -> Bot:
 
 def test_to_json() -> None:
     update = Update.from_dict({'update_id': 1})
-    assert api_methods._to_json(update) == json_dumps(update.to_dict())
-    assert api_methods._to_json(None) is None
+    assert api_methods._json_dumps(update) == json_dumps(update.to_dict())
+    assert api_methods._json_dumps(None) is None
 
 
 def test_strs_to_json() -> None:

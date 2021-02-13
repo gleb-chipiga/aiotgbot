@@ -23,7 +23,7 @@ __all__ = ('ParamType', 'ApiMethods')
 api_logger: Final[logging.Logger] = logging.getLogger('aiotgbot.api')
 
 
-def _to_json(
+def _json_dumps(
     value: Union[BaseTelegram, Iterable[BaseTelegram], None]
 ) -> Optional[str]:
     if value is None:
@@ -140,12 +140,12 @@ class ApiMethods(ABC):
         response = await self._safe_request(
             RequestMethod.POST, 'sendMessage', chat_id, text=text,
             parse_mode=_parse_mode_to_str(parse_mode),
-            entities=_to_json(entities),
+            entities=_json_dumps(entities),
             disable_web_page_preview=disable_web_page_preview,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -177,11 +177,12 @@ class ApiMethods(ABC):
         response = await self._safe_request(
             RequestMethod.POST, 'copyMessage', chat_id,
             from_chat_id=from_chat_id, message_id=message_id,
-            parse_mode=parse_mode, caption_entities=_to_json(caption_entities),
+            parse_mode=parse_mode,
+            caption_entities=_json_dumps(caption_entities),
             caption=caption, disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return MessageId.from_dict(response.result)
 
@@ -200,11 +201,11 @@ class ApiMethods(ABC):
         response = await self._safe_request(
             RequestMethod.POST, 'sendPhoto', chat_id, photo=photo,
             caption=caption, parse_mode=_parse_mode_to_str(parse_mode),
-            caption_entities=_to_json(caption_entities),
+            caption_entities=_json_dumps(caption_entities),
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -227,13 +228,13 @@ class ApiMethods(ABC):
         response = await self._safe_request(
             RequestMethod.POST, 'sendAudio', chat_id, audio=audio,
             caption=caption, parse_mode=_parse_mode_to_str(parse_mode),
-            caption_entities=_to_json(caption_entities),
+            caption_entities=_json_dumps(caption_entities),
             disable_notification=disable_notification,
             duration=duration, performer=performer,
             title=title, thumb=thumb,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -258,13 +259,13 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'sendDocument', chat_id,
             document=document, thumb=thumb, caption=caption,
             parse_mode=_parse_mode_to_str(parse_mode),
-            caption_entities=_to_json(caption_entities),
+            caption_entities=_json_dumps(caption_entities),
             disable_content_type_detection=disable_content_type_detection,
             disable_notification=disable_notification,
             duration=duration, performer=performer, title=title,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -290,12 +291,12 @@ class ApiMethods(ABC):
             video=video, duration=duration, width=width,
             height=height, thumb=thumb, caption=caption,
             parse_mode=_parse_mode_to_str(parse_mode),
-            caption_entities=_to_json(caption_entities),
+            caption_entities=_json_dumps(caption_entities),
             supports_streaming=supports_streaming,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -320,11 +321,11 @@ class ApiMethods(ABC):
             animation=animation, duration=duration, width=width,
             height=height, thumb=thumb, caption=caption,
             parse_mode=_parse_mode_to_str(parse_mode),
-            caption_entities=_to_json(caption_entities),
+            caption_entities=_json_dumps(caption_entities),
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -345,12 +346,12 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'sendVoice', chat_id,
             voice=voice, caption=caption,
             parse_mode=_parse_mode_to_str(parse_mode),
-            caption_entities=_to_json(caption_entities),
+            caption_entities=_json_dumps(caption_entities),
             duration=duration,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -373,7 +374,7 @@ class ApiMethods(ABC):
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -432,7 +433,7 @@ class ApiMethods(ABC):
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -456,7 +457,7 @@ class ApiMethods(ABC):
             latitude=latitude, longitude=longitude,
             horizontal_accuracy=horizontal_accuracy, heading=heading,
             proximity_alert_radius=proximity_alert_radius,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         if isinstance(response.result, bool):
             return response.result
@@ -474,7 +475,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'stopMessageLiveLocation',
             chat_id=chat_id, message_id=message_id,
             inline_message_id=inline_message_id,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         if isinstance(response.result, bool):
             return response.result
@@ -503,7 +504,7 @@ class ApiMethods(ABC):
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -526,7 +527,7 @@ class ApiMethods(ABC):
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -556,12 +557,12 @@ class ApiMethods(ABC):
             correct_option_id=correct_option_id,
             is_closed=is_closed, explanation=explanation,
             explanation_parse_mode=explanation_parse_mode,
-            explanation_entities=_to_json(explanation_entities),
+            explanation_entities=_json_dumps(explanation_entities),
             open_period=open_period, close_date=close_date,
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -578,7 +579,7 @@ class ApiMethods(ABC):
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -871,9 +872,9 @@ class ApiMethods(ABC):
             chat_id=chat_id, message_id=message_id,
             inline_message_id=inline_message_id, text=text,
             parse_mode=_parse_mode_to_str(parse_mode),
-            entities=_to_json(entities),
+            entities=_json_dumps(entities),
             disable_web_page_preview=disable_web_page_preview,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         if isinstance(response.result, bool):
             return response.result
@@ -907,8 +908,8 @@ class ApiMethods(ABC):
             chat_id=chat_id, message_id=message_id,
             inline_message_id=inline_message_id,
             caption=caption, parse_mode=_parse_mode_to_str(parse_mode),
-            caption_entities=_to_json(caption_entities),
-            reply_markup=_to_json(reply_markup))
+            caption_entities=_json_dumps(caption_entities),
+            reply_markup=_json_dumps(reply_markup))
 
         if isinstance(response.result, bool):
             return response.result
@@ -942,7 +943,7 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'editMessageMedia', chat_id=chat_id,
             message_id=message_id, inline_message_id=inline_message_id,
-            media=_to_json(media), reply_markup=_to_json(reply_markup),
+            media=_json_dumps(media), reply_markup=_json_dumps(reply_markup),
             **attachments)
         if isinstance(response.result, bool):
             return response.result
@@ -971,7 +972,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'editMessageReplyMarkup',
             chat_id=chat_id, message_id=message_id,
             inline_message_id=inline_message_id,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         if isinstance(response.result, bool):
             return response.result
@@ -986,7 +987,7 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'stopPoll',
             chat_id=chat_id, message_id=message_id,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Poll.from_dict(response.result)
 
@@ -1013,7 +1014,7 @@ class ApiMethods(ABC):
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -1046,7 +1047,7 @@ class ApiMethods(ABC):
             user_id=user_id, name=name, title=title, emojis=emojis,
             png_sticker=png_sticker, tgs_sticker=tgs_sticker,
             contains_masks=contains_masks,
-            mask_position=_to_json(mask_position))
+            mask_position=_json_dumps(mask_position))
         assert isinstance(response.result, bool)
         return response.result
 
@@ -1059,7 +1060,7 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'addStickerToSet',
             user_id=user_id, name=name, title=title, png_sticker=png_sticker,
-            emojis=emojis, mask_position=_to_json(mask_position))
+            emojis=emojis, mask_position=_json_dumps(mask_position))
 
         return File.from_dict(response.result)
 
@@ -1145,7 +1146,7 @@ class ApiMethods(ABC):
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
@@ -1207,7 +1208,7 @@ class ApiMethods(ABC):
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
-            reply_markup=_to_json(reply_markup))
+            reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
 
