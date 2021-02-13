@@ -79,5 +79,5 @@ __all__ = (
     'StorageProtocol',
 
     'ContextFunction',
-    'Runner',
+    'Runner'
 )
