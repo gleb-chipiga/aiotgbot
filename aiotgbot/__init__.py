@@ -17,7 +17,7 @@ from .filters import (ANDFilter, CallbackQueryDataFilter, CommandsFilter,
                       ORFilter, PrivateChatFilter, StateFilter,
                       UpdateTypeFilter)
 from .handler_table import HandlerTable
-from .helpers import Runner
+from .runner import ContextFunction, Runner
 from .storage import StorageProtocol
 
 __all__ = (
@@ -78,5 +78,6 @@ __all__ = (
 
     'StorageProtocol',
 
-    'Runner'
+    'ContextFunction',
+    'Runner',
 )
