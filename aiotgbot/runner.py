@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from asyncio.tasks import Task
 from inspect import isasyncgenfunction
 from signal import SIGINT, SIGTERM
@@ -8,6 +9,8 @@ from typing import (Any, AsyncIterator, Callable, Dict, Final, Iterator,
 __all__ = ('ContextFunction', 'Runner')
 
 ContextFunction = Callable[['Runner'], AsyncIterator[None]]
+
+logger = logging.getLogger('runner')
 
 
 class Runner(MutableMapping[str, Any]):
@@ -44,8 +47,9 @@ class Runner(MutableMapping[str, Any]):
         assert not self._stopped
         self._started = True
         loop = asyncio.get_running_loop()
-        loop.add_signal_handler(SIGINT, self.stop)
-        loop.add_signal_handler(SIGTERM, self.stop)
+        loop.add_signal_handler(SIGINT, self._signal_handler, SIGINT.name)
+        loop.add_signal_handler(SIGTERM, self._signal_handler, SIGTERM.name)
+        logger.debug('Enter wait loop')
         iterator = self._context_function(self).__aiter__()
         await iterator.__anext__()
         self._wait_task = asyncio.create_task(self._wait())
@@ -53,6 +57,7 @@ class Runner(MutableMapping[str, Any]):
             await self._wait_task
         except asyncio.CancelledError:
             pass
+        logger.debug('Waiting finished')
         try:
             await iterator.__anext__()
         except StopAsyncIteration:
@@ -65,6 +70,10 @@ class Runner(MutableMapping[str, Any]):
         assert not self._stopped
         while not self._stopped:
             await asyncio.sleep(3600)
+
+    def _signal_handler(self, signal_name: str) -> None:
+        logger.debug('Received signal %s', signal_name)
+        self.stop()
 
     def stop(self) -> None:
         if not self._started:
