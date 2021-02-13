@@ -136,7 +136,7 @@ class ApiMethods(ABC):
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
     ) -> Message:
-        api_logger.debug('Send message "%s" to chat "%s"', text, chat_id)
+        api_logger.debug('Send message %r to chat "%s"', text, chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendMessage', chat_id, text=text,
             parse_mode=_parse_mode_to_str(parse_mode),
