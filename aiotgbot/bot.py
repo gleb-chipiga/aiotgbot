@@ -161,7 +161,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
             name: str(value) if isinstance(value, (int,  float)) else value
             for name, value in params.items() if value is not None
         }
-        bot_logger.debug('Request %s %s %s', http_method, api_method, data)
+        bot_logger.debug('Request %s %s %r', http_method, api_method, data)
         if http_method == RequestMethod.GET:
             if len(data) > 0:
                 assert all(isinstance(value, str) for value in data.values())
