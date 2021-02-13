@@ -1,15 +1,15 @@
 import re
-from typing import Tuple
+from typing import Final, Tuple
 
 import attr
 
-from . import Bot
+from . import Bot, FilterProtocol
 from .bot_update import BotUpdate
 from .constants import ChatType, ContentType, UpdateType
 
 __all__ = ('UpdateTypeFilter', 'StateFilter', 'CommandsFilter',
            'ContentTypeFilter', 'MessageTextFilter', 'CallbackQueryDataFilter',
-           'PrivateChatFilter', 'GroupChatFilter')
+           'PrivateChatFilter', 'GroupChatFilter', 'ORFilter', 'ANDFilter')
 
 
 @attr.s(slots=True, frozen=True, auto_attribs=True)
@@ -99,3 +99,23 @@ class GroupChatFilter:
         return (update.message is not None and
                 update.message.chat is not None and
                 update.message.chat.type in group_types)
+
+
+class ORFilter:
+
+    def __init__(self, *filters: FilterProtocol) -> None:
+        self._filters: Final[Tuple[FilterProtocol, ...]] = filters
+
+    async def check(self, bot: Bot, update: BotUpdate) -> bool:
+        return any([await _filter.check(bot, update)
+                    for _filter in self._filters])
+
+
+class ANDFilter:
+
+    def __init__(self, *filters: FilterProtocol) -> None:
+        self._filters: Final[Tuple[FilterProtocol, ...]] = filters
+
+    async def check(self, bot: Bot, update: BotUpdate) -> bool:
+        return all([await _filter.check(bot, update)
+                    for _filter in self._filters])

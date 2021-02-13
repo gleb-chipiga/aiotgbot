@@ -1,17 +1,17 @@
 import re
 from typing import Any, Callable, Optional
 
+import attr
 import pytest
-
 from aiotgbot import Bot, FilterProtocol, HandlerTable
 from aiotgbot.api_types import CallbackQuery, Message, Update
 from aiotgbot.bot import PollBot
 from aiotgbot.bot_update import BotUpdate, Context
 from aiotgbot.constants import ContentType, UpdateType
-from aiotgbot.filters import (CallbackQueryDataFilter, CommandsFilter,
-                              ContentTypeFilter, GroupChatFilter,
-                              MessageTextFilter, PrivateChatFilter,
-                              StateFilter, UpdateTypeFilter)
+from aiotgbot.filters import (ANDFilter, CallbackQueryDataFilter,
+                              CommandsFilter, ContentTypeFilter,
+                              GroupChatFilter, MessageTextFilter, ORFilter,
+                              PrivateChatFilter, StateFilter, UpdateTypeFilter)
 from aiotgbot.storage_memory import MemoryStorage
 
 
@@ -203,3 +203,39 @@ async def test_group_chat_filter(bot: Bot, make_message: _MakeMessage,
         message=make_message(chat={'id': 1, 'type': 'group'})))
     assert not await _filter.check(bot, make_bot_update(
         None, Context({}), message=make_message()))
+
+
+@attr.s(frozen=True, auto_attribs=True)
+class FlagFilter:
+    flag: bool
+
+    async def check(self, _: Bot, __: BotUpdate) -> bool:
+        return self.flag
+
+
+@pytest.mark.parametrize('flag1, flag2, result', (
+    (False, True, True),
+    (True, False, True),
+    (True, True, True),
+    (False, False, False)
+))
+@pytest.mark.asyncio
+async def test_or_filter(bot: Bot, make_bot_update: _MakeBotUpdate,
+                         flag1: bool, flag2: bool, result: bool) -> None:
+    _filter: FilterProtocol = ORFilter(FlagFilter(flag1), FlagFilter(flag2))
+    update = make_bot_update(None, Context({}))
+    assert await _filter.check(bot, update) == result
+
+
+@pytest.mark.parametrize('flag1, flag2, result', (
+    (False, True, False),
+    (True, False, False),
+    (True, True, True),
+    (False, False, False)
+))
+@pytest.mark.asyncio
+async def test_and_filter(bot: Bot, make_bot_update: _MakeBotUpdate,
+                          flag1: bool, flag2: bool, result: bool) -> None:
+    _filter: FilterProtocol = ANDFilter(FlagFilter(flag1), FlagFilter(flag2))
+    update = make_bot_update(None, Context({}))
+    assert await _filter.check(bot, update) == result
