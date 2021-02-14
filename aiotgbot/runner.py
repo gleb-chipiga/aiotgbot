@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from asyncio.tasks import Task
+from contextlib import suppress
 from inspect import isasyncgenfunction
 from signal import SIGINT, SIGTERM
 from typing import (Any, AsyncIterator, Callable, Dict, Final, Iterator,
@@ -53,10 +54,8 @@ class Runner(MutableMapping[str, Any]):
         iterator = self._context_function(self).__aiter__()
         await iterator.__anext__()
         self._wait_task = asyncio.create_task(self._wait())
-        try:
+        with suppress(asyncio.CancelledError):
             await self._wait_task
-        except asyncio.CancelledError:
-            pass
         logger.debug('Waiting finished')
         try:
             await iterator.__anext__()
