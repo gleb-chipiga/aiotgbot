@@ -1,6 +1,15 @@
-About
-=====
-Asynchronous library for Telegram bot API.
+=========================================
+Asynchronous library for Telegram bot API
+=========================================
+
+Key Features
+============
+
+* Asyncio and `aiohttp <https://github.com/aio-libs/aiohttp>`_ based
+* All `Telegram Bot API <https://core.telegram.org/bots/api>`_ types an methods support
+* Bot API Rate limit support
+* Both long polling and webhooks supported
+* Fully type annotated (`PEP 484 <https://www.python.org/dev/peps/pep-0484/>`_)
 
 Installation
 ============
@@ -9,6 +18,18 @@ aiotgbot requires Python 3.8 or greater and is available on PyPI. Use pip to ins
 .. code-block:: bash
 
     pip install aiotgbot
+
+Requirements
+============
+
+* Python >= 3.8
+* `aiohttp <https://github.com/aio-libs/aiohttp>`_
+* `aiojobs <https://github.com/aio-libs/aiojobs>`_
+* `attrs <https://github.com/python-attrs/attrs>`_
+* `backoff <https://github.com/litl/backoff>`_
+* `frozenlist <https://github.com/aio-libs/frozenlist>`_
+* `aiofreqlimit <https://github.com/gleb-chipiga/aiofreqlimit>`_
+* `yarl <https://github.com/aio-libs/yarl>`_
 
 Using aiotgbot
 ==================
