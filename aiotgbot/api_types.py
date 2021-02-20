@@ -61,7 +61,6 @@ class StreamFile:
 
 
 class LocalFile:
-    __slots__ = '_path', '_content_type'
 
     def __init__(
         self, path: Union[str, Path], content_type: Optional[str] = None,

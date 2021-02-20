@@ -7,7 +7,6 @@ __all__ = ('Context', 'BotUpdate')
 
 
 class Context(MutableMapping[str, Any]):
-    __slots__ = '_data'
 
     def __init__(self, data: Dict[str, Any]) -> None:
         self._data: Final[Dict[str, Any]] = data
@@ -35,7 +34,6 @@ class Context(MutableMapping[str, Any]):
 
 
 class BotUpdate(MutableMapping[str, Any]):
-    __slots__ = '_state', '_context', '_update', '_data'
 
     def __init__(self, state: Optional[str], context: Context,
                  update: Update) -> None:
