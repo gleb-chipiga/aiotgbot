@@ -53,7 +53,7 @@ class DataMappingError(BaseException):
     pass
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class StreamFile:
     content: AsyncIterator[bytes]
     name: str
@@ -118,7 +118,7 @@ _FieldType = Union[int, str, bool, float, Tuple[Any, ...], List[Any],
 _HintsGenerator = Generator[Tuple[str, str, Any], None, None]
 
 
-@attr.s(slots=True, frozen=True)
+@attr.s(frozen=True)
 class BaseTelegram:
 
     def to_dict(self) -> Dict[str, Any]:
@@ -233,13 +233,13 @@ class BaseTelegram:
 _Telegram = TypeVar('_Telegram', bound=BaseTelegram)
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ResponseParameters(BaseTelegram):
     migrate_to_chat_id: Optional[int] = None
     retry_after: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class APIResponse(BaseTelegram):
     ok: bool
     result: Any
@@ -248,7 +248,7 @@ class APIResponse(BaseTelegram):
     parameters: Optional[ResponseParameters] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Update(BaseTelegram):
     update_id: int
     message: Optional['Message'] = None
@@ -264,7 +264,7 @@ class Update(BaseTelegram):
     poll_answer: Optional['PollAnswer'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class WebhookInfo(BaseTelegram):
     allowed_updates: Tuple[str, ...]
     url: Optional[str] = None
@@ -276,7 +276,7 @@ class WebhookInfo(BaseTelegram):
     max_connections: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class User(BaseTelegram):
     id: int
     is_bot: bool
@@ -289,7 +289,7 @@ class User(BaseTelegram):
     supports_inline_queries: Optional[bool] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Chat(BaseTelegram):
     id: int
     type: str
@@ -310,7 +310,7 @@ class Chat(BaseTelegram):
     location: Optional['ChatLocation'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Message(BaseTelegram):
     message_id: int
     date: int
@@ -365,12 +365,12 @@ class Message(BaseTelegram):
     reply_markup: Optional['InlineKeyboardMarkup'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class MessageId(BaseTelegram):
     message_id: int
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class MessageEntity(BaseTelegram):
     type: str
     offset: int
@@ -380,7 +380,7 @@ class MessageEntity(BaseTelegram):
     language: Optional[str] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PhotoSize(BaseTelegram):
     file_id: str
     file_unique_id: str
@@ -389,7 +389,7 @@ class PhotoSize(BaseTelegram):
     file_size: int
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Audio(BaseTelegram):
     file_id: str
     file_unique_id: str
@@ -402,7 +402,7 @@ class Audio(BaseTelegram):
     thumb: Optional[PhotoSize] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Document(BaseTelegram):
     file_id: str
     file_unique_id: str
@@ -412,7 +412,7 @@ class Document(BaseTelegram):
     file_size: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Video(BaseTelegram):
     file_id: str
     file_unique_id: str
@@ -425,7 +425,7 @@ class Video(BaseTelegram):
     file_size: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Animation(BaseTelegram):
     file_id: str
     file_unique_id: str
@@ -435,7 +435,7 @@ class Animation(BaseTelegram):
     file_size: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Voice(BaseTelegram):
     file_id: str
     file_unique_id: str
@@ -444,7 +444,7 @@ class Voice(BaseTelegram):
     file_size: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class VideoNote(BaseTelegram):
     file_id: str
     file_unique_id: str
@@ -454,7 +454,7 @@ class VideoNote(BaseTelegram):
     file_size: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Contact(BaseTelegram):
     phone_number: str
     first_name: str
@@ -463,13 +463,13 @@ class Contact(BaseTelegram):
     vcard: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Dice(BaseTelegram):
     emoji: str
     value: int
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Location(BaseTelegram):
     longitude: float
     latitude: float
@@ -479,7 +479,7 @@ class Location(BaseTelegram):
     proximity_alert_radius: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Venue(BaseTelegram):
     location: Location
     title: str
@@ -490,14 +490,14 @@ class Venue(BaseTelegram):
     google_place_type: Optional[str] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ProximityAlertTriggered(BaseTelegram):
     traveler: User
     watcher: User
     distance: int
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PollOption(BaseTelegram):
     text: str
     voter_count: int
@@ -509,7 +509,7 @@ class PollAnswer(BaseTelegram):
     option_ids: Tuple[int, ...]
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Poll(BaseTelegram):
     id: str
     question: str
@@ -526,13 +526,13 @@ class Poll(BaseTelegram):
     close_date: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class UserProfilePhotos(BaseTelegram):
     total_count: int
     photos: Tuple[Tuple[PhotoSize, ...], ...]
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class File(BaseTelegram):
     file_id: str
     file_unique_id: str
@@ -546,7 +546,7 @@ ReplyMarkup = Union['InlineKeyboardMarkup',
                     'ForceReply']
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ReplyKeyboardMarkup(BaseTelegram):
     keyboard: List[List['KeyboardButton']]
     resize_keyboard: Optional[bool] = None
@@ -554,7 +554,7 @@ class ReplyKeyboardMarkup(BaseTelegram):
     selective: Optional[bool] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class KeyboardButton(BaseTelegram):
     text: str
     request_contact: Optional[bool] = None
@@ -562,23 +562,23 @@ class KeyboardButton(BaseTelegram):
     request_poll: Optional['KeyboardButtonPollType'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class KeyboardButtonPollType(BaseTelegram):
     type_: PollType
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ReplyKeyboardRemove(BaseTelegram):
     remove_keyboard: bool
     selective: Optional[bool] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineKeyboardMarkup(BaseTelegram):
     inline_keyboard: List[List['InlineKeyboardButton']]
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineKeyboardButton(BaseTelegram):
     text: str
     url: Optional[str] = None
@@ -590,7 +590,7 @@ class InlineKeyboardButton(BaseTelegram):
     pay: Optional[bool] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class LoginUrl(BaseTelegram):
     url: str
     forward_text: Optional[str] = None
@@ -598,7 +598,7 @@ class LoginUrl(BaseTelegram):
     request_write_access: Optional[bool] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class CallbackQuery(BaseTelegram):
     id: str
     from_: User
@@ -609,13 +609,13 @@ class CallbackQuery(BaseTelegram):
     game_short_name: Optional[str] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ForceReply(BaseTelegram):
     force_reply: bool
     selective: Optional[bool] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ChatPhoto(BaseTelegram):
     small_file_id: str
     small_file_unique_id: str
@@ -623,7 +623,7 @@ class ChatPhoto(BaseTelegram):
     big_file_unique_id: str
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ChatMember(BaseTelegram):
     user: User
     status: str
@@ -647,7 +647,7 @@ class ChatMember(BaseTelegram):
     can_send_polls: Optional[bool] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ChatPermissions(BaseTelegram):
     can_send_messages: Optional[bool] = None
     can_send_media_messages: Optional[bool] = None
@@ -659,13 +659,13 @@ class ChatPermissions(BaseTelegram):
     can_pin_messages: Optional[bool] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ChatLocation(BaseTelegram):
     location: Location
     address: str
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class BotCommand(BaseTelegram):
     command: str
     description: str
@@ -674,7 +674,7 @@ class BotCommand(BaseTelegram):
 InputFile = Union[LocalFile, StreamFile]
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InputMedia(BaseTelegram):
     media: Union[str, InputFile]
     caption: Optional[str] = None
@@ -688,12 +688,12 @@ class InputMedia(BaseTelegram):
         return super().to_dict()
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InputMediaPhoto(InputMedia):
     type: str = attr.ib(default=InputMediaType.PHOTO, init=False)
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InputMediaVideo(InputMedia):
     type: str = attr.ib(default=InputMediaType.VIDEO, init=False)
     thumb: Optional[str] = None
@@ -703,7 +703,7 @@ class InputMediaVideo(InputMedia):
     supports_streaming: Optional[bool] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InputMediaAnimation(InputMedia):
     type: str = attr.ib(default=InputMediaType.ANIMATION, init=False)
     thumb: Optional[str] = None
@@ -712,7 +712,7 @@ class InputMediaAnimation(InputMedia):
     duration: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InputMediaAudio(InputMedia):
     type: str = attr.ib(default=InputMediaType.AUDIO, init=False)
     thumb: Optional[str] = None
@@ -721,14 +721,14 @@ class InputMediaAudio(InputMedia):
     title: Optional[str] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InputMediaDocument(InputMedia):
     type: str = attr.ib(default=InputMediaType.DOCUMENT, init=False)
     thumb: Optional[str] = None
     disable_content_type_detection: Optional[bool] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Sticker(BaseTelegram):
     file_id: str
     file_unique_id: str
@@ -742,7 +742,7 @@ class Sticker(BaseTelegram):
     file_size: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class StickerSet(BaseTelegram):
     name: str
     title: str
@@ -752,7 +752,7 @@ class StickerSet(BaseTelegram):
     thumb: Optional[PhotoSize] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class MaskPosition(BaseTelegram):
     point: str
     x_shift: float
@@ -760,7 +760,7 @@ class MaskPosition(BaseTelegram):
     scale: float
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQuery(BaseTelegram):
     id: str
     from_: User
@@ -791,7 +791,7 @@ InlineQueryResult = Union['InlineQueryResultCachedAudio',
                           'InlineQueryResultVoice']
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultArticle(BaseTelegram):
     type: str
     id: str
@@ -806,7 +806,7 @@ class InlineQueryResultArticle(BaseTelegram):
     thumb_height: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultPhoto(BaseTelegram):
     type: str
     td: str
@@ -823,7 +823,7 @@ class InlineQueryResultPhoto(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultGif(BaseTelegram):
     type: str
     id: str
@@ -839,7 +839,7 @@ class InlineQueryResultGif(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultMpeg4Gif(BaseTelegram):
     type: str
     id: str
@@ -855,7 +855,7 @@ class InlineQueryResultMpeg4Gif(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultVideo(BaseTelegram):
     type: str
     id: str
@@ -874,7 +874,7 @@ class InlineQueryResultVideo(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultAudio(BaseTelegram):
     type: str
     id: str
@@ -889,7 +889,7 @@ class InlineQueryResultAudio(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultVoice(BaseTelegram):
     type: str
     id: str
@@ -903,7 +903,7 @@ class InlineQueryResultVoice(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultDocument(BaseTelegram):
     type: str
     id: str
@@ -921,7 +921,7 @@ class InlineQueryResultDocument(BaseTelegram):
     thumb_height: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultLocation(BaseTelegram):
     type: str
     id: str
@@ -939,7 +939,7 @@ class InlineQueryResultLocation(BaseTelegram):
     thumb_height: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultVenue(BaseTelegram):
     type: str
     id: str
@@ -958,7 +958,7 @@ class InlineQueryResultVenue(BaseTelegram):
     thumb_height: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultContact(BaseTelegram):
     type: str
     id: str
@@ -973,7 +973,7 @@ class InlineQueryResultContact(BaseTelegram):
     thumb_height: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultGame(BaseTelegram):
     type: str
     id: str
@@ -981,7 +981,7 @@ class InlineQueryResultGame(BaseTelegram):
     reply_markup: Optional[InlineKeyboardMarkup] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultCachedPhoto(BaseTelegram):
     type: str
     id: str
@@ -995,7 +995,7 @@ class InlineQueryResultCachedPhoto(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultCachedGif(BaseTelegram):
     type: str
     id: str
@@ -1008,7 +1008,7 @@ class InlineQueryResultCachedGif(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultCachedMpeg4Gif(BaseTelegram):
     type: str
     id: str
@@ -1021,7 +1021,7 @@ class InlineQueryResultCachedMpeg4Gif(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultCachedSticker(BaseTelegram):
     type: str
     id: str
@@ -1030,7 +1030,7 @@ class InlineQueryResultCachedSticker(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultCachedDocument(BaseTelegram):
     type: str
     id: str
@@ -1044,7 +1044,7 @@ class InlineQueryResultCachedDocument(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultCachedVideo(BaseTelegram):
     type: str
     id: str
@@ -1058,7 +1058,7 @@ class InlineQueryResultCachedVideo(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultCachedVoice(BaseTelegram):
     type: str
     id: str
@@ -1071,7 +1071,7 @@ class InlineQueryResultCachedVoice(BaseTelegram):
     input_message_content: Optional['InputMessageContent'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InlineQueryResultCachedAudio(BaseTelegram):
     type: str
     id: str
@@ -1089,7 +1089,7 @@ InputMessageContent = Union['InputTextMessageContent',
                             'InputContactMessageContent']
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InputTextMessageContent(BaseTelegram):
     message_text: str
     parse_mode: Optional[ParseMode] = None
@@ -1097,7 +1097,7 @@ class InputTextMessageContent(BaseTelegram):
     disable_web_page_preview: Optional[bool] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InputLocationMessageContent(BaseTelegram):
     latitude: float
     longitude: float
@@ -1107,7 +1107,7 @@ class InputLocationMessageContent(BaseTelegram):
     proximity_alert_radius: Optional[int] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InputVenueMessageContent(BaseTelegram):
     latitude: float
     longitude: float
@@ -1119,7 +1119,7 @@ class InputVenueMessageContent(BaseTelegram):
     google_place_type: Optional[str] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class InputContactMessageContent(BaseTelegram):
     phone_number: str
     first_name: str
@@ -1127,7 +1127,7 @@ class InputContactMessageContent(BaseTelegram):
     vcard: Optional[str] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ChosenInlineResult(BaseTelegram):
     result_id: str
     from_: User
@@ -1136,13 +1136,13 @@ class ChosenInlineResult(BaseTelegram):
     inline_message_id: Optional[str] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class LabeledPrice(BaseTelegram):
     label: str
     amount: int
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Invoice(BaseTelegram):
     title: str
     description: str
@@ -1151,7 +1151,7 @@ class Invoice(BaseTelegram):
     total_amount: int
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ShippingAddress(BaseTelegram):
     country_code: str
     state: str
@@ -1161,7 +1161,7 @@ class ShippingAddress(BaseTelegram):
     post_code: str
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class OrderInfo(BaseTelegram):
     name: Optional[str] = None
     phone_number: Optional[str] = None
@@ -1169,14 +1169,14 @@ class OrderInfo(BaseTelegram):
     shipping_address: Optional[ShippingAddress] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ShippingOption(BaseTelegram):
     id: str
     title: str
     prices: Tuple[LabeledPrice, ...]
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class SuccessfulPayment(BaseTelegram):
     currency: str
     total_amount: int
@@ -1187,7 +1187,7 @@ class SuccessfulPayment(BaseTelegram):
     order_info: Optional[OrderInfo] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class ShippingQuery(BaseTelegram):
     id: str
     from_: User
@@ -1195,7 +1195,7 @@ class ShippingQuery(BaseTelegram):
     shipping_address: ShippingAddress
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PreCheckoutQuery(BaseTelegram):
     id: str
     from_: User
@@ -1206,13 +1206,13 @@ class PreCheckoutQuery(BaseTelegram):
     order_info: Optional[OrderInfo] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PassportData(BaseTelegram):
     data: Tuple['EncryptedPassportElement', ...]
     credentials: 'EncryptedCredentials'
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PassportFile(BaseTelegram):
     file_id: str
     file_unique_id: str
@@ -1220,7 +1220,7 @@ class PassportFile(BaseTelegram):
     file_date: int
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class EncryptedPassportElement(BaseTelegram):
     type: str
     data: Optional[str] = None
@@ -1234,7 +1234,7 @@ class EncryptedPassportElement(BaseTelegram):
     hash: Optional[str] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class EncryptedCredentials(BaseTelegram):
     data: str
     hash: str
@@ -1252,7 +1252,7 @@ PassportElementError = Union['PassportElementErrorDataField',
                              'PassportElementErrorUnspecified']
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PassportElementErrorDataField(BaseTelegram):
     source: str
     type: str
@@ -1261,7 +1261,7 @@ class PassportElementErrorDataField(BaseTelegram):
     message: str
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PassportElementErrorFrontSide(BaseTelegram):
     source: str
     type: str
@@ -1269,7 +1269,7 @@ class PassportElementErrorFrontSide(BaseTelegram):
     message: str
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PassportElementErrorReverseSide(BaseTelegram):
     source: str
     type: str
@@ -1277,7 +1277,7 @@ class PassportElementErrorReverseSide(BaseTelegram):
     message: str
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PassportElementErrorSelfie(BaseTelegram):
     source: str
     type: str
@@ -1285,7 +1285,7 @@ class PassportElementErrorSelfie(BaseTelegram):
     message: str
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PassportElementErrorFile(BaseTelegram):
     source: str
     type: str
@@ -1293,7 +1293,7 @@ class PassportElementErrorFile(BaseTelegram):
     message: str
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PassportElementErrorFiles(BaseTelegram):
     source: str
     type: str
@@ -1301,7 +1301,7 @@ class PassportElementErrorFiles(BaseTelegram):
     message: str
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PassportElementErrorTranslationFile(BaseTelegram):
     source: str
     type: str
@@ -1309,7 +1309,7 @@ class PassportElementErrorTranslationFile(BaseTelegram):
     message: str
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PassportElementErrorTranslationFiles(BaseTelegram):
     source: str
     type: str
@@ -1317,7 +1317,7 @@ class PassportElementErrorTranslationFiles(BaseTelegram):
     message: str
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class PassportElementErrorUnspecified(BaseTelegram):
     source: str
     type: str
@@ -1325,7 +1325,7 @@ class PassportElementErrorUnspecified(BaseTelegram):
     message: str
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class Game(BaseTelegram):
     title: str
     description: str
@@ -1335,12 +1335,12 @@ class Game(BaseTelegram):
     animation: Optional['Animation'] = None
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class CallbackGame(BaseTelegram):
     pass
 
 
-@attr.s(slots=True, auto_attribs=True)
+@attr.s(auto_attribs=True)
 class GameHighScore(BaseTelegram):
     position: int
     user: User

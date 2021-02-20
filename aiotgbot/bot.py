@@ -7,12 +7,12 @@ from typing import (Any, Awaitable, Callable, Dict, Final, Iterator,
                     MutableMapping, Optional, Protocol, Tuple, Union,
                     runtime_checkable)
 
-import aiohttp
 import aiojobs
 import attr
 import backoff
 from aiofreqlimit import FreqLimit
-from aiohttp import BaseConnector, TCPConnector
+from aiohttp import (BaseConnector, ClientError, ClientSession, FormData,
+                     TCPConnector)
 from aiojobs_protocols import SchedulerProtocol
 
 from .api_methods import ApiMethods, ParamType
@@ -67,7 +67,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
             _connector: BaseConnector = connector
         else:
             _connector = TCPConnector(keepalive_timeout=60)
-        self._client: Final[aiohttp.ClientSession] = aiohttp.ClientSession(
+        self._client: Final[ClientSession] = ClientSession(
             connector=_connector,
             json_serialize=json_dumps,
             headers={'User-Agent': SOFTWARE}
@@ -103,7 +103,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         return self._storage
 
     @property
-    def client(self) -> aiohttp.ClientSession:
+    def client(self) -> ClientSession:
         if self._client is None:
             raise RuntimeError('Access to client during bot is not running.')
         else:
@@ -147,7 +147,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         else:
             return TelegramError(error_code, description)
 
-    @backoff.on_exception(backoff.expo, aiohttp.ClientError)
+    @backoff.on_exception(backoff.expo, ClientError)
     async def _request(
             self,
             http_method: RequestMethod,
@@ -166,7 +166,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
             else:
                 request = partial(self.client.get)
         else:
-            form_data = aiohttp.FormData()
+            form_data = FormData()
             for name, value in data.items():
                 if isinstance(value, (StreamFile, LocalFile)):
                     form_data.add_field(name, value.content,
@@ -373,7 +373,7 @@ HandlerCallable = Callable[[Bot, BotUpdate], Awaitable[None]]
 FiltersType = Tuple['FilterProtocol', ...]
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class Handler:
     callable: HandlerCallable
     filters: FiltersType

@@ -12,7 +12,7 @@ __all__ = ('UpdateTypeFilter', 'StateFilter', 'CommandsFilter',
            'PrivateChatFilter', 'GroupChatFilter', 'ORFilter', 'ANDFilter')
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class UpdateTypeFilter:
     update_type: UpdateType
 
@@ -20,7 +20,7 @@ class UpdateTypeFilter:
         return getattr(update, self.update_type.value) is not None
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class StateFilter:
     state: str
 
@@ -28,7 +28,7 @@ class StateFilter:
         return update.state == self.state
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class CommandsFilter:
     commands: Tuple[str, ...]
 
@@ -41,7 +41,7 @@ class CommandsFilter:
         return False
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class ContentTypeFilter:
     content_types: Tuple[ContentType, ...]
 
@@ -62,7 +62,7 @@ class ContentTypeFilter:
         return False
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class MessageTextFilter:
     pattern: 're.Pattern[str]'
 
@@ -72,7 +72,7 @@ class MessageTextFilter:
                 self.pattern.match(update.message.text) is not None)
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class CallbackQueryDataFilter:
     pattern: 're.Pattern[str]'
 
@@ -82,7 +82,7 @@ class CallbackQueryDataFilter:
                 self.pattern.match(update.callback_query.data) is not None)
 
 
-@attr.s(slots=True, frozen=True)
+@attr.s(frozen=True)
 class PrivateChatFilter:
 
     async def check(self, _: Bot, update: BotUpdate) -> bool:  # noqa
@@ -91,7 +91,7 @@ class PrivateChatFilter:
                 update.message.chat.type == ChatType.PRIVATE)
 
 
-@attr.s(slots=True, frozen=True)
+@attr.s(frozen=True)
 class GroupChatFilter:
 
     async def check(self, _: Bot, update: BotUpdate) -> bool:  # noqa

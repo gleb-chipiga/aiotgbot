@@ -4,7 +4,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import attr
 import pytest
-
 from aiotgbot import api_types
 from aiotgbot.api_types import (BaseTelegram, CallbackQuery,
                                 ChosenInlineResult, DataMappingError,
@@ -15,21 +14,21 @@ from aiotgbot.api_types import (BaseTelegram, CallbackQuery,
                                 Poll, PreCheckoutQuery, ShippingQuery)
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class Class1(BaseTelegram):
     a: int
     b: Optional[int]
     c: Optional[str]
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class Class2(BaseTelegram):
     a: int
     y: float
     z: Optional[bool]
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class Class3(BaseTelegram):
     a: int
     b: Optional[int]
@@ -41,14 +40,14 @@ class Class3(BaseTelegram):
     h: Optional[Union[Class1, Class2]]
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class Class4(BaseTelegram):
     a: int
     b: Optional[int]
     c_: Optional[str]
 
 
-@attr.s(slots=True, frozen=True, auto_attribs=True)
+@attr.s(frozen=True, auto_attribs=True)
 class Class5(BaseTelegram):
     a: int
     b: Optional[str]
