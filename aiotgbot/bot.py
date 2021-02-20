@@ -8,18 +8,15 @@ from typing import (Any, Awaitable, Callable, Dict, Final, Iterator,
                     runtime_checkable)
 
 import aiohttp
-import aiohttp.web
 import aiojobs
 import attr
 import backoff
 from aiofreqlimit import FreqLimit
 from aiohttp import BaseConnector, TCPConnector
 from aiojobs_protocols import SchedulerProtocol
-from yarl import URL
 
 from .api_methods import ApiMethods, ParamType
-from .api_types import (APIResponse, InputFile, LocalFile, StreamFile, Update,
-                        User)
+from .api_types import APIResponse, LocalFile, StreamFile, Update, User
 from .bot_update import BotUpdate, Context
 from .constants import ChatType, RequestMethod
 from .exceptions import (BadGateway, BotBlocked, BotKicked, MigrateToChat,
@@ -27,7 +24,7 @@ from .exceptions import (BadGateway, BotBlocked, BotKicked, MigrateToChat,
 from .helpers import KeyLock, get_software, json_dumps
 from .storage import StorageProtocol
 
-__all__ = ('Bot', 'PollBot', 'ListenBot', 'HandlerCallable', 'Handler',
+__all__ = ('Bot', 'PollBot', 'HandlerCallable', 'Handler',
            'HandlerTableProtocol', 'FilterProtocol')
 
 SOFTWARE: Final[str] = get_software()
@@ -370,49 +367,6 @@ class PollBot(Bot):
                 await self._scheduler.spawn(self._handle_update(update))
             if len(updates) > 0:
                 self._updates_offset = updates[-1].update_id + 1
-
-
-class ListenBot(Bot):
-
-    def __init__(
-        self,
-        token: str,
-        handler_table: 'HandlerTableProtocol',
-        storage: StorageProtocol,
-        url: Union[str, URL, None] = None,
-        certificate: Optional[InputFile] = None,
-        ip_address: Optional[str] = None,
-        connector: Optional[BaseConnector] = None
-    ) -> None:
-        super().__init__(token, handler_table, storage, connector)
-        self._url: Optional[str] = str(url) if isinstance(url, URL) else url
-        self._certificate = certificate
-        self._ip_address = ip_address
-
-    async def handler(
-        self, request: aiohttp.web.Request
-    ) -> aiohttp.web.StreamResponse:
-        if not self._started:
-            raise aiohttp.web.HTTPInternalServerError()
-        assert self._scheduler is not None
-        update = Update.from_dict(await request.json())
-        await self._scheduler.spawn(self._handle_update(update))
-        return aiohttp.web.Response()
-
-    async def start(self) -> None:
-        if self._started:
-            raise RuntimeError('Polling already started')
-        await self._start()
-        await self.set_webhook(self._url, self._certificate, self._ip_address)
-
-    async def stop(self) -> None:
-        if not self._started:
-            raise RuntimeError('Polling not started')
-        if self._stopped:
-            raise RuntimeError('Polling already stopped')
-        self._stopped = True
-        await self.delete_webhook()
-        await self._cleanup()
 
 
 HandlerCallable = Callable[[Bot, BotUpdate], Awaitable[None]]
