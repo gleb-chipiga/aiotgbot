@@ -6,8 +6,8 @@ Key Features
 ============
 
 * Asyncio and `aiohttp <https://github.com/aio-libs/aiohttp>`_ based
-* All `Telegram Bot API <https://core.telegram.org/bots/api>`_ types an methods support
-* Bot API Rate limit support
+* All `Telegram Bot API <https://core.telegram.org/bots/api>`_ types and methods supported
+* Bot API rate limit support
 * Both long polling and webhooks supported
 * Fully type annotated (`PEP 484 <https://www.python.org/dev/peps/pep-0484/>`_)
 
