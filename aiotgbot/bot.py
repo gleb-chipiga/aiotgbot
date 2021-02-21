@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 from abc import abstractmethod
 from functools import partial
@@ -178,7 +179,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
 
         url = TG_API_URL.format(token=self._token, method=api_method)
         async with request(url) as response:
-            response_dict = await response.json()
+            response_dict = json.loads(await response.read())
         response_logger.debug(response_dict)
         api_response = APIResponse.from_dict(response_dict)
 

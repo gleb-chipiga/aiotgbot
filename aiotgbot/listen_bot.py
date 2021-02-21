@@ -1,4 +1,5 @@
 import asyncio
+import json
 from hmac import compare_digest
 from ipaddress import IPv4Address, IPv4Network
 from secrets import token_urlsafe
@@ -70,7 +71,8 @@ class ListenBot(Bot):
         if not compare_digest(self._webhook_token,
                               request.match_info['token']):
             raise HTTPNotFound()
-        update = Update.from_dict(await request.json())
+        update_data = json.loads(await request.read())
+        update = Update.from_dict(update_data)
         await self._scheduler.spawn(self._handle_update(update))
         return Response()
 
