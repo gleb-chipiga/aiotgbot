@@ -1,8 +1,7 @@
 import asyncio
 import json
-from hmac import compare_digest
 from ipaddress import IPv4Address, IPv4Network
-from secrets import token_urlsafe
+from secrets import compare_digest, token_urlsafe
 from typing import Any, Awaitable, Callable, Final, Optional, Tuple, Union
 
 from aiohttp import BaseConnector
