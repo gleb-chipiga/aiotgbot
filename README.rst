@@ -13,7 +13,7 @@ Key Features
 
 Installation
 ============
-aiotgbot requires Python 3.8 or greater and is available on PyPI. Use pip to install it:
+aiotgbot is available on PyPI. Use pip to install it:
 
 .. code-block:: bash
 
