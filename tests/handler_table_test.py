@@ -1,7 +1,6 @@
 import re
 
 import pytest
-
 from aiotgbot.api_types import Message, Update
 from aiotgbot.bot import (Bot, Handler, HandlerCallable, HandlerTableProtocol,
                           PollBot)
@@ -281,6 +280,56 @@ def test_handler_pre_checkout_query(handler: HandlerCallable) -> None:
 
     assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.PRE_CHECKOUT_QUERY),
+        StateFilter('state1'),
+        GroupChatFilter()
+    ))]
+
+
+def test_my_chat_member_handler(handler: HandlerCallable) -> None:
+    ht = HandlerTable()
+    ht.my_chat_member_handler(handler,
+                              state='state1',
+                              filters=[GroupChatFilter()])
+
+    assert ht._handlers == [Handler(handler, filters=(
+        UpdateTypeFilter(UpdateType.MY_CHAT_MEMBER),
+        StateFilter('state1'),
+        GroupChatFilter()
+    ))]
+
+
+def test_my_chat_member(handler: HandlerCallable) -> None:
+    ht = HandlerTable()
+    ht.my_chat_member(state='state1',
+                      filters=[GroupChatFilter()])(handler)
+
+    assert ht._handlers == [Handler(handler, filters=(
+        UpdateTypeFilter(UpdateType.MY_CHAT_MEMBER),
+        StateFilter('state1'),
+        GroupChatFilter()
+    ))]
+
+
+def test_chat_member_handler(handler: HandlerCallable) -> None:
+    ht = HandlerTable()
+    ht.chat_member_handler(handler,
+                           state='state1',
+                           filters=[GroupChatFilter()])
+
+    assert ht._handlers == [Handler(handler, filters=(
+        UpdateTypeFilter(UpdateType.CHAT_MEMBER),
+        StateFilter('state1'),
+        GroupChatFilter()
+    ))]
+
+
+def test_chat_member(handler: HandlerCallable) -> None:
+    ht = HandlerTable()
+    ht.chat_member(state='state1',
+                   filters=[GroupChatFilter()])(handler)
+
+    assert ht._handlers == [Handler(handler, filters=(
+        UpdateTypeFilter(UpdateType.CHAT_MEMBER),
         StateFilter('state1'),
         GroupChatFilter()
     ))]

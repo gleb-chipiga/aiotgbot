@@ -6,12 +6,12 @@ from typing import Final, Iterable, Optional, Tuple, Union
 import attr
 
 from .api_types import (APIResponse, BaseTelegram, BotCommand, Chat,
-                        ChatMember, ChatPermissions, File, GameHighScore,
-                        InlineKeyboardMarkup, InlineQueryResult, InputFile,
-                        InputMedia, InputMediaAudio, InputMediaDocument,
-                        InputMediaPhoto, InputMediaVideo, LabeledPrice,
-                        MaskPosition, Message, MessageEntity, MessageId,
-                        PassportElementError, Poll, ReplyMarkup,
+                        ChatInviteLink, ChatMember, ChatPermissions, File,
+                        GameHighScore, InlineKeyboardMarkup, InlineQueryResult,
+                        InputFile, InputMedia, InputMediaAudio,
+                        InputMediaDocument, InputMediaPhoto, InputMediaVideo,
+                        LabeledPrice, MaskPosition, Message, MessageEntity,
+                        MessageId, PassportElementError, Poll, ReplyMarkup,
                         ShippingOption, StickerSet, Update, User,
                         UserProfilePhotos, WebhookInfo)
 from .constants import (ChatAction, DiceEmoji, ParseMode, PollType,
@@ -611,10 +611,12 @@ class ApiMethods(ABC):
         return File.from_dict(response.result)
 
     async def kick_chat_member(self, chat_id: Union[int, str], user_id: int,
-                               until_date: Optional[int] = None) -> bool:
+                               until_date: Optional[int] = None,
+                               revoke_messages: Optional[bool] = None) -> bool:
         response = await self._request(
             RequestMethod.POST, 'kickChatMember',
-            chat_id=chat_id, user_id=user_id, until_date=until_date)
+            chat_id=chat_id, user_id=user_id, until_date=until_date,
+            revoke_messages=revoke_messages)
         assert isinstance(response.result, bool)
         return response.result
 
@@ -645,10 +647,12 @@ class ApiMethods(ABC):
         self, chat_id: Union[int, str],
         user_id: int,
         is_anonymous: Optional[int] = None,
+        can_manage_chat: Optional[int] = None,
         can_change_info: Optional[int] = None,
         can_post_messages: Optional[bool] = None,
         can_edit_messages: Optional[bool] = None,
         can_delete_messages: Optional[bool] = None,
+        can_manage_voice_chats: Optional[bool] = None,
         can_invite_users: Optional[bool] = None,
         can_restrict_members: Optional[bool] = None,
         can_pin_messages: Optional[bool] = None,
@@ -658,10 +662,12 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'promoteChatMember',
             chat_id=chat_id, user_id=user_id, is_anonymous=is_anonymous,
+            can_manage_chat=can_manage_chat,
             can_change_info=can_change_info,
             can_post_messages=can_post_messages,
             can_edit_messages=can_edit_messages,
             can_delete_messages=can_delete_messages,
+            can_manage_voice_chats=can_manage_voice_chats,
             can_invite_users=can_invite_users,
             can_restrict_members=can_restrict_members,
             can_pin_messages=can_pin_messages,
@@ -688,6 +694,37 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'exportChatInviteLink', chat_id=chat_id)
         assert isinstance(response.result, str)
         return response.result
+
+    async def create_chat_invite_link(
+        self, chat_id: Union[int, str], expire_date: Optional[int] = None,
+        member_limit: Optional[int] = None
+    ) -> ChatInviteLink:
+        api_logger.debug('Create chat "%s" invite link', chat_id)
+        response = await self._request(
+            RequestMethod.POST, 'createChatInviteLink', chat_id=chat_id,
+            expire_date=expire_date, member_limit=member_limit)
+        return ChatInviteLink.from_dict(response.result)
+
+    async def edit_chat_invite_link(
+        self, chat_id: Union[int, str], invite_link: str,
+        expire_date: Optional[int] = None,
+        member_limit: Optional[int] = None
+    ) -> ChatInviteLink:
+        api_logger.debug('Edit chat "%s" invite link', chat_id)
+        response = await self._request(
+            RequestMethod.POST, 'editChatInviteLink', chat_id=chat_id,
+            invite_link=invite_link, expire_date=expire_date,
+            member_limit=member_limit)
+        return ChatInviteLink.from_dict(response.result)
+
+    async def revoke_chat_invite_link(
+        self, chat_id: Union[int, str], invite_link: str
+    ) -> ChatInviteLink:
+        api_logger.debug('Revoke chat "%s" invite link', chat_id)
+        response = await self._request(
+            RequestMethod.POST, 'revokeChatInviteLink', chat_id=chat_id,
+            invite_link=invite_link)
+        return ChatInviteLink.from_dict(response.result)
 
     async def set_chat_permissions(
         self, chat_id: Union[int, str],

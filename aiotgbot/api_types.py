@@ -18,9 +18,9 @@ __all__ = ('DataMappingError', 'StreamFile', 'LocalFile', 'BaseTelegram',
            'UserProfilePhotos', 'File', 'ReplyMarkup', 'ReplyKeyboardMarkup',
            'KeyboardButton', 'KeyboardButtonPollType', 'ReplyKeyboardRemove',
            'InlineKeyboardMarkup', 'InlineKeyboardButton', 'LoginUrl',
-           'CallbackQuery', 'ForceReply', 'ChatPhoto', 'ChatMember',
-           'ChatPermissions', 'ChatLocation', 'BotCommand', 'InputFile',
-           'InputMedia', 'InputMediaPhoto', 'InputMediaVideo',
+           'CallbackQuery', 'ForceReply', 'ChatPhoto', 'ChatInviteLink',
+           'ChatMember', 'ChatPermissions', 'ChatLocation', 'BotCommand',
+           'InputFile', 'InputMedia', 'InputMediaPhoto', 'InputMediaVideo',
            'InputMediaAnimation', 'InputMediaAudio', 'InputMediaDocument',
            'Sticker', 'StickerSet', 'MaskPosition', 'InlineQuery',
            'InlineQueryResult', 'InlineQueryResultArticle',
@@ -262,6 +262,8 @@ class Update(BaseTelegram):
     pre_checkout_query: Optional['PreCheckoutQuery'] = None
     poll: Optional['Poll'] = None
     poll_answer: Optional['PollAnswer'] = None
+    my_chat_member: Optional['ChatMemberUpdated'] = None
+    chat_member: Optional['ChatMemberUpdated'] = None
 
 
 @attr.s(auto_attribs=True)
@@ -354,6 +356,7 @@ class Message(BaseTelegram):
     group_chat_created: Optional[bool] = None
     supergroup_chat_created: Optional[bool] = None
     channel_chat_created: Optional[bool] = None
+    message_auto_delete_timer_changed: Optional['MADTC'] = None
     migrate_to_chat_id: Optional[int] = None
     migrate_from_chat_id: Optional[int] = None
     pinned_message: Optional['Message'] = None
@@ -362,6 +365,9 @@ class Message(BaseTelegram):
     connected_website: Optional[str] = None
     passport_data: Optional['PassportData'] = None
     proximity_alert_triggered: Optional['ProximityAlertTriggered'] = None
+    voice_chat_started: Optional['VoiceChatStarted'] = None
+    voice_chat_ended: Optional['VoiceChatEnded'] = None
+    voice_chat_participants_invited: Optional['VCPI'] = None
     reply_markup: Optional['InlineKeyboardMarkup'] = None
 
 
@@ -491,10 +497,36 @@ class Venue(BaseTelegram):
 
 
 @attr.s(auto_attribs=True)
+class VoiceChatStarted(BaseTelegram):
+    pass
+
+
+@attr.s(auto_attribs=True)
+class VoiceChatEnded(BaseTelegram):
+    duration: int
+
+
+@attr.s(auto_attribs=True)
+class VoiceChatParticipantsInvited(BaseTelegram):
+    users: Optional[Tuple[User, ...]] = None
+
+
+VCPI = VoiceChatParticipantsInvited
+
+
+@attr.s(auto_attribs=True)
 class ProximityAlertTriggered(BaseTelegram):
     traveler: User
     watcher: User
     distance: int
+
+
+@attr.s(auto_attribs=True)
+class MessageAutoDeleteTimerChanged(BaseTelegram):
+    message_auto_delete_time: int
+
+
+MADTC = MessageAutoDeleteTimerChanged
 
 
 @attr.s(auto_attribs=True)
@@ -624,6 +656,16 @@ class ChatPhoto(BaseTelegram):
 
 
 @attr.s(auto_attribs=True)
+class ChatInviteLink(BaseTelegram):
+    invite_link: str
+    creator: User
+    is_primary: bool
+    is_revoked: bool
+    expire_date: Optional[int] = None
+    member_limit: Optional[int] = None
+
+
+@attr.s(auto_attribs=True)
 class ChatMember(BaseTelegram):
     user: User
     status: str
@@ -631,10 +673,12 @@ class ChatMember(BaseTelegram):
     is_anonymous: Optional[bool] = None
     until_date: Optional[int] = None
     can_be_edited: Optional[bool] = None
+    can_manage_chat: Optional[bool] = None
     can_change_info: Optional[bool] = None
     can_post_messages: Optional[bool] = None
     can_edit_messages: Optional[bool] = None
     can_delete_messages: Optional[bool] = None
+    can_manage_voice_chats: Optional[bool] = None
     can_invite_users: Optional[bool] = None
     can_restrict_members: Optional[bool] = None
     can_pin_messages: Optional[bool] = None
@@ -645,6 +689,16 @@ class ChatMember(BaseTelegram):
     can_send_other_messages: Optional[bool] = None
     can_add_web_page_previews: Optional[bool] = None
     can_send_polls: Optional[bool] = None
+
+
+@attr.s(auto_attribs=True)
+class ChatMemberUpdated(BaseTelegram):
+    chat: Chat
+    from_: User
+    date: int
+    old_chat_member: ChatMember
+    new_chat_member: ChatMember
+    invite_link: ChatInviteLink
 
 
 @attr.s(auto_attribs=True)

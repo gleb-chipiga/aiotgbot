@@ -256,6 +256,16 @@ class Bot(MutableMapping[str, Any], ApiMethods):
             user_id = update.shipping_query.from_.id
         elif update.pre_checkout_query is not None:
             user_id = update.pre_checkout_query.from_.id
+        elif update.my_chat_member is not None:
+            assert update.my_chat_member.from_ is not None
+            user_id = update.my_chat_member.from_.id
+            assert update.my_chat_member.chat is not None
+            chat_id = update.my_chat_member.chat.id
+        elif update.chat_member is not None:
+            assert update.chat_member.from_ is not None
+            user_id = update.chat_member.from_.id
+            assert update.chat_member.chat is not None
+            chat_id = update.chat_member.chat.id
 
         return '{}|{}'.format(str(user_id) if user_id is not None else '',
                               str(chat_id) if chat_id is not None else '')

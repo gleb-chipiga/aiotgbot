@@ -143,9 +143,9 @@ class HandlerTable:
         return decorator
 
     def inline_query_handler(
-            self, handler: HandlerCallable,
-            state: Optional[str] = None,
-            filters: Optional[Iterable[FilterProtocol]] = None
+        self, handler: HandlerCallable,
+        state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
     ) -> None:
         update_type_filter = UpdateTypeFilter(UpdateType.INLINE_QUERY)
         handler_filters: List[FilterProtocol] = [update_type_filter]
@@ -156,8 +156,9 @@ class HandlerTable:
         self._handlers.append(Handler(handler, tuple(handler_filters)))
 
     def inline_query(
-            self, state: Optional[str] = None,
-            filters: Optional[Iterable[FilterProtocol]] = None
+        self,
+        state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
             self.inline_query_handler(handler=handler, state=state,
@@ -166,9 +167,9 @@ class HandlerTable:
         return decorator
 
     def chosen_inline_result_handler(
-            self, handler: HandlerCallable,
-            state: Optional[str] = None,
-            filters: Optional[Iterable[FilterProtocol]] = None
+        self, handler: HandlerCallable,
+        state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
     ) -> None:
         update_type_filter = UpdateTypeFilter(UpdateType.CHOSEN_INLINE_RESULT)
         handler_filters: List[FilterProtocol] = [update_type_filter]
@@ -179,8 +180,8 @@ class HandlerTable:
         self._handlers.append(Handler(handler, tuple(handler_filters)))
 
     def chosen_inline_result(
-            self, state: Optional[str] = None,
-            filters: Optional[Iterable[FilterProtocol]] = None
+        self, state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
             self.chosen_inline_result_handler(handler=handler, state=state,
@@ -189,10 +190,10 @@ class HandlerTable:
         return decorator
 
     def callback_query_handler(
-            self, handler: HandlerCallable,
-            state: Optional[str] = None,
-            data_match: Union[str, 're.Pattern[str]', None] = None,
-            filters: Optional[Iterable[FilterProtocol]] = None
+        self, handler: HandlerCallable,
+        state: Optional[str] = None,
+        data_match: Union[str, 're.Pattern[str]', None] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
     ) -> None:
         update_type_filter = UpdateTypeFilter(UpdateType.CALLBACK_QUERY)
         handler_filters: List[FilterProtocol] = [update_type_filter]
@@ -208,9 +209,9 @@ class HandlerTable:
         self._handlers.append(Handler(handler, tuple(handler_filters)))
 
     def callback_query(
-            self, state: Optional[str] = None,
-            data_match: Union[str, 're.Pattern[str]', None] = None,
-            filters: Optional[Iterable[FilterProtocol]] = None
+        self, state: Optional[str] = None,
+        data_match: Union[str, 're.Pattern[str]', None] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
             self.callback_query_handler(handler=handler, state=state,
@@ -219,9 +220,9 @@ class HandlerTable:
         return decorator
 
     def shipping_query_handler(
-            self, handler: HandlerCallable,
-            state: Optional[str] = None,
-            filters: Optional[Iterable[FilterProtocol]] = None
+        self, handler: HandlerCallable,
+        state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
     ) -> None:
         update_type_filter = UpdateTypeFilter(UpdateType.SHIPPING_QUERY)
         handler_filters: List[FilterProtocol] = [update_type_filter]
@@ -232,8 +233,8 @@ class HandlerTable:
         self._handlers.append(Handler(handler, tuple(handler_filters)))
 
     def shipping_query(
-            self, state: Optional[str] = None,
-            filters: Optional[Iterable[FilterProtocol]] = None
+        self, state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
             self.shipping_query_handler(handler=handler, state=state,
@@ -242,9 +243,9 @@ class HandlerTable:
         return decorator
 
     def pre_checkout_query_handler(
-            self, handler: HandlerCallable,
-            state: Optional[str] = None,
-            filters: Optional[Iterable[FilterProtocol]] = None
+        self, handler: HandlerCallable,
+        state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
     ) -> None:
         update_type_filter = UpdateTypeFilter(UpdateType.PRE_CHECKOUT_QUERY)
         handler_filters: List[FilterProtocol] = [update_type_filter]
@@ -255,11 +256,57 @@ class HandlerTable:
         self._handlers.append(Handler(handler, tuple(handler_filters)))
 
     def pre_checkout_query(
-            self, state: Optional[str] = None,
-            filters: Optional[Iterable[FilterProtocol]] = None
+        self, state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
             self.pre_checkout_query_handler(handler=handler, state=state,
                                             filters=filters)
+            return handler
+        return decorator
+
+    def my_chat_member_handler(
+        self, handler: HandlerCallable,
+        state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
+    ) -> None:
+        update_type_filter = UpdateTypeFilter(UpdateType.MY_CHAT_MEMBER)
+        handler_filters: List[FilterProtocol] = [update_type_filter]
+        if state is not None:
+            handler_filters.append(StateFilter(state))
+        if filters is not None:
+            handler_filters.extend(filters)
+        self._handlers.append(Handler(handler, tuple(handler_filters)))
+
+    def my_chat_member(
+        self, state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
+    ) -> HandlerDecorator:
+        def decorator(handler: HandlerCallable) -> HandlerCallable:
+            self.my_chat_member_handler(handler=handler, state=state,
+                                        filters=filters)
+            return handler
+        return decorator
+
+    def chat_member_handler(
+        self, handler: HandlerCallable,
+        state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
+    ) -> None:
+        update_type_filter = UpdateTypeFilter(UpdateType.CHAT_MEMBER)
+        handler_filters: List[FilterProtocol] = [update_type_filter]
+        if state is not None:
+            handler_filters.append(StateFilter(state))
+        if filters is not None:
+            handler_filters.extend(filters)
+        self._handlers.append(Handler(handler, tuple(handler_filters)))
+
+    def chat_member(
+        self, state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
+    ) -> HandlerDecorator:
+        def decorator(handler: HandlerCallable) -> HandlerCallable:
+            self.chat_member_handler(handler=handler, state=state,
+                                     filters=filters)
             return handler
         return decorator
