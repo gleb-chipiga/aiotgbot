@@ -2,11 +2,11 @@ import asyncio
 import json
 from ipaddress import IPv4Address, IPv4Network
 from secrets import compare_digest, token_urlsafe
-from typing import Any, Awaitable, Callable, Final, Optional, Tuple, Union
+from typing import Any, Final, Optional, Tuple, Union
 
 from aiohttp import BaseConnector
 from aiohttp.web import (Application, HTTPInternalServerError, HTTPNotFound,
-                         Request, Response, StreamResponse, middleware)
+                         Request, Response, StreamResponse)
 from yarl import URL
 
 from .api_types import InputFile, Update
@@ -29,7 +29,8 @@ class ListenBot(Bot):
         certificate: Optional[InputFile] = None,
         ip_address: Optional[str] = None,
         connector: Optional[BaseConnector] = None,
-        check_remote_address: bool = False,
+        check_address: bool = False,
+        address_header: Optional[str] = None,
         **application_args: Any
     ) -> None:
         super().__init__(token, handler_table, storage, connector)
@@ -37,36 +38,29 @@ class ListenBot(Bot):
         self._certificate = certificate
         self._ip_address = ip_address
         self._webhook_token: Optional[str] = None
-        middlewares = []
-        if check_remote_address:
-            middlewares.append(self._check_remote_address)
-        if 'middlewares' in application_args:
-            middlewares.extend(application_args.pop('middlewares'))
-        if 'router' in application_args:
-            raise RuntimeError('"Router" application arg is not supported')
-        self._application = Application(middlewares=middlewares,
-                                        **application_args)
+        self._check_address: Final[bool] = check_address
+        self._address_header: Final[Optional[str]] = address_header
+        self._application = Application(**application_args)
         self._application.router.add_post('/{token}', self._handler)
 
     @property
     def application(self) -> Application:
         return self._application
 
-    @middleware
-    async def _check_remote_address(
-        self, request: Request,
-        handler: Callable[[Request], Awaitable[StreamResponse]]
-    ) -> StreamResponse:
-        address = IPv4Address(request.remote)
-        if not any(address in network for network in NETWORKS):
-            raise HTTPNotFound()
-        return await handler(request)
+    def _address_is_allowed(self, request: Request) -> bool:
+        if self._address_header is not None:
+            address = IPv4Address(request.headers[self._address_header])
+        else:
+            address = IPv4Address(request.remote)
+        return any(address in network for network in NETWORKS)
 
     async def _handler(self, request: Request) -> StreamResponse:
         if not self._started:
             raise HTTPInternalServerError()
         assert self._scheduler is not None
         assert self._webhook_token is not None
+        if self._check_address and not self._address_is_allowed(request):
+            raise HTTPNotFound()
         if not compare_digest(self._webhook_token,
                               request.match_info['token']):
             raise HTTPNotFound()
