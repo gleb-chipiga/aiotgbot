@@ -15,7 +15,6 @@ from .storage import StorageProtocol
 
 NETWORKS: Final[Tuple[IPv4Network, ...]] = (IPv4Network('149.154.160.0/20'),
                                             IPv4Network('91.108.4.0/22'))
-WEBHOOK_TOKEN_SIZE: Final[int] = 32
 
 
 class ListenBot(Bot):
@@ -74,8 +73,7 @@ class ListenBot(Bot):
             raise RuntimeError('Polling already started')
         await self._start()
         loop = asyncio.get_running_loop()
-        self._webhook_token = await loop.run_in_executor(
-            None, token_urlsafe, WEBHOOK_TOKEN_SIZE)
+        self._webhook_token = await loop.run_in_executor(None, token_urlsafe)
         assert isinstance(self._webhook_token, str)
         url = str(self._url / self._webhook_token)
         await self.set_webhook(url, self._certificate, self._ip_address)
