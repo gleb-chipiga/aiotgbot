@@ -4,44 +4,29 @@ from asyncio.tasks import Task
 from contextlib import suppress
 from inspect import isasyncgenfunction
 from signal import SIGINT, SIGTERM
-from typing import (Any, AsyncIterator, Callable, Dict, Final, Iterator,
-                    MutableMapping, Optional)
+from typing import Any, AsyncIterator, Callable, Final, Mapping, Optional
 
 __all__ = ('ContextFunction', 'Runner')
 
-ContextFunction = Callable[['Runner'], AsyncIterator[None]]
+ContextFunction = Callable[..., AsyncIterator[None]]
 
 logger = logging.getLogger('runner')
 
 
-class Runner(MutableMapping[str, Any]):
+class Runner:
 
     def __init__(
-        self, context_function: ContextFunction, debug: bool = False
+        self, context_function: ContextFunction, debug: bool = False,
+        **kwargs: Any
     ) -> None:
         if not isasyncgenfunction(context_function):
             raise RuntimeError('Argument is not async generator')
         self._context_function: Final[ContextFunction] = context_function
+        self._kwargs: Final[Mapping[str, Any]] = kwargs
         self._debug: Final[bool] = debug
         self._wait_task: Optional[Task[None]] = None
         self._started: bool = False
         self._stopped: bool = False
-        self._data: Final[Dict[str, Any]] = {}
-
-    def __getitem__(self, key: str) -> Any:
-        return self._data[key]
-
-    def __setitem__(self, key: str, value: Any) -> None:
-        self._data[key] = value
-
-    def __delitem__(self, key: str) -> None:
-        del self._data[key]
-
-    def __len__(self) -> int:
-        return len(self._data)
-
-    def __iter__(self) -> Iterator[str]:
-        return iter(self._data)
 
     async def _run(self) -> None:
         assert not self._started
@@ -51,7 +36,7 @@ class Runner(MutableMapping[str, Any]):
         loop.add_signal_handler(SIGINT, self._signal_handler, SIGINT.name)
         loop.add_signal_handler(SIGTERM, self._signal_handler, SIGTERM.name)
         logger.debug('Enter wait loop')
-        iterator = self._context_function(self).__aiter__()
+        iterator = self._context_function(self, **self._kwargs).__aiter__()
         await iterator.__anext__()
         self._wait_task = asyncio.create_task(self._wait())
         with suppress(asyncio.CancelledError):

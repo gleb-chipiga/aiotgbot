@@ -6,26 +6,14 @@ import pytest
 from aiotgbot import Runner
 
 
-def test_runner_mapping() -> None:
-    async def _context(_runner: Runner) -> AsyncIterator[None]:
-        yield
-
-    runner = Runner(_context)
-    runner['key1'] = 'value1'
-    runner['key2'] = 'value2'
-    assert runner['key1'] == 'value1'
-    assert len(runner) == 2
-    assert tuple(runner) == ('key1', 'key2')
-    del runner['key1']
-    assert tuple(runner) == ('key2',)
-
-
 def test_runner() -> None:
-    async def context(runner: Runner) -> AsyncIterator[None]:
+    async def context(runner: Runner, a: int, b: str) -> AsyncIterator[None]:
+        assert a == 1
+        assert b == 's'
         asyncio.get_running_loop().call_later(.01, runner.stop)
         yield
 
-    Runner(context).run()
+    Runner(context, a=1, b='s').run()
 
 
 def test_runner_signal_handler() -> None:
