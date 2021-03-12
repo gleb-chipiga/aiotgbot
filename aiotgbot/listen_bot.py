@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 from ipaddress import IPv4Address, IPv4Network
 from secrets import compare_digest, token_urlsafe
 from typing import Any, Final, Optional, Tuple, Union
@@ -15,6 +16,8 @@ from .storage import StorageProtocol
 
 NETWORKS: Final[Tuple[IPv4Network, ...]] = (IPv4Network('149.154.160.0/20'),
                                             IPv4Network('91.108.4.0/22'))
+
+bot_logger: Final[logging.Logger] = logging.getLogger('aiotgbot.bot')
 
 
 class ListenBot(Bot):
@@ -72,17 +75,23 @@ class ListenBot(Bot):
         if self._started:
             raise RuntimeError('Polling already started')
         await self._start()
+        assert self._me is not None
         loop = asyncio.get_running_loop()
         self._webhook_token = await loop.run_in_executor(None, token_urlsafe)
         assert isinstance(self._webhook_token, str)
         url = str(self._url / self._webhook_token)
         await self.set_webhook(url, self._certificate, self._ip_address)
+        bot_logger.info('Bot %s (%s) start listen', self._me.first_name,
+                        self._me.username)
 
     async def stop(self) -> None:
         if not self._started:
             raise RuntimeError('Polling not started')
         if self._stopped:
             raise RuntimeError('Polling already stopped')
+        assert self._me is not None
         self._stopped = True
         await self.delete_webhook()
         await self._cleanup()
+        bot_logger.info('Bot %s (%s) stop listen', self._me.first_name,
+                        self._me.username)
