@@ -100,6 +100,10 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         return iter(self._data)
 
     @property
+    def id(self) -> int:
+        return int(self._token.split(':')[0])
+
+    @property
     def storage(self) -> StorageProtocol:
         return self._storage
 
