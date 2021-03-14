@@ -698,7 +698,7 @@ class ChatMemberUpdated(BaseTelegram):
     date: int
     old_chat_member: ChatMember
     new_chat_member: ChatMember
-    invite_link: ChatInviteLink
+    invite_link: Optional[ChatInviteLink] = None
 
 
 @attr.s(auto_attribs=True)
