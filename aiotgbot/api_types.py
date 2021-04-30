@@ -365,6 +365,7 @@ class Message(BaseTelegram):
     connected_website: Optional[str] = None
     passport_data: Optional['PassportData'] = None
     proximity_alert_triggered: Optional['ProximityAlertTriggered'] = None
+    voice_chat_scheduled: Optional['VoiceChatScheduled'] = None
     voice_chat_started: Optional['VoiceChatStarted'] = None
     voice_chat_ended: Optional['VoiceChatEnded'] = None
     voice_chat_participants_invited: Optional['VCPI'] = None
@@ -527,6 +528,11 @@ class MessageAutoDeleteTimerChanged(BaseTelegram):
 
 
 MADTC = MessageAutoDeleteTimerChanged
+
+
+@attr.s(auto_attribs=True)
+class VoiceChatScheduled(BaseTelegram):
+    start_date: int
 
 
 @attr.s(auto_attribs=True)
@@ -820,6 +826,7 @@ class InlineQuery(BaseTelegram):
     from_: User
     query: str
     offset: str
+    chat_type: Optional[str] = None
     location: Optional[Location] = None
 
 
@@ -1179,6 +1186,30 @@ class InputContactMessageContent(BaseTelegram):
     first_name: str
     last_name: Optional[str] = None
     vcard: Optional[str] = None
+
+
+@attr.s(auto_attribs=True)
+class InputInvoiceMessageContent:
+    title: str
+    description: str
+    payload: str
+    provider_token: str
+    currency: str
+    prices: Tuple['LabeledPrice', ...]
+    max_tip_amount: Optional[int] = None
+    suggested_tip_amounts: Optional[Tuple[int, ...]] = None
+    provider_data: Optional[str] = None
+    photo_url: Optional[str] = None
+    photo_size: Optional[int] = None
+    photo_width: Optional[int] = None
+    photo_height: Optional[int] = None
+    need_name: Optional[bool] = None
+    need_phone_number: Optional[bool] = None
+    need_email: Optional[bool] = None
+    need_shipping_address: Optional[bool] = None
+    send_phone_number_to_provider: Optional[bool] = None
+    send_email_to_provider: Optional[bool] = None
+    is_flexible: Optional[bool] = None
 
 
 @attr.s(auto_attribs=True)

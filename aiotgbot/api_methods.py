@@ -1149,8 +1149,11 @@ class ApiMethods(ABC):
 
     async def send_invoice(
         self, chat_id: int, title: str, description: str, payload: str,
-        provider_token: str, start_parameter: str, currency: str,
-        prices: Iterable[LabeledPrice], provider_data: Optional[str] = None,
+        provider_token: str, currency: str, prices: Iterable[LabeledPrice],
+        max_tip_amount: Optional[int] = None,
+        suggested_tip_amounts: Optional[Tuple[int, ...]] = None,
+        start_parameter: Optional[str] = None,
+        provider_data: Optional[str] = None,
         photo_url: Optional[str] = None, photo_size: Optional[int] = None,
         photo_width: Optional[int] = None, photo_height: Optional[int] = None,
         need_name: Optional[bool] = None,
@@ -1169,9 +1172,12 @@ class ApiMethods(ABC):
         response = await self._safe_request(
             RequestMethod.POST, 'sendInvoice', chat_id,
             title=title, description=description, payload=payload,
-            provider_token=provider_token, start_parameter=start_parameter,
+            provider_token=provider_token,
             currency=currency,
             prices=json_dumps(tuple(price.to_dict() for price in prices)),
+            max_tip_amount=max_tip_amount,
+            suggested_tip_amounts=suggested_tip_amounts,
+            start_parameter=start_parameter,
             provider_data=provider_data, photo_url=photo_url,
             photo_size=photo_size, photo_width=photo_width,
             photo_height=photo_height, need_name=need_name,
