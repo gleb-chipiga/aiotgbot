@@ -35,7 +35,7 @@ setup(
     packages=['aiotgbot'],
     package_data={'aiotgbot': ['py.typed']},
     python_requires='>=3.8,<3.10',
-    install_requires=['aiohttp', 'aiojobs', 'aiojobs-stubs>=0.2.2.post1',
+    install_requires=['aiohttp', 'aiojobs', 'aiojobs-stubs>=0.3.0.post1',
                       'attrs', 'backoff', 'frozenlist', 'aiofreqlimit',
                       'yarl'],
     tests_require=['pytest', 'pytest-asyncio', 'hypothesis'],
