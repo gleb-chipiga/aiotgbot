@@ -541,6 +541,7 @@ class PollOption(BaseTelegram):
     voter_count: int
 
 
+@attr.s(auto_attribs=True)
 class PollAnswer(BaseTelegram):
     poll_id: str
     user: User
