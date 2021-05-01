@@ -1,7 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
+from enum import Enum
 from itertools import count
-from typing import Final, Iterable, Optional, Tuple, Union
+from typing import Any, Dict, Final, Iterable, Optional, Tuple, Union
 
 import attr
 
@@ -23,19 +24,35 @@ __all__ = ('ParamType', 'ApiMethods')
 api_logger: Final[logging.Logger] = logging.getLogger('aiotgbot.api')
 
 
+_ItemType = Union[BaseTelegram, str, int, Enum]
+
+
+def _unstructure_item(
+    item: Union[BaseTelegram, str, int, Enum]
+) -> Union[Dict[str, Any], str, int]:
+    if isinstance(item, BaseTelegram):
+        return item.to_dict()
+    elif isinstance(item, Enum) and isinstance(item.value, str):
+        return item.value
+    elif isinstance(item, Enum):
+        raise RuntimeError(f'Unsupported enum type: {item!r}')
+    elif isinstance(item, (str, int)):
+        return item
+    else:
+        raise RuntimeError(f'Unsupported item type: {item!r}')
+
+
 def _json_dumps(
-    value: Union[BaseTelegram, Iterable[BaseTelegram], None]
+    value: Union[BaseTelegram, Iterable[_ItemType], None]
 ) -> Optional[str]:
     if value is None:
         return None
     elif isinstance(value, Iterable):
-        return json_dumps(tuple(item.to_dict() for item in value))
-    else:
+        return json_dumps(tuple(_unstructure_item(item) for item in value))
+    elif isinstance(value, BaseTelegram):
         return json_dumps(value.to_dict())
-
-
-def _strs_to_json(value: Optional[Iterable[str]]) -> Optional[str]:
-    return json_dumps(tuple(value)) if value is not None else None
+    else:
+        raise RuntimeError(f'Unsupported value type: {value!r}')
 
 
 def _parse_mode_to_str(parse_mode: Optional[ParseMode]) -> Optional[str]:
@@ -72,7 +89,7 @@ class ApiMethods(ABC):
                          f'allowed_updates: {allowed_updates}')
         response = await self._request(
             RequestMethod.GET, 'getUpdates', offset=offset, limit=limit,
-            timeout=timeout, allowed_updates=_strs_to_json(allowed_updates))
+            timeout=timeout, allowed_updates=_json_dumps(allowed_updates))
 
         return tuple(Update.from_dict(item) for item in response.result)
 
@@ -88,7 +105,7 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'setWebhook', url=url, certificate=certificate,
             ip_address=ip_address, max_connections=max_connections,
-            allowed_updates=_strs_to_json(allowed_updates),
+            allowed_updates=_json_dumps(allowed_updates),
             drop_pending_updates=drop_pending_updates)
         assert isinstance(response.result, bool)
         return response.result
@@ -400,7 +417,7 @@ class ApiMethods(ABC):
                     item, media=f'attach://{attachment_name}'))
         response = await self._safe_request(
             RequestMethod.POST, 'sendMediaGroup', chat_id,
-            media=json_dumps(tuple(item.to_dict() for item in attached_media)),
+            media=_json_dumps(attached_media),
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
@@ -551,7 +568,7 @@ class ApiMethods(ABC):
         api_logger.debug('Send poll to chat "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendPoll', chat_id,
-            question=question, options=json_dumps(tuple(options)),
+            question=question, options=_json_dumps(options),
             is_anonymous=is_anonymous, type=type_,
             allows_multiple_answers=allows_multiple_answers,
             correct_option_id=correct_option_id,
@@ -638,7 +655,7 @@ class ApiMethods(ABC):
         api_logger.debug('Restrict member %s in "%s"', user_id, chat_id)
         response = await self._request(
             RequestMethod.POST, 'restrictChatMember', chat_id=chat_id,
-            user_id=user_id, permissions=json_dumps(permissions.to_dict()),
+            user_id=user_id, permissions=_json_dumps(permissions),
             until_date=until_date)
         assert isinstance(response.result, bool)
         return response.result
@@ -733,7 +750,7 @@ class ApiMethods(ABC):
         api_logger.debug('Set chat "%s" permissions', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'setChatPermissions', chat_id,
-            permissions=json_dumps(permissions.to_dict()))
+            permissions=_json_dumps(permissions))
         assert isinstance(response.result, bool)
         return response.result
 
@@ -870,8 +887,7 @@ class ApiMethods(ABC):
         api_logger.debug('Set my commands "%s"', commands)
         response = await self._request(
             RequestMethod.POST, 'setMyCommands',
-            commands=json_dumps(tuple(command.to_dict()
-                                      for command in commands)))
+            commands=_json_dumps(commands))
         assert isinstance(response.result, bool)
         return response.result
 
@@ -1140,7 +1156,7 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'answerInlineQuery',
             inline_query_id=inline_query_id,
-            results=json_dumps(tuple(result.to_dict() for result in results)),
+            results=_json_dumps(results),
             cache_time=cache_time, is_personal=is_personal,
             next_offset=next_offset, switch_pm_text=switch_pm_text,
             switch_pm_parameter=switch_pm_parameter)
@@ -1174,9 +1190,9 @@ class ApiMethods(ABC):
             title=title, description=description, payload=payload,
             provider_token=provider_token,
             currency=currency,
-            prices=json_dumps(tuple(price.to_dict() for price in prices)),
+            prices=_json_dumps(prices),
             max_tip_amount=max_tip_amount,
-            suggested_tip_amounts=suggested_tip_amounts,
+            suggested_tip_amounts=_json_dumps(suggested_tip_amounts),
             start_parameter=start_parameter,
             provider_data=provider_data, photo_url=photo_url,
             photo_size=photo_size, photo_width=photo_width,
@@ -1199,15 +1215,10 @@ class ApiMethods(ABC):
         error_message: Optional[str] = None
     ) -> bool:
         api_logger.debug('Answer shipping query "%s"', inline_query_id)
-        if shipping_options is not None:
-            shipping_options_json: Optional[str] = json_dumps(tuple(
-                item.to_dict() for item in shipping_options))
-        else:
-            shipping_options_json = None
         response = await self._request(
             RequestMethod.POST, 'answerShippingQuery',
             inline_query_id=inline_query_id, ok=ok,
-            shipping_options=shipping_options_json,
+            shipping_options=_json_dumps(shipping_options),
             error_message=error_message)
         assert isinstance(response.result, bool)
         return response.result
@@ -1233,7 +1244,7 @@ class ApiMethods(ABC):
         response = await self._request(
             RequestMethod.POST, 'setPassportDataErrors',
             user_id=user_id,
-            errors=json_dumps(tuple(error.to_dict() for error in errors)))
+            errors=_json_dumps(errors))
         assert isinstance(response.result, bool)
         return response.result
 

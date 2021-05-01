@@ -1,3 +1,4 @@
+from enum import Enum
 from io import BytesIO
 from typing import Any, AsyncIterator, Callable, Union, cast
 from unittest.mock import Mock, call
@@ -6,9 +7,11 @@ import pytest
 from aiotgbot import api_methods
 from aiotgbot.api_methods import ApiMethods, ParamType
 from aiotgbot.api_types import (APIResponse, Chat, File, InputMediaPhoto,
-                                KeyboardButton, Message, ReplyKeyboardMarkup,
-                                StreamFile, Update, User)
-from aiotgbot.constants import ChatAction, ParseMode, RequestMethod, UpdateType
+                                KeyboardButton, Message, MessageEntity,
+                                MessageId, ReplyKeyboardMarkup, StreamFile,
+                                Update, User)
+from aiotgbot.constants import (ChatAction, ChatType, ParseMode, RequestMethod,
+                                UpdateType)
 from aiotgbot.helpers import json_dumps
 
 _MakeMessage = Callable[..., Message]
@@ -71,16 +74,59 @@ async def bot() -> Bot:
     return Bot()
 
 
-def test_to_json() -> None:
-    update = Update.from_dict({'update_id': 1})
-    assert api_methods._json_dumps(update) == json_dumps(update.to_dict())
+def test_unstructure_item() -> None:
+    assert api_methods._unstructure_item(MessageId(123)) == {'message_id': 123}
+    assert api_methods._unstructure_item(ChatType.CHANNEL) == 'channel'
+    assert api_methods._unstructure_item(1) == 1
+    assert api_methods._unstructure_item('one') == 'one'
+
+
+def test_unstructure_item_unsupported_type() -> None:
+    with pytest.raises(RuntimeError, match="Unsupported item type: b'bbb'"):
+        api_methods._unstructure_item(b'bbb')  # type: ignore
+
+
+def test_unstructure_item_unsupported_enum() -> None:
+    class TestEnum(Enum):
+        aaa = b'aaa'
+        bbb = b'bbb'
+    with pytest.raises(RuntimeError, match="Unsupported enum type"):
+        api_methods._unstructure_item(TestEnum.aaa)
+
+
+def test_json_dumps_none() -> None:
     assert api_methods._json_dumps(None) is None
 
 
-def test_strs_to_json() -> None:
-    strs = ('str1', 'str2', 'str3')
-    assert api_methods._strs_to_json(strs) == json_dumps(strs)
-    assert api_methods._strs_to_json(None) is None
+def test_json_dumps_base_telegram() -> None:
+    update = Update.from_dict({'update_id': 1})
+    assert api_methods._json_dumps(update) == json_dumps(update.to_dict())
+
+
+def test_json_dumps_iterable_base_telegram() -> None:
+    data = (
+        MessageEntity('type1', 10, 5),
+        MessageEntity('type2', 20, 8)
+    )
+    assert api_methods._json_dumps(data) == json_dumps((
+        {'type': 'type1', 'offset': 10, 'length': 5},
+        {'type': 'type2', 'offset': 20, 'length': 8}
+    ))
+
+
+def test_json_dumps_iterable_str() -> None:
+    data = ('one', 'two', 'thee')
+    assert api_methods._json_dumps(data) == json_dumps(data)
+
+
+def test_json_dumps_iterable_int() -> None:
+    data = (1, 2, 3, 4, 5)
+    assert api_methods._json_dumps(data) == json_dumps(data)
+
+
+def test_json_dumps_unsupported() -> None:
+    with pytest.raises(RuntimeError, match='Unsupported value type: True'):
+        api_methods._json_dumps(True)  # type: ignore
 
 
 def test_parse_mode_to_str() -> None:
