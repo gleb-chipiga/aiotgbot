@@ -35,11 +35,11 @@ def _unstructure_item(
     elif isinstance(item, Enum) and isinstance(item.value, str):
         return item.value
     elif isinstance(item, Enum):
-        raise RuntimeError(f'Unsupported enum type: {item!r}')
+        raise TypeError(f'Unsupported enum type: {item!r}')
     elif isinstance(item, (str, int)):
         return item
     else:
-        raise RuntimeError(f'Unsupported item type: {item!r}')
+        raise TypeError(f'Unsupported item type: {item!r}')
 
 
 def _json_dumps(
@@ -52,7 +52,7 @@ def _json_dumps(
     elif isinstance(value, BaseTelegram):
         return json_dumps(value.to_dict())
     else:
-        raise RuntimeError(f'Unsupported value type: {value!r}')
+        raise TypeError(f'Unsupported value type: {value!r}')
 
 
 def _enum_to_str(item: Optional[Enum]) -> Optional[str]:

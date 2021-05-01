@@ -82,7 +82,7 @@ def test_unstructure_item() -> None:
 
 
 def test_unstructure_item_unsupported_type() -> None:
-    with pytest.raises(RuntimeError, match="Unsupported item type: b'bbb'"):
+    with pytest.raises(TypeError, match="Unsupported item type: b'bbb'"):
         api_methods._unstructure_item(b'bbb')  # type: ignore
 
 
@@ -90,7 +90,7 @@ def test_unstructure_item_unsupported_enum() -> None:
     class TestEnum(Enum):
         aaa = b'aaa'
         bbb = b'bbb'
-    with pytest.raises(RuntimeError, match="Unsupported enum type"):
+    with pytest.raises(TypeError, match="Unsupported enum type"):
         api_methods._unstructure_item(TestEnum.aaa)
 
 
@@ -125,7 +125,7 @@ def test_json_dumps_iterable_int() -> None:
 
 
 def test_json_dumps_unsupported() -> None:
-    with pytest.raises(RuntimeError, match='Unsupported value type: True'):
+    with pytest.raises(TypeError, match='Unsupported value type: True'):
         api_methods._json_dumps(True)  # type: ignore
 
 
