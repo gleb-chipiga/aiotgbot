@@ -129,10 +129,10 @@ def test_json_dumps_unsupported() -> None:
         api_methods._json_dumps(True)  # type: ignore
 
 
-def test_parse_mode_to_str() -> None:
-    pm = ParseMode.HTML
-    assert api_methods._parse_mode_to_str(pm) == pm.value
-    assert api_methods._parse_mode_to_str(None) is None
+def test_enum_to_str() -> None:
+    parse_mode = ParseMode.HTML
+    assert api_methods._enum_to_str(parse_mode) == parse_mode.value
+    assert api_methods._enum_to_str(None) is None
 
 
 @pytest.mark.asyncio

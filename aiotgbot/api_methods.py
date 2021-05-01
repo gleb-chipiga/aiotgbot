@@ -55,12 +55,8 @@ def _json_dumps(
         raise RuntimeError(f'Unsupported value type: {value!r}')
 
 
-def _parse_mode_to_str(parse_mode: Optional[ParseMode]) -> Optional[str]:
-    return parse_mode.value if parse_mode is not None else None
-
-
-def _dice_emoji_to_str(dice_emoji: Optional[DiceEmoji]) -> Optional[str]:
-    return dice_emoji.value if dice_emoji is not None else None
+def _enum_to_str(item: Optional[Enum]) -> Optional[str]:
+    return item.value if item is not None else None
 
 
 ParamType = Union[int, float, str, InputFile, None]
@@ -156,7 +152,7 @@ class ApiMethods(ABC):
         api_logger.debug('Send message %r to chat "%s"', text, chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendMessage', chat_id, text=text,
-            parse_mode=_parse_mode_to_str(parse_mode),
+            parse_mode=_enum_to_str(parse_mode),
             entities=_json_dumps(entities),
             disable_web_page_preview=disable_web_page_preview,
             disable_notification=disable_notification,
@@ -217,7 +213,7 @@ class ApiMethods(ABC):
         api_logger.debug('Send photo to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendPhoto', chat_id, photo=photo,
-            caption=caption, parse_mode=_parse_mode_to_str(parse_mode),
+            caption=caption, parse_mode=_enum_to_str(parse_mode),
             caption_entities=_json_dumps(caption_entities),
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
@@ -244,7 +240,7 @@ class ApiMethods(ABC):
         api_logger.debug('Send audio to "%s"', chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendAudio', chat_id, audio=audio,
-            caption=caption, parse_mode=_parse_mode_to_str(parse_mode),
+            caption=caption, parse_mode=_enum_to_str(parse_mode),
             caption_entities=_json_dumps(caption_entities),
             disable_notification=disable_notification,
             duration=duration, performer=performer,
@@ -275,7 +271,7 @@ class ApiMethods(ABC):
         response = await self._safe_request(
             RequestMethod.POST, 'sendDocument', chat_id,
             document=document, thumb=thumb, caption=caption,
-            parse_mode=_parse_mode_to_str(parse_mode),
+            parse_mode=_enum_to_str(parse_mode),
             caption_entities=_json_dumps(caption_entities),
             disable_content_type_detection=disable_content_type_detection,
             disable_notification=disable_notification,
@@ -307,7 +303,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'sendVideo', chat_id,
             video=video, duration=duration, width=width,
             height=height, thumb=thumb, caption=caption,
-            parse_mode=_parse_mode_to_str(parse_mode),
+            parse_mode=_enum_to_str(parse_mode),
             caption_entities=_json_dumps(caption_entities),
             supports_streaming=supports_streaming,
             disable_notification=disable_notification,
@@ -337,7 +333,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'sendAnimation', chat_id,
             animation=animation, duration=duration, width=width,
             height=height, thumb=thumb, caption=caption,
-            parse_mode=_parse_mode_to_str(parse_mode),
+            parse_mode=_enum_to_str(parse_mode),
             caption_entities=_json_dumps(caption_entities),
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
@@ -362,7 +358,7 @@ class ApiMethods(ABC):
         response = await self._safe_request(
             RequestMethod.POST, 'sendVoice', chat_id,
             voice=voice, caption=caption,
-            parse_mode=_parse_mode_to_str(parse_mode),
+            parse_mode=_enum_to_str(parse_mode),
             caption_entities=_json_dumps(caption_entities),
             duration=duration,
             disable_notification=disable_notification,
@@ -592,7 +588,7 @@ class ApiMethods(ABC):
         api_logger.debug('Send dice "%s" to chat "%s"', emoji, chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'sendDice', chat_id,
-            emoji=_dice_emoji_to_str(emoji),
+            emoji=_enum_to_str(emoji),
             disable_notification=disable_notification,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
@@ -924,7 +920,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'editMessageText',
             chat_id=chat_id, message_id=message_id,
             inline_message_id=inline_message_id, text=text,
-            parse_mode=_parse_mode_to_str(parse_mode),
+            parse_mode=_enum_to_str(parse_mode),
             entities=_json_dumps(entities),
             disable_web_page_preview=disable_web_page_preview,
             reply_markup=_json_dumps(reply_markup))
@@ -960,7 +956,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'editMessageCaption',
             chat_id=chat_id, message_id=message_id,
             inline_message_id=inline_message_id,
-            caption=caption, parse_mode=_parse_mode_to_str(parse_mode),
+            caption=caption, parse_mode=_enum_to_str(parse_mode),
             caption_entities=_json_dumps(caption_entities),
             reply_markup=_json_dumps(reply_markup))
 
