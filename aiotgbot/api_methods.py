@@ -56,6 +56,7 @@ def _json_dumps(
 
 
 def _enum_to_str(item: Optional[Enum]) -> Optional[str]:
+    assert item is None or isinstance(item.value, str)
     return item.value if item is not None else None
 
 
