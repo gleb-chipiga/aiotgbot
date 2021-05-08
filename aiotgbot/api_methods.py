@@ -547,7 +547,7 @@ class ApiMethods(ABC):
 
     async def send_poll(
         self, chat_id: Union[int, str], question: str,
-        options: Iterable[str], is_anonymous: Optional[bool],
+        options: Iterable[str], is_anonymous: Optional[bool] = None,
         type_: Optional[PollType] = None,
         allows_multiple_answers: Optional[bool] = None,
         correct_option_id: Optional[bool] = None,
