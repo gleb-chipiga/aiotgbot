@@ -550,7 +550,7 @@ class ApiMethods(ABC):
         options: Iterable[str], is_anonymous: Optional[bool] = None,
         type_: Optional[PollType] = None,
         allows_multiple_answers: Optional[bool] = None,
-        correct_option_id: Optional[bool] = None,
+        correct_option_id: Optional[int] = None,
         is_closed: Optional[bool] = None,
         explanation: Optional[str] = None,
         explanation_parse_mode: Optional[ParseMode] = None,
