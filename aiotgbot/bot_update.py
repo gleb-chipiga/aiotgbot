@@ -1,7 +1,8 @@
 from typing import Any, Dict, Final, Iterator, MutableMapping, Optional
 
-from .api_types import (CallbackQuery, ChosenInlineResult, InlineQuery,
-                        Message, PreCheckoutQuery, ShippingQuery, Update)
+from .api_types import (CallbackQuery, ChatMemberUpdated, ChosenInlineResult,
+                        InlineQuery, Message, Poll, PollAnswer,
+                        PreCheckoutQuery, ShippingQuery, Update)
 
 __all__ = ('Context', 'BotUpdate')
 
@@ -108,3 +109,19 @@ class BotUpdate(MutableMapping[str, Any]):
     @property
     def pre_checkout_query(self) -> Optional[PreCheckoutQuery]:
         return self._update.pre_checkout_query
+
+    @property
+    def poll(self) -> Optional[Poll]:
+        return self._update.poll
+
+    @property
+    def poll_answer(self) -> Optional[PollAnswer]:
+        return self._update.poll_answer
+
+    @property
+    def my_chat_member(self) -> Optional[ChatMemberUpdated]:
+        return self._update.my_chat_member
+
+    @property
+    def chat_member(self) -> Optional[ChatMemberUpdated]:
+        return self._update.chat_member

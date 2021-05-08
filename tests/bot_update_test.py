@@ -1,9 +1,9 @@
 from typing import Dict, Union
 
 import pytest
-
-from aiotgbot.api_types import (CallbackQuery, ChosenInlineResult, InlineQuery,
-                                Message, PreCheckoutQuery, ShippingQuery,
+from aiotgbot.api_types import (CallbackQuery, ChatMemberUpdated,
+                                ChosenInlineResult, InlineQuery, Message, Poll,
+                                PollAnswer, PreCheckoutQuery, ShippingQuery,
                                 Update)
 from aiotgbot.bot_update import BotUpdate, Context
 
@@ -204,3 +204,67 @@ def test_bot_update_pre_checkout_query(user_dict: _UserDict,
     _update = Update(update_id=1, pre_checkout_query=pre_checkout_query)
     _bot_update = BotUpdate('state1', context, _update)
     assert _bot_update.pre_checkout_query == pre_checkout_query
+
+
+def test_bot_update_poll(user_dict: _UserDict, context: Context) -> None:
+    poll = Poll.from_dict({
+        'id': 'id', 'question': 'question', 'options': [],
+        'total_voter_count': 3, 'is_closed': True, 'is_anonymous': True,
+        'type': 'quiz', 'allows_multiple_answers': False,
+        'explanation_entities': []
+    })
+    _update = Update(update_id=1, poll=poll)
+    _bot_update = BotUpdate('state1', context, _update)
+    assert _bot_update.poll == poll
+
+
+def test_bot_update_poll_answer(user_dict: _UserDict,
+                                context: Context) -> None:
+    poll_answer = PollAnswer.from_dict({
+        'poll_id': 'id',
+        'user': {'id': 1, 'is_bot': False, 'first_name': 'name'},
+        'option_ids': []
+    })
+    _update = Update(update_id=1, poll_answer=poll_answer)
+    _bot_update = BotUpdate('state1', context, _update)
+    assert _bot_update.poll_answer == poll_answer
+
+
+def test_bot_update_my_chat_member(user_dict: _UserDict,
+                                   context: Context) -> None:
+    my_chat_member = ChatMemberUpdated.from_dict({
+        'chat': {'id': 111, 'type': 'group'},
+        'from': {'id': 1, 'is_bot': False, 'first_name': 'name'},
+        'date': 123,
+        'old_chat_member': {
+            'user': {'id': 1, 'is_bot': False, 'first_name': 'name1'},
+            'status': 'status1'
+        },
+        'new_chat_member': {
+            'user': {'id': 1, 'is_bot': False, 'first_name': 'name2'},
+            'status': 'status2'
+        }
+    })
+    _update = Update(update_id=1, my_chat_member=my_chat_member)
+    _bot_update = BotUpdate('state1', context, _update)
+    assert _bot_update.my_chat_member == my_chat_member
+
+
+def test_bot_update_chat_member(user_dict: _UserDict,
+                                context: Context) -> None:
+    chat_member = ChatMemberUpdated.from_dict({
+        'chat': {'id': 111, 'type': 'group'},
+        'from': {'id': 1, 'is_bot': False, 'first_name': 'name'},
+        'date': 123,
+        'old_chat_member': {
+            'user': {'id': 1, 'is_bot': False, 'first_name': 'name1'},
+            'status': 'status1'
+        },
+        'new_chat_member': {
+            'user': {'id': 1, 'is_bot': False, 'first_name': 'name2'},
+            'status': 'status2'
+        }
+    })
+    _update = Update(update_id=1, chat_member=chat_member)
+    _bot_update = BotUpdate('state1', context, _update)
+    assert _bot_update.chat_member == chat_member

@@ -21,7 +21,7 @@ def handler() -> HandlerCallable:
     return _handler
 
 
-def test_handler_table_protocol() -> None:
+def test_protocol() -> None:
     ht: HandlerTableProtocol = HandlerTable()
     assert isinstance(ht, HandlerTableProtocol)
 
@@ -42,7 +42,7 @@ def test_freeze(handler: HandlerCallable) -> None:
                            filters=[PrivateChatFilter()])
 
 
-def test_handler_table_message_handler(handler: HandlerCallable) -> None:
+def test_message_handler(handler: HandlerCallable) -> None:
     ht = HandlerTable()
 
     ht.message_handler(handler, state='state1', commands=['command1'],
@@ -60,7 +60,7 @@ def test_handler_table_message_handler(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_table_message(handler: HandlerCallable) -> None:
+def test_message(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.message(state='state1', commands=['command1'],
                content_types=[ContentType.CONTACT],
@@ -77,7 +77,7 @@ def test_handler_table_message(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_table_edited_message_handler(
+def test_edited_message_handler(
     handler: HandlerCallable
 ) -> None:
     ht = HandlerTable()
@@ -92,7 +92,7 @@ def test_handler_table_edited_message_handler(
     ))]
 
 
-def test_handler_table_edited_message(handler: HandlerCallable) -> None:
+def test_edited_message(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.edited_message(state='state1',
                       filters=[GroupChatFilter()])(handler)
@@ -104,7 +104,7 @@ def test_handler_table_edited_message(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_channel_post_handler(handler: HandlerCallable) -> None:
+def test_channel_post_handler(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.channel_post_handler(handler,
                             state='state1',
@@ -117,7 +117,7 @@ def test_handler_channel_post_handler(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_table_channel_post(handler: HandlerCallable) -> None:
+def test_table_channel_post(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.channel_post(state='state1',
                     filters=[GroupChatFilter()])(handler)
@@ -129,7 +129,7 @@ def test_handler_table_channel_post(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_edited_channel_post_handler(handler: HandlerCallable) -> None:
+def test_edited_channel_post_handler(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.edited_channel_post_handler(handler,
                                    state='state1',
@@ -142,7 +142,7 @@ def test_handler_edited_channel_post_handler(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_table_edited_channel_post(handler: HandlerCallable) -> None:
+def test_table_edited_channel_post(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.edited_channel_post(state='state1',
                            filters=[GroupChatFilter()])(handler)
@@ -154,7 +154,7 @@ def test_handler_table_edited_channel_post(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_inline_query_handler(handler: HandlerCallable) -> None:
+def test_inline_query_handler(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.inline_query_handler(handler,
                             state='state1',
@@ -167,7 +167,7 @@ def test_handler_inline_query_handler(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_table_inline_query(handler: HandlerCallable) -> None:
+def test_table_inline_query(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.inline_query(state='state1',
                     filters=[GroupChatFilter()])(handler)
@@ -179,7 +179,7 @@ def test_handler_table_inline_query(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_chosen_inline_result_handler(
+def test_chosen_inline_result_handler(
     handler: HandlerCallable
 ) -> None:
     ht = HandlerTable()
@@ -194,7 +194,7 @@ def test_handler_chosen_inline_result_handler(
     ))]
 
 
-def test_handler_chosen_inline_result(handler: HandlerCallable) -> None:
+def test_chosen_inline_result(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.chosen_inline_result(state='state1',
                             filters=[GroupChatFilter()])(handler)
@@ -206,7 +206,7 @@ def test_handler_chosen_inline_result(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_callback_query_handler(handler: HandlerCallable) -> None:
+def test_callback_query_handler(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.callback_query_handler(handler,
                               state='state1',
@@ -221,7 +221,7 @@ def test_handler_callback_query_handler(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_callback_query(handler: HandlerCallable) -> None:
+def test_callback_query(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.callback_query(state='state1',
                       data_match='pattern',
@@ -235,7 +235,7 @@ def test_handler_callback_query(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_shipping_query_handler(handler: HandlerCallable) -> None:
+def test_shipping_query_handler(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.shipping_query_handler(handler,
                               state='state1',
@@ -248,7 +248,7 @@ def test_handler_shipping_query_handler(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_shipping_query(handler: HandlerCallable) -> None:
+def test_shipping_query(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.shipping_query(state='state1',
                       filters=[GroupChatFilter()])(handler)
@@ -260,7 +260,7 @@ def test_handler_shipping_query(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_pre_checkout_query_handler(handler: HandlerCallable) -> None:
+def test_pre_checkout_query_handler(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.pre_checkout_query_handler(handler,
                                   state='state1',
@@ -273,13 +273,58 @@ def test_handler_pre_checkout_query_handler(handler: HandlerCallable) -> None:
     ))]
 
 
-def test_handler_pre_checkout_query(handler: HandlerCallable) -> None:
+def test_pre_checkout_query(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.pre_checkout_query(state='state1',
                           filters=[GroupChatFilter()])(handler)
 
     assert ht._handlers == [Handler(handler, filters=(
         UpdateTypeFilter(UpdateType.PRE_CHECKOUT_QUERY),
+        StateFilter('state1'),
+        GroupChatFilter()
+    ))]
+
+
+def test_poll_handler(handler: HandlerCallable) -> None:
+    ht = HandlerTable()
+    ht.poll_handler(handler, state='state1', filters=[GroupChatFilter()])
+
+    assert ht._handlers == [Handler(handler, filters=(
+        UpdateTypeFilter(UpdateType.POLL),
+        StateFilter('state1'),
+        GroupChatFilter()
+    ))]
+
+
+def test_poll(handler: HandlerCallable) -> None:
+    ht = HandlerTable()
+    ht.poll(state='state1', filters=[GroupChatFilter()])(handler)
+
+    assert ht._handlers == [Handler(handler, filters=(
+        UpdateTypeFilter(UpdateType.POLL),
+        StateFilter('state1'),
+        GroupChatFilter()
+    ))]
+
+
+def test_poll_answer_handler(handler: HandlerCallable) -> None:
+    ht = HandlerTable()
+    ht.poll_answer_handler(handler, state='state1',
+                           filters=[GroupChatFilter()])
+
+    assert ht._handlers == [Handler(handler, filters=(
+        UpdateTypeFilter(UpdateType.POLL_ANSWER),
+        StateFilter('state1'),
+        GroupChatFilter()
+    ))]
+
+
+def test_poll_answer(handler: HandlerCallable) -> None:
+    ht = HandlerTable()
+    ht.poll_answer(state='state1', filters=[GroupChatFilter()])(handler)
+
+    assert ht._handlers == [Handler(handler, filters=(
+        UpdateTypeFilter(UpdateType.POLL_ANSWER),
         StateFilter('state1'),
         GroupChatFilter()
     ))]
@@ -336,7 +381,7 @@ def test_chat_member(handler: HandlerCallable) -> None:
 
 
 @pytest.mark.asyncio
-async def test_handler_get_handler(handler: HandlerCallable) -> None:
+async def test_get_handler(handler: HandlerCallable) -> None:
     ht = HandlerTable()
     ht.message(state='state1')(handler)
     ht.freeze()

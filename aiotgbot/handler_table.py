@@ -265,6 +265,51 @@ class HandlerTable:
             return handler
         return decorator
 
+    def poll_handler(
+        self, handler: HandlerCallable,
+        state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
+    ) -> None:
+        update_type_filter = UpdateTypeFilter(UpdateType.POLL)
+        handler_filters: List[FilterProtocol] = [update_type_filter]
+        if state is not None:
+            handler_filters.append(StateFilter(state))
+        if filters is not None:
+            handler_filters.extend(filters)
+        self._handlers.append(Handler(handler, tuple(handler_filters)))
+
+    def poll(
+        self, state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
+    ) -> HandlerDecorator:
+        def decorator(handler: HandlerCallable) -> HandlerCallable:
+            self.poll_handler(handler=handler, state=state, filters=filters)
+            return handler
+        return decorator
+
+    def poll_answer_handler(
+        self, handler: HandlerCallable,
+        state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
+    ) -> None:
+        update_type_filter = UpdateTypeFilter(UpdateType.POLL_ANSWER)
+        handler_filters: List[FilterProtocol] = [update_type_filter]
+        if state is not None:
+            handler_filters.append(StateFilter(state))
+        if filters is not None:
+            handler_filters.extend(filters)
+        self._handlers.append(Handler(handler, tuple(handler_filters)))
+
+    def poll_answer(
+        self, state: Optional[str] = None,
+        filters: Optional[Iterable[FilterProtocol]] = None
+    ) -> HandlerDecorator:
+        def decorator(handler: HandlerCallable) -> HandlerCallable:
+            self.poll_answer_handler(handler=handler, state=state,
+                                     filters=filters)
+            return handler
+        return decorator
+
     def my_chat_member_handler(
         self, handler: HandlerCallable,
         state: Optional[str] = None,
