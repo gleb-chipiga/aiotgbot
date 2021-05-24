@@ -559,9 +559,9 @@ class Poll(BaseTelegram):
     is_anonymous: bool
     type_: str
     allows_multiple_answers: bool
-    explanation_entities: Tuple[MessageEntity, ...]
     correct_option_id: Optional[int] = None
     explanation: Optional[str] = None
+    explanation_entities: Optional[Tuple[MessageEntity, ...]] = None
     open_period: Optional[int] = None
     close_date: Optional[int] = None
 
