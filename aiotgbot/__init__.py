@@ -8,8 +8,8 @@ from .api_types import (BaseTelegram, CallbackQuery, Chat, ChosenInlineResult,
                         ShippingQuery, StreamFile, User)
 from .bot import Bot, FilterProtocol, PollBot
 from .bot_update import BotUpdate
-from .constants import (ChatAction, ChatType, ContentType, ParseMode, PollType,
-                        UpdateType)
+from .constants import (ChatAction, ChatMemberStatus, ChatType, ContentType,
+                        ParseMode, PollType, UpdateType)
 from .exceptions import (BadGateway, BotBlocked, BotKicked, MigrateToChat,
                          RestartingTelegram, RetryAfter, TelegramError)
 from .filters import (ANDFilter, CallbackQueryDataFilter, CommandsFilter,
@@ -53,6 +53,7 @@ __all__ = (
     'ParseMode',
     'PollType',
     'UpdateType',
+    'ChatMemberStatus',
 
     'BadGateway',
     'BotBlocked',
