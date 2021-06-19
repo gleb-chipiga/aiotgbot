@@ -1,4 +1,5 @@
 import asyncio
+from enum import Enum
 from io import BufferedReader
 from pathlib import Path
 from typing import (Any, AsyncIterator, Dict, Final, Generator, Iterable, List,
@@ -133,6 +134,8 @@ class BaseTelegram:
                 _dict[key] = BaseTelegram._to_list(value)
             elif isinstance(value, (int, str, bool, float)):
                 _dict[key] = value
+            elif isinstance(value, Enum):
+                _dict[key] = value.value
             elif value is None:
                 continue
             else:
@@ -154,6 +157,8 @@ class BaseTelegram:
                 _list.append(BaseTelegram._to_list(item))
             elif isinstance(item, BaseTelegram):
                 _list.append(item.to_dict())
+            elif isinstance(value, Enum):
+                _list.append(value.value)
             else:
                 raise TypeError(f'"{item}" has unsupported type')
 
