@@ -6,14 +6,14 @@ from typing import Any, Dict, Final, Iterable, Optional, Tuple, Union
 
 import attr
 
-from .api_types import (APIResponse, BaseTelegram, BotCommand, Chat,
-                        ChatInviteLink, ChatMember, ChatPermissions, File,
-                        GameHighScore, InlineKeyboardMarkup, InlineQueryResult,
-                        InputFile, InputMedia, InputMediaAudio,
-                        InputMediaDocument, InputMediaPhoto, InputMediaVideo,
-                        LabeledPrice, MaskPosition, Message, MessageEntity,
-                        MessageId, PassportElementError, Poll, ReplyMarkup,
-                        ShippingOption, StickerSet, Update, User,
+from .api_types import (APIResponse, BaseTelegram, BotCommand, BotCommandScope,
+                        Chat, ChatInviteLink, ChatMember, ChatPermissions,
+                        File, GameHighScore, InlineKeyboardMarkup,
+                        InlineQueryResult, InputFile, InputMedia,
+                        InputMediaAudio, InputMediaDocument, InputMediaPhoto,
+                        InputMediaVideo, LabeledPrice, MaskPosition, Message,
+                        MessageEntity, MessageId, PassportElementError, Poll,
+                        ReplyMarkup, ShippingOption, StickerSet, Update, User,
                         UserProfilePhotos, WebhookInfo)
 from .constants import (ChatAction, DiceEmoji, ParseMode, PollType,
                         RequestMethod, UpdateType)
@@ -624,11 +624,11 @@ class ApiMethods(ABC):
                                        file_id=file_id)
         return File.from_dict(response.result)
 
-    async def kick_chat_member(self, chat_id: Union[int, str], user_id: int,
-                               until_date: Optional[int] = None,
-                               revoke_messages: Optional[bool] = None) -> bool:
+    async def ban_chat_member(self, chat_id: Union[int, str], user_id: int,
+                              until_date: Optional[int] = None,
+                              revoke_messages: Optional[bool] = None) -> bool:
         response = await self._request(
-            RequestMethod.POST, 'kickChatMember',
+            RequestMethod.POST, 'banChatMember',
             chat_id=chat_id, user_id=user_id, until_date=until_date,
             revoke_messages=revoke_messages)
         assert isinstance(response.result, bool)
@@ -835,10 +835,10 @@ class ApiMethods(ABC):
 
         return tuple(ChatMember.from_dict(item) for item in response.result)
 
-    async def get_chat_members_count(self, chat_id: Union[int, str]) -> int:
-        api_logger.debug('Get chat members count "%s"', chat_id)
+    async def get_chat_member_count(self, chat_id: Union[int, str]) -> int:
+        api_logger.debug('Get chat member count "%s"', chat_id)
         response = await self._request(
-            RequestMethod.GET, 'getChatMembersCount', chat_id=chat_id)
+            RequestMethod.GET, 'getChatMemberCount', chat_id=chat_id)
         assert isinstance(response.result, int)
         return response.result
 
@@ -880,19 +880,38 @@ class ApiMethods(ABC):
         assert isinstance(response.result, bool)
         return response.result
 
-    async def set_my_commands(self, commands: Iterable[BotCommand]) -> bool:
+    async def set_my_commands(self, commands: Iterable[BotCommand],
+                              scope: Optional[BotCommandScope] = None,
+                              language_code: Optional[str] = None) -> bool:
         api_logger.debug('Set my commands "%s"', commands)
         response = await self._request(
             RequestMethod.POST, 'setMyCommands',
-            commands=_json_dumps(commands))
+            commands=_json_dumps(commands), scope=_json_dumps(scope),
+            language_code=language_code)
         assert isinstance(response.result, bool)
         return response.result
 
-    async def get_my_commands(self) -> Tuple[BotCommand, ...]:
+    async def get_my_commands(
+        self, scope: Optional[BotCommandScope] = None,
+        language_code: Optional[str] = None
+    ) -> Tuple[BotCommand, ...]:
         api_logger.debug('Get my commands')
-        response = await self._request(RequestMethod.GET, 'getMyCommands')
+        response = await self._request(
+            RequestMethod.GET, 'getMyCommands', scope=_json_dumps(scope),
+            language_code=language_code)
 
         return tuple(BotCommand.from_dict(item) for item in response.result)
+
+    async def delete_my_commands(
+        self, scope: Optional[BotCommandScope] = None,
+        language_code: Optional[str] = None
+    ) -> bool:
+        api_logger.debug('Delete my commands')
+        response = await self._request(
+            RequestMethod.GET, 'deleteMyCommands', scope=_json_dumps(scope),
+            language_code=language_code)
+        assert isinstance(response.result, bool)
+        return response.result
 
     async def edit_message_text(
         self,

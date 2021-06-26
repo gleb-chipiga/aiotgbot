@@ -21,31 +21,31 @@ __all__ = ('DataMappingError', 'StreamFile', 'LocalFile', 'BaseTelegram',
            'InlineKeyboardMarkup', 'InlineKeyboardButton', 'LoginUrl',
            'CallbackQuery', 'ForceReply', 'ChatPhoto', 'ChatInviteLink',
            'ChatMember', 'ChatMemberUpdated', 'ChatPermissions',
-           'ChatLocation', 'BotCommand', 'InputFile', 'InputMedia',
-           'InputMediaPhoto', 'InputMediaVideo', 'InputMediaAnimation',
-           'InputMediaAudio', 'InputMediaDocument', 'Sticker', 'StickerSet',
-           'MaskPosition', 'InlineQuery', 'InlineQueryResult',
-           'InlineQueryResultArticle', 'InlineQueryResultPhoto',
-           'InlineQueryResultGif', 'InlineQueryResultMpeg4Gif',
-           'InlineQueryResultVideo', 'InlineQueryResultAudio',
-           'InlineQueryResultVoice', 'InlineQueryResultDocument',
-           'InlineQueryResultLocation', 'InlineQueryResultVenue',
-           'InlineQueryResultContact', 'InlineQueryResultGame',
-           'InlineQueryResultCachedPhoto', 'InlineQueryResultCachedGif',
-           'InlineQueryResultCachedMpeg4Gif', 'InlineQueryResultCachedSticker',
-           'InlineQueryResultCachedDocument', 'InlineQueryResultCachedVideo',
-           'InlineQueryResultCachedVoice', 'InlineQueryResultCachedAudio',
-           'InputMessageContent', 'InputTextMessageContent',
-           'InputLocationMessageContent', 'InputVenueMessageContent',
-           'InputContactMessageContent', 'ChosenInlineResult', 'LabeledPrice',
-           'Invoice', 'ShippingAddress', 'OrderInfo', 'ShippingOption',
-           'SuccessfulPayment', 'ShippingQuery', 'PreCheckoutQuery',
-           'PassportData', 'PassportFile', 'EncryptedPassportElement',
-           'EncryptedCredentials', 'PassportElementError',
-           'PassportElementErrorDataField', 'PassportElementErrorFrontSide',
-           'PassportElementErrorReverseSide', 'PassportElementErrorSelfie',
-           'PassportElementErrorFile', 'PassportElementErrorFiles',
-           'PassportElementErrorTranslationFile',
+           'ChatLocation', 'BotCommand', 'InputFile', 'BotCommandScope',
+           'InputMedia', 'InputMediaPhoto', 'InputMediaVideo',
+           'InputMediaAnimation', 'InputMediaAudio', 'InputMediaDocument',
+           'Sticker', 'StickerSet', 'MaskPosition', 'InlineQuery',
+           'InlineQueryResult', 'InlineQueryResultArticle',
+           'InlineQueryResultPhoto', 'InlineQueryResultGif',
+           'InlineQueryResultMpeg4Gif', 'InlineQueryResultVideo',
+           'InlineQueryResultAudio', 'InlineQueryResultVoice',
+           'InlineQueryResultDocument', 'InlineQueryResultLocation',
+           'InlineQueryResultVenue', 'InlineQueryResultContact',
+           'InlineQueryResultGame', 'InlineQueryResultCachedPhoto',
+           'InlineQueryResultCachedGif', 'InlineQueryResultCachedMpeg4Gif',
+           'InlineQueryResultCachedSticker', 'InlineQueryResultCachedDocument',
+           'InlineQueryResultCachedVideo', 'InlineQueryResultCachedVoice',
+           'InlineQueryResultCachedAudio', 'InputMessageContent',
+           'InputTextMessageContent', 'InputLocationMessageContent',
+           'InputVenueMessageContent', 'InputContactMessageContent',
+           'ChosenInlineResult', 'LabeledPrice', 'Invoice', 'ShippingAddress',
+           'OrderInfo', 'ShippingOption', 'SuccessfulPayment', 'ShippingQuery',
+           'PreCheckoutQuery', 'PassportData', 'PassportFile',
+           'EncryptedPassportElement', 'EncryptedCredentials',
+           'PassportElementError', 'PassportElementErrorDataField',
+           'PassportElementErrorFrontSide', 'PassportElementErrorReverseSide',
+           'PassportElementErrorSelfie', 'PassportElementErrorFile',
+           'PassportElementErrorFiles', 'PassportElementErrorTranslationFile',
            'PassportElementErrorTranslationFiles',
            'PassportElementErrorUnspecified', 'Game', 'CallbackGame',
            'GameHighScore')
@@ -596,6 +596,7 @@ class ReplyKeyboardMarkup(BaseTelegram):
     keyboard: List[List['KeyboardButton']]
     resize_keyboard: Optional[bool] = None
     one_time_keyboard: Optional[bool] = None
+    input_field_placeholder: Optional[str] = None
     selective: Optional[bool] = None
 
 
@@ -657,6 +658,7 @@ class CallbackQuery(BaseTelegram):
 @attr.s(auto_attribs=True)
 class ForceReply(BaseTelegram):
     force_reply: bool
+    input_field_placeholder: Optional[str] = None
     selective: Optional[bool] = None
 
 
@@ -737,6 +739,53 @@ class BotCommand(BaseTelegram):
     command: str
     description: str
 
+
+@attr.s(auto_attribs=True)
+class BotCommandScopeDefault(BaseTelegram):
+    type: str = 'default'
+
+
+@attr.s(auto_attribs=True)
+class BotCommandScopeAllPrivateChats(BaseTelegram):
+    type: str = 'all_private_chats'
+
+
+@attr.s(auto_attribs=True)
+class BotCommandScopeAllGroupChats(BaseTelegram):
+    type: str = 'all_group_chats'
+
+
+@attr.s(auto_attribs=True)
+class BotCommandScopeAllChatAdministrators(BaseTelegram):
+    type: str = 'all_chat_administrators'
+
+
+@attr.s(auto_attribs=True)
+class BotCommandScopeChat(BaseTelegram):
+    chat_id: Union[int, str]
+    type: str = 'chat'
+
+
+@attr.s(auto_attribs=True)
+class BotCommandScopeChatAdministrators(BaseTelegram):
+    chat_id: Union[int, str]
+    type: str = 'chat'
+
+
+@attr.s(auto_attribs=True)
+class BotCommandScopeChatMember(BaseTelegram):
+    chat_id: Union[int, str]
+    user_id: int
+    type: str = 'chat'
+
+
+BotCommandScope = Union[BotCommandScopeDefault,
+                        BotCommandScopeAllPrivateChats,
+                        BotCommandScopeAllGroupChats,
+                        BotCommandScopeAllChatAdministrators,
+                        BotCommandScopeChat,
+                        BotCommandScopeChatAdministrators,
+                        BotCommandScopeChatMember]
 
 InputFile = Union[LocalFile, StreamFile]
 
