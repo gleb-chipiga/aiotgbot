@@ -2,7 +2,8 @@ import asyncio
 import json
 from contextlib import asynccontextmanager
 from functools import partial
-from typing import AsyncGenerator, Dict, Final, Hashable
+from typing import AsyncGenerator, Final, Hashable
+from weakref import WeakValueDictionary
 
 __all__ = ('json_dumps', 'get_python_version', 'get_software', 'KeyLock')
 
@@ -23,14 +24,15 @@ def get_software() -> str:
 class KeyLock:
 
     def __init__(self) -> None:
-        self._keys: Final[Dict[Hashable, asyncio.Event]] = {}
+        self._locks: ('Final[WeakValueDictionary[Hashable,'
+                      'asyncio.Lock]]') = WeakValueDictionary()
 
     @asynccontextmanager
     async def acquire(self, key: Hashable) -> AsyncGenerator[None, None]:
-        while key in self._keys:
-            await self._keys[key].wait()
-        self._keys[key] = asyncio.Event()
-        try:
+        if key not in self._locks:
+            lock = asyncio.Lock()
+            self._locks[key] = lock
+        else:
+            lock = self._locks[key]
+        async with lock:
             yield
-        finally:
-            self._keys.pop(key).set()
