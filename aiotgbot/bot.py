@@ -285,7 +285,7 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         update_state = self._update_state(update)
         state_key = f'{STATE_PREFIX}|{update_state}'
         context_key = f'{CONTEXT_PREFIX}|{update_state}'
-        async with self._context_lock.acquire(state_key):
+        async with self._context_lock.resource(state_key):
             state = await self._storage.get(state_key)
             assert isinstance(state, str) or state is None
             context_dict = await self._storage.get(context_key)

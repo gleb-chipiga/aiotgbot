@@ -25,7 +25,7 @@ async def test_key_lock_intervals() -> None:
 
     async def lock(_key_lock: KeyLock) -> time_marks:
         time1 = loop.time()
-        async with _key_lock.acquire('key'):
+        async with _key_lock.resource('key'):
             time2 = loop.time()
             await asyncio.sleep(.1)
             time3 = loop.time()
@@ -47,11 +47,11 @@ async def test_key_lock_intervals() -> None:
 async def test_key_lock_keys() -> None:
     key_lock = KeyLock()
     assert tuple(key_lock._locks) == ()
-    async with key_lock.acquire('key2'):
+    async with key_lock.resource('key2'):
         assert tuple(key_lock._locks.keys()) == ('key2',)
-        async with key_lock.acquire('key3'):
+        async with key_lock.resource('key3'):
             assert tuple(key_lock._locks.keys()) == ('key2', 'key3')
-            async with key_lock.acquire('key4'):
+            async with key_lock.resource('key4'):
                 assert tuple(key_lock._locks.keys()) == (
                     'key2', 'key3', 'key4')
         assert tuple(key_lock._locks.keys()) == ('key2',)
@@ -62,7 +62,7 @@ async def test_key_lock_keys() -> None:
 async def test_key_lock_overlaps() -> None:
 
     async def task1(_key_lock: KeyLock) -> None:
-        async with _key_lock.acquire('key1'):
+        async with _key_lock.resource('key1'):
             assert tuple(_key_lock._locks) == ('key1',)
             await asyncio.sleep(.1)
             assert tuple(_key_lock._locks) == ('key1', 'key2')
@@ -70,7 +70,7 @@ async def test_key_lock_overlaps() -> None:
     async def task2(_key_lock: KeyLock) -> None:
         await asyncio.sleep(.05)
         assert tuple(_key_lock._locks) == ('key1',)
-        async with _key_lock.acquire('key2'):
+        async with _key_lock.resource('key2'):
             assert tuple(_key_lock._locks) == ('key1', 'key2')
             await asyncio.sleep(.07)
             assert tuple(_key_lock._locks) == ('key2', 'key3')
@@ -78,10 +78,10 @@ async def test_key_lock_overlaps() -> None:
     async def task3(_key_lock: KeyLock) -> None:
         await asyncio.sleep(.1)
         assert tuple(_key_lock._locks) == ('key2',)
-        async with _key_lock.acquire('key3'):
+        async with _key_lock.resource('key3'):
             assert tuple(_key_lock._locks) == ('key2', 'key3')
             lock2 = ref(_key_lock._locks['key2'])
-            async with _key_lock.acquire('key2'):
+            async with _key_lock.resource('key2'):
                 assert tuple(_key_lock._locks) == ('key2', 'key3')
                 assert lock2() is _key_lock._locks['key2']
                 await asyncio.sleep(.1)

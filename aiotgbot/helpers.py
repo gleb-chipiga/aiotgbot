@@ -28,7 +28,7 @@ class KeyLock:
                       'asyncio.Lock]]') = WeakValueDictionary()
 
     @asynccontextmanager
-    async def acquire(self, key: Hashable) -> AsyncIterator[None]:
+    async def resource(self, key: Hashable) -> AsyncIterator[None]:
         if key not in self._locks:
             lock = asyncio.Lock()
             self._locks[key] = lock
