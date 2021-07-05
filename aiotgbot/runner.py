@@ -3,7 +3,7 @@ import logging
 from asyncio.tasks import Task
 from contextlib import suppress
 from inspect import isasyncgenfunction
-from signal import SIGHUP, SIGINT, SIGTERM
+from signal import SIGINT, SIGTERM
 from typing import Any, AsyncIterator, Callable, Final, Mapping, Optional
 
 __all__ = ('ContextFunction', 'Runner')
@@ -35,7 +35,6 @@ class Runner:
         loop = asyncio.get_running_loop()
         loop.add_signal_handler(SIGINT, self._signal_handler, SIGINT.name)
         loop.add_signal_handler(SIGTERM, self._signal_handler, SIGTERM.name)
-        loop.add_signal_handler(SIGHUP, self._signal_handler, SIGHUP.name)
         logger.debug('Enter wait loop')
         iterator = self._context_function(self, **self._kwargs).__aiter__()
         await iterator.__anext__()
