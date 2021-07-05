@@ -207,13 +207,13 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         chat = await self.get_chat(chat_id)
         while True:
             try:
-                message_limit = self._message_limit.acquire()
+                message_limit = self._message_limit.resource()
                 if chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
-                    group_limit = self._group_limit.acquire(chat.id)
+                    group_limit = self._group_limit.resource(chat.id)
                     async with message_limit, group_limit:
                         return await request()
                 else:
-                    chat_limit = self._chat_limit.acquire(chat.id)
+                    chat_limit = self._chat_limit.resource(chat.id)
                     async with message_limit, chat_limit:
                         return await request()
             except RetryAfter as retry_after:
