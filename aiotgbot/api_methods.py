@@ -710,25 +710,31 @@ class ApiMethods(ABC):
         return response.result
 
     async def create_chat_invite_link(
-        self, chat_id: Union[int, str], expire_date: Optional[int] = None,
-        member_limit: Optional[int] = None
+        self, chat_id: Union[int, str], name: Optional[str] = None,
+        expire_date: Optional[int] = None,
+        member_limit: Optional[int] = None,
+        creates_join_request: Optional[bool] = None
     ) -> ChatInviteLink:
         api_logger.debug('Create chat "%s" invite link', chat_id)
         response = await self._request(
             RequestMethod.POST, 'createChatInviteLink', chat_id=chat_id,
-            expire_date=expire_date, member_limit=member_limit)
+            name=name, expire_date=expire_date, member_limit=member_limit,
+            creates_join_request=creates_join_request)
         return ChatInviteLink.from_dict(response.result)
 
     async def edit_chat_invite_link(
         self, chat_id: Union[int, str], invite_link: str,
+        name: Optional[str] = None,
         expire_date: Optional[int] = None,
-        member_limit: Optional[int] = None
+        member_limit: Optional[int] = None,
+        creates_join_request: Optional[bool] = None
     ) -> ChatInviteLink:
         api_logger.debug('Edit chat "%s" invite link', chat_id)
         response = await self._request(
             RequestMethod.POST, 'editChatInviteLink', chat_id=chat_id,
-            invite_link=invite_link, expire_date=expire_date,
-            member_limit=member_limit)
+            invite_link=invite_link, name=name, expire_date=expire_date,
+            member_limit=member_limit,
+            creates_join_request=creates_join_request)
         return ChatInviteLink.from_dict(response.result)
 
     async def revoke_chat_invite_link(
@@ -739,6 +745,28 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'revokeChatInviteLink', chat_id=chat_id,
             invite_link=invite_link)
         return ChatInviteLink.from_dict(response.result)
+
+    async def approve_chat_join_request(
+        self, chat_id: Union[int, str], user_id: int
+    ) -> bool:
+        api_logger.debug('Approve "%s" chat "%s" join request', chat_id,
+                         user_id)
+        response = await self._request(
+            RequestMethod.POST, 'approveChatJoinRequest', chat_id=chat_id,
+            user_id=user_id)
+        assert isinstance(response.result, bool)
+        return response.result
+
+    async def decline_chat_join_request(
+        self, chat_id: Union[int, str], user_id: int
+    ) -> bool:
+        api_logger.debug('Decline "%s" chat "%s" join request', chat_id,
+                         user_id)
+        response = await self._request(
+            RequestMethod.POST, 'declineChatJoinRequest', chat_id=chat_id,
+            user_id=user_id)
+        assert isinstance(response.result, bool)
+        return response.result
 
     async def set_chat_permissions(
         self, chat_id: Union[int, str],

@@ -273,6 +273,7 @@ class Update(BaseTelegram):
     poll_answer: Optional['PollAnswer'] = None
     my_chat_member: Optional['ChatMemberUpdated'] = None
     chat_member: Optional['ChatMemberUpdated'] = None
+    chat_join_request: Optional['ChatJoinRequest'] = None
 
 
 @attr.s(auto_attribs=True)
@@ -677,10 +678,13 @@ class ChatPhoto(BaseTelegram):
 class ChatInviteLink(BaseTelegram):
     invite_link: str
     creator: User
+    creates_join_request: bool
     is_primary: bool
     is_revoked: bool
+    name: Optional[str] = None
     expire_date: Optional[int] = None
     member_limit: Optional[int] = None
+    pending_join_request_count: Optional[int] = None
 
 
 @attr.s(auto_attribs=True)
@@ -716,6 +720,15 @@ class ChatMemberUpdated(BaseTelegram):
     date: int
     old_chat_member: ChatMember
     new_chat_member: ChatMember
+    invite_link: Optional[ChatInviteLink] = None
+
+
+@attr.s(auto_attribs=True)
+class ChatJoinRequest(BaseTelegram):
+    chat: Chat
+    from_: User
+    date: int
+    bio: Optional[str] = None
     invite_link: Optional[ChatInviteLink] = None
 
 
