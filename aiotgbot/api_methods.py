@@ -702,6 +702,32 @@ class ApiMethods(ABC):
         assert isinstance(response.result, bool)
         return response.result
 
+    async def ban_chat_sender_chat(
+        self, chat_id: Union[int, str],
+        sender_chat_id: int,
+        until_date: Optional[int]
+    ) -> bool:
+        api_logger.debug('Ban chat "%s" sender chat "%s"',
+                         chat_id, sender_chat_id)
+        response = await self._request(
+            RequestMethod.POST, 'banChatSenderChat',
+            chat_id=chat_id, sender_chat_id=sender_chat_id,
+            until_date=until_date)
+        assert isinstance(response.result, bool)
+        return response.result
+
+    async def unban_chat_sender_chat(
+        self, chat_id: Union[int, str],
+        sender_chat_id: int
+    ) -> bool:
+        api_logger.debug('Unban chat "%s" sender chat "%s"',
+                         chat_id, sender_chat_id)
+        response = await self._request(
+            RequestMethod.POST, 'unbanChatSenderChat',
+            chat_id=chat_id, sender_chat_id=sender_chat_id)
+        assert isinstance(response.result, bool)
+        return response.result
+
     async def export_chat_invite_link(self, chat_id: Union[int, str]) -> str:
         api_logger.debug('Export chat "%s" invite link', chat_id)
         response = await self._request(

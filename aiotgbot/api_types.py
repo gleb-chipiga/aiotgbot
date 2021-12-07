@@ -311,11 +311,13 @@ class Chat(BaseTelegram):
     last_name: Optional[str] = None
     photo: Optional['ChatPhoto'] = None
     bio: Optional[str] = None
+    has_private_forwards: Optional[bool] = None
     description: Optional[str] = None
     invite_link: Optional[str] = None
     pinned_message: Optional['Message'] = None
     permissions: Optional['ChatPermissions'] = None
     slow_mode_delay: Optional[int] = None
+    has_protected_content: Optional[bool] = None
     sticker_set_name: Optional[str] = None
     can_set_sticker_set: Optional[bool] = None
     linked_chat_id: Optional[int] = None
@@ -335,9 +337,11 @@ class Message(BaseTelegram):
     forward_signature: Optional[str] = None
     forward_sender_name: Optional[str] = None
     forward_date: Optional[int] = None
+    is_automatic_forward: Optional[bool] = None
     reply_to_message: Optional['Message'] = None
     via_bot: Optional[User] = None
     edit_date: Optional[int] = None
+    has_protected_content: Optional[bool] = None
     media_group_id: Optional[str] = None
     author_signature: Optional[str] = None
     text: Optional[str] = None
