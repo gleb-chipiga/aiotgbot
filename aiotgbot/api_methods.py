@@ -146,6 +146,7 @@ class ApiMethods(ABC):
         entities: Optional[Iterable[MessageEntity]] = None,
         disable_web_page_preview: Optional[bool] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
@@ -157,6 +158,7 @@ class ApiMethods(ABC):
             entities=_json_dumps(entities),
             disable_web_page_preview=disable_web_page_preview,
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -165,14 +167,16 @@ class ApiMethods(ABC):
 
     async def forward_message(
         self, chat_id: Union[int, str], from_chat_id: Union[int, str],
-        message_id: int, disable_notification: Optional[bool] = None
+        message_id: int, disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
     ) -> Message:
         api_logger.debug('Forward message %s to "%s" from "%s"', message_id,
                          chat_id, from_chat_id)
         response = await self._safe_request(
             RequestMethod.POST, 'forwardMessage', chat_id,
             from_chat_id=from_chat_id, message_id=message_id,
-            disable_notification=disable_notification)
+            disable_notification=disable_notification,
+            protect_content=protect_content)
 
         return Message.from_dict(response.result)
 
@@ -182,6 +186,7 @@ class ApiMethods(ABC):
         parse_mode: Optional[ParseMode] = None,
         caption_entities: Optional[Iterable[MessageEntity]] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
@@ -194,6 +199,7 @@ class ApiMethods(ABC):
             parse_mode=parse_mode,
             caption_entities=_json_dumps(caption_entities),
             caption=caption, disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -207,6 +213,7 @@ class ApiMethods(ABC):
         parse_mode: Optional[ParseMode] = None,
         caption_entities: Optional[Iterable[MessageEntity]] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
@@ -217,6 +224,7 @@ class ApiMethods(ABC):
             caption=caption, parse_mode=_enum_to_str(parse_mode),
             caption_entities=_json_dumps(caption_entities),
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -230,6 +238,7 @@ class ApiMethods(ABC):
         parse_mode: Optional[ParseMode] = None,
         caption_entities: Optional[Iterable[MessageEntity]] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         duration: Optional[int] = None,
         performer: Optional[str] = None,
         title: Optional[str] = None,
@@ -244,6 +253,7 @@ class ApiMethods(ABC):
             caption=caption, parse_mode=_enum_to_str(parse_mode),
             caption_entities=_json_dumps(caption_entities),
             disable_notification=disable_notification,
+            protect_content=protect_content,
             duration=duration, performer=performer,
             title=title, thumb=thumb,
             reply_to_message_id=reply_to_message_id,
@@ -261,6 +271,7 @@ class ApiMethods(ABC):
         caption_entities: Optional[Iterable[MessageEntity]] = None,
         disable_content_type_detection: Optional[bool] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         duration: Optional[int] = None,
         performer: Optional[str] = None,
         title: Optional[str] = None,
@@ -276,6 +287,7 @@ class ApiMethods(ABC):
             caption_entities=_json_dumps(caption_entities),
             disable_content_type_detection=disable_content_type_detection,
             disable_notification=disable_notification,
+            protect_content=protect_content,
             duration=duration, performer=performer, title=title,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
@@ -295,6 +307,7 @@ class ApiMethods(ABC):
         caption_entities: Optional[Iterable[MessageEntity]] = None,
         supports_streaming: Optional[bool] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
@@ -308,6 +321,7 @@ class ApiMethods(ABC):
             caption_entities=_json_dumps(caption_entities),
             supports_streaming=supports_streaming,
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -325,6 +339,7 @@ class ApiMethods(ABC):
         parse_mode: Optional[ParseMode] = None,
         caption_entities: Optional[Iterable[MessageEntity]] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
@@ -337,6 +352,7 @@ class ApiMethods(ABC):
             parse_mode=_enum_to_str(parse_mode),
             caption_entities=_json_dumps(caption_entities),
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -351,6 +367,7 @@ class ApiMethods(ABC):
         caption_entities: Optional[Iterable[MessageEntity]] = None,
         duration: Optional[int] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
@@ -363,6 +380,7 @@ class ApiMethods(ABC):
             caption_entities=_json_dumps(caption_entities),
             duration=duration,
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -376,6 +394,7 @@ class ApiMethods(ABC):
         length: Optional[int] = None,
         thumb: Optional[Union[InputFile, str]] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
@@ -386,6 +405,7 @@ class ApiMethods(ABC):
             video_note=video_note, duration=duration,
             length=length, thumb=thumb,
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -397,6 +417,7 @@ class ApiMethods(ABC):
         media: Iterable[Union[InputMediaAudio, InputMediaDocument,
                               InputMediaPhoto, InputMediaVideo]],
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None
     ) -> Tuple[Message, ...]:
@@ -416,6 +437,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'sendMediaGroup', chat_id,
             media=_json_dumps(attached_media),
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             **attachments
@@ -433,6 +455,7 @@ class ApiMethods(ABC):
         proximity_alert_radius: Optional[int] = None,
         length: Optional[int] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
@@ -445,6 +468,7 @@ class ApiMethods(ABC):
             live_period=live_period, heading=heading,
             proximity_alert_radius=proximity_alert_radius, length=length,
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -505,6 +529,7 @@ class ApiMethods(ABC):
         foursquare_id: Optional[str] = None,
         foursquare_type: Optional[str] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
@@ -516,6 +541,7 @@ class ApiMethods(ABC):
             address=address, foursquare_id=foursquare_id,
             foursquare_type=foursquare_type,
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -529,6 +555,7 @@ class ApiMethods(ABC):
         last_name: Optional[str] = None,
         vcard: Optional[str] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
@@ -539,6 +566,7 @@ class ApiMethods(ABC):
             phone_number=phone_number, first_name=first_name,
             last_name=last_name, vcard=vcard,
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -558,6 +586,7 @@ class ApiMethods(ABC):
         open_period: Optional[int] = None,
         close_date: Optional[int] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
@@ -574,6 +603,7 @@ class ApiMethods(ABC):
             explanation_entities=_json_dumps(explanation_entities),
             open_period=open_period, close_date=close_date,
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -583,6 +613,7 @@ class ApiMethods(ABC):
     async def send_dice(self, chat_id: Union[int, str],
                         emoji: Optional[DiceEmoji] = None,
                         disable_notification: Optional[bool] = None,
+                        protect_content: Optional[bool] = None,
                         reply_to_message_id: Optional[int] = None,
                         allow_sending_without_reply: Optional[bool] = None,
                         reply_markup: Optional[ReplyMarkup] = None) -> Message:
@@ -591,6 +622,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'sendDice', chat_id,
             emoji=_enum_to_str(emoji),
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -1126,6 +1158,7 @@ class ApiMethods(ABC):
         self, chat_id: Union[int, str],
         sticker: Union[InputFile, str],
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[ReplyMarkup] = None
@@ -1135,6 +1168,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'sendSticker',
             chat_id=chat_id, sticker=sticker,
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -1250,6 +1284,7 @@ class ApiMethods(ABC):
         send_email_to_provider: Optional[bool] = None,
         is_flexible: Optional[bool] = None,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
@@ -1273,6 +1308,7 @@ class ApiMethods(ABC):
             send_email_to_provider=send_email_to_provider,
             is_flexible=is_flexible,
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))
@@ -1321,6 +1357,7 @@ class ApiMethods(ABC):
     async def send_game(
         self, chat_id: int, game_short_name: str,
         disable_notification: Optional[bool] = None,
+        protect_content: Optional[bool] = None,
         reply_to_message_id: Optional[int] = None,
         allow_sending_without_reply: Optional[bool] = None,
         reply_markup: Optional[InlineKeyboardMarkup] = None
@@ -1330,6 +1367,7 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'sendGame', chat_id,
             game_short_name=game_short_name,
             disable_notification=disable_notification,
+            protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_json_dumps(reply_markup))

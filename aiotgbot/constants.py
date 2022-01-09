@@ -62,6 +62,7 @@ class MessageEntityType(str, Enum):
     TEXT_MENTION = 'text_mention'
     UNDERLINE = 'underline'
     STRIKETHROUGH = 'strikethrough'
+    SPOILER = 'spoiler'
 
 
 @unique
