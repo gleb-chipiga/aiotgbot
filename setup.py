@@ -35,10 +35,10 @@ setup(
     ],
     packages=['aiotgbot'],
     package_data={'aiotgbot': ['py.typed']},
-    python_requires='>=3.8,<3.10',
-    install_requires=['aiohttp', 'aiojobs', 'aiojobs-stubs>=0.3.0.post1',
+    python_requires='>=3.8,<3.11',
+    install_requires=['aiohttp', 'aiojobs', 'aiojobs-stubs>=1.0.0.post0',
                       'attrs', 'backoff', 'frozenlist', 'aiofreqlimit>=0.0.7',
                       'yarl'],
-    tests_require=['pytest', 'pytest-asyncio', 'hypothesis'],
+    tests_require=['pytest', 'pytest-asyncio>=0.17.1', 'hypothesis'],
     extras_require={'sqlite': ['aiosqlite'], 'passport': ['cryptography']}
 )

@@ -4,6 +4,8 @@ from typing import Any, AsyncIterator, Callable, Union, cast
 from unittest.mock import Mock, call
 
 import pytest
+import pytest_asyncio
+
 from aiotgbot import api_methods
 from aiotgbot.api_methods import ApiMethods, ParamType
 from aiotgbot.api_types import (APIResponse, Chat, File, InputMediaPhoto,
@@ -69,8 +71,8 @@ class Bot(ApiMethods):
             http_method, api_method, chat_id, **params))
 
 
-@pytest.fixture
-async def bot() -> Bot:
+@pytest_asyncio.fixture
+async def _bot() -> Bot:
     return Bot()
 
 
@@ -136,14 +138,14 @@ def test_enum_to_str() -> None:
 
 
 @pytest.mark.asyncio
-async def test_api_methods_get_updates(bot: Bot) -> None:
+async def test_api_methods_get_updates(_bot: Bot) -> None:
     update = Update.from_dict({'update_id': 1})
-    bot.request_mock.return_value = APIResponse.from_dict(
+    _bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': [{'update_id': 1}]})
-    assert await bot.get_updates(
+    assert await _bot.get_updates(
         offset=0, limit=10, timeout=15,
         allowed_updates=[UpdateType.MESSAGE]) == (update,)
-    assert bot.request_mock.call_args_list == [call(
+    assert _bot.request_mock.call_args_list == [call(
         RequestMethod.GET,
         'getUpdates',
         offset=0,
@@ -154,23 +156,23 @@ async def test_api_methods_get_updates(bot: Bot) -> None:
 
 
 @pytest.mark.asyncio
-async def test_api_methods_get_me(bot: Bot) -> None:
+async def test_api_methods_get_me(_bot: Bot) -> None:
     user = User.from_dict({'id': 1, 'is_bot': False, 'first_name': 'fn'})
-    bot.request_mock.return_value = APIResponse.from_dict(
+    _bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': user.to_dict()})
-    assert await bot.get_me() == user
-    assert bot.request_mock.call_args_list == [call(
+    assert await _bot.get_me() == user
+    assert _bot.request_mock.call_args_list == [call(
         RequestMethod.GET, 'getMe'
     )]
 
 
 @pytest.mark.asyncio
-async def test_api_methods_send_message(bot: Bot, make_message: _MakeMessage,
+async def test_api_methods_send_message(_bot: Bot, make_message: _MakeMessage,
                                         reply_kb: ReplyKeyboardMarkup) -> None:
     message = make_message(text='Hello!')
-    bot.safe_request_mock.return_value = APIResponse.from_dict(
+    _bot.safe_request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': message.to_dict()})
-    assert await bot.send_message(
+    assert await _bot.send_message(
         chat_id=1,
         text='Hello!',
         parse_mode=ParseMode.HTML,
@@ -178,7 +180,7 @@ async def test_api_methods_send_message(bot: Bot, make_message: _MakeMessage,
         reply_to_message_id=111,
         reply_markup=reply_kb
     ) == message
-    assert bot.safe_request_mock.call_args_list == [call(
+    assert _bot.safe_request_mock.call_args_list == [call(
         RequestMethod.POST,
         'sendMessage',
         1,
@@ -187,6 +189,7 @@ async def test_api_methods_send_message(bot: Bot, make_message: _MakeMessage,
         entities=None,
         disable_web_page_preview=True,
         disable_notification=None,
+        protect_content=None,
         reply_to_message_id=111,
         allow_sending_without_reply=None,
         reply_markup=json_dumps(reply_kb.to_dict())
@@ -194,19 +197,19 @@ async def test_api_methods_send_message(bot: Bot, make_message: _MakeMessage,
 
 
 @pytest.mark.asyncio
-async def test_api_methods_send_photo(bot: Bot, make_message: _MakeMessage,
+async def test_api_methods_send_photo(_bot: Bot, make_message: _MakeMessage,
                                       reply_kb: ReplyKeyboardMarkup) -> None:
     message = make_message(photo=[])
-    bot.safe_request_mock.return_value = APIResponse.from_dict(
+    _bot.safe_request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': message.to_dict()})
-    assert await bot.send_photo(
+    assert await _bot.send_photo(
         chat_id=1,
         photo='some photo',
         parse_mode=ParseMode.HTML,
         reply_to_message_id=111,
         reply_markup=reply_kb
     ) == message
-    assert bot.safe_request_mock.call_args_list == [call(
+    assert _bot.safe_request_mock.call_args_list == [call(
         RequestMethod.POST,
         'sendPhoto', 1,
         photo='some photo',
@@ -214,6 +217,7 @@ async def test_api_methods_send_photo(bot: Bot, make_message: _MakeMessage,
         parse_mode='HTML',
         caption_entities=None,
         disable_notification=None,
+        protect_content=None,
         reply_to_message_id=111,
         allow_sending_without_reply=None,
         reply_markup=json_dumps(reply_kb.to_dict())
@@ -221,35 +225,36 @@ async def test_api_methods_send_photo(bot: Bot, make_message: _MakeMessage,
 
 
 @pytest.mark.asyncio
-async def test_api_methods_forward_message(bot: Bot,
+async def test_api_methods_forward_message(_bot: Bot,
                                            make_message: _MakeMessage) -> None:
     message = make_message(text='Hello!')
-    bot.safe_request_mock.return_value = APIResponse.from_dict(
+    _bot.safe_request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': message.to_dict()})
-    assert await bot.forward_message(
+    assert await _bot.forward_message(
         chat_id=1,
         from_chat_id=2,
         message_id=9
     ) == message
-    assert bot.safe_request_mock.call_args_list == [call(
+    assert _bot.safe_request_mock.call_args_list == [call(
         RequestMethod.POST,
         'forwardMessage',
         1,
         from_chat_id=2,
         message_id=9,
-        disable_notification=None
+        disable_notification=None,
+        protect_content=None
     )]
 
 
 @pytest.mark.asyncio
-async def test_api_methods_send_chat_action(bot: Bot) -> None:
-    bot.safe_request_mock.return_value = APIResponse.from_dict(
+async def test_api_methods_send_chat_action(_bot: Bot) -> None:
+    _bot.safe_request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': True})
-    assert await bot.send_chat_action(
+    assert await _bot.send_chat_action(
         chat_id=1,
         action=ChatAction.TYPING
     )
-    assert bot.safe_request_mock.call_args_list == [call(
+    assert _bot.safe_request_mock.call_args_list == [call(
         RequestMethod.POST,
         'sendChatAction',
         1,
@@ -258,17 +263,17 @@ async def test_api_methods_send_chat_action(bot: Bot) -> None:
 
 
 @pytest.mark.asyncio
-async def test_api_methods_get_file(bot: Bot) -> None:
+async def test_api_methods_get_file(_bot: Bot) -> None:
     _file = File.from_dict({
         'file_id': '1',
         'file_unique_id': '2',
         'file_size': 11,
         'file_path': 'path'
     })
-    bot.request_mock.return_value = APIResponse.from_dict(
+    _bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': _file.to_dict()})
-    assert await bot.get_file(file_id='1')
-    assert bot.request_mock.call_args_list == [call(
+    assert await _bot.get_file(file_id='1')
+    assert _bot.request_mock.call_args_list == [call(
         RequestMethod.GET,
         'getFile',
         file_id='1'
@@ -276,11 +281,11 @@ async def test_api_methods_get_file(bot: Bot) -> None:
 
 
 @pytest.mark.asyncio
-async def test_api_methods_leave_chat(bot: Bot) -> None:
-    bot.request_mock.return_value = APIResponse.from_dict(
+async def test_api_methods_leave_chat(_bot: Bot) -> None:
+    _bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': True})
-    assert await bot.leave_chat(chat_id=1)
-    assert bot.request_mock.call_args_list == [call(
+    assert await _bot.leave_chat(chat_id=1)
+    assert _bot.request_mock.call_args_list == [call(
         RequestMethod.POST,
         'leaveChat',
         chat_id=1
@@ -288,29 +293,29 @@ async def test_api_methods_leave_chat(bot: Bot) -> None:
 
 
 @pytest.mark.asyncio
-async def test_api_methods_get_chat(bot: Bot) -> None:
+async def test_api_methods_get_chat(_bot: Bot) -> None:
     chat = Chat.from_dict({
         'id': 1,
         'type': 'private'
     })
-    bot.request_mock.return_value = APIResponse.from_dict(
+    _bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': chat.to_dict()})
-    assert await bot.get_chat(chat_id=1)
-    assert bot.request_mock.call_args_list == [call(
+    assert await _bot.get_chat(chat_id=1)
+    assert _bot.request_mock.call_args_list == [call(
         RequestMethod.GET, 'getChat', chat_id=1
     )]
 
 
 @pytest.mark.asyncio
-async def test_api_methods_answer_callback_query(bot: Bot) -> None:
-    bot.request_mock.return_value = APIResponse.from_dict(
+async def test_api_methods_answer_callback_query(_bot: Bot) -> None:
+    _bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': True})
-    assert await bot.answer_callback_query(
+    assert await _bot.answer_callback_query(
         callback_query_id='1',
         text='message',
         show_alert=True
     )
-    assert bot.request_mock.call_args_list == [call(
+    assert _bot.request_mock.call_args_list == [call(
         RequestMethod.POST,
         'answerCallbackQuery',
         callback_query_id='1',
@@ -323,17 +328,17 @@ async def test_api_methods_answer_callback_query(bot: Bot) -> None:
 
 @pytest.mark.asyncio
 async def test_api_methods_edit_message_text(
-    bot: Bot, make_message: _MakeMessage
+    _bot: Bot, make_message: _MakeMessage
 ) -> None:
     message = make_message(text='text2')
-    bot.request_mock.return_value = APIResponse.from_dict(
+    _bot.request_mock.return_value = APIResponse.from_dict(
         {'ok': True, 'result': message.to_dict()})
-    assert await bot.edit_message_text(
+    assert await _bot.edit_message_text(
         text='text2',
         chat_id=1,
         message_id=1
     )
-    assert bot.request_mock.call_args_list == [call(
+    assert _bot.request_mock.call_args_list == [call(
         RequestMethod.POST,
         'editMessageText',
         text='text2',
@@ -348,18 +353,18 @@ async def test_api_methods_edit_message_text(
 
 
 @pytest.mark.asyncio
-async def test_send_media_group(bot: Bot, make_message: _MakeMessage) -> None:
+async def test_send_media_group(_bot: Bot, make_message: _MakeMessage) -> None:
     file0 = stream_file('bytes1')
     file1 = stream_file('bytes2')
     file2 = stream_file('bytes3')
 
-    bot.safe_request_mock.return_value = APIResponse.from_dict({
+    _bot.safe_request_mock.return_value = APIResponse.from_dict({
         'ok': True,
         'result': [make_message().to_dict(), make_message().to_dict(),
                    make_message().to_dict()]
     })
 
-    await bot.send_media_group(
+    await _bot.send_media_group(
         1,
         media=(
             InputMediaPhoto(media=file0, caption='f1'),
@@ -368,7 +373,7 @@ async def test_send_media_group(bot: Bot, make_message: _MakeMessage) -> None:
         )
     )
 
-    assert bot.safe_request_mock.call_args_list == [call(
+    assert _bot.safe_request_mock.call_args_list == [call(
         RequestMethod.POST,
         'sendMediaGroup',
         1,
@@ -381,6 +386,7 @@ async def test_send_media_group(bot: Bot, make_message: _MakeMessage) -> None:
                             caption='f3').to_dict()
         ]),
         disable_notification=None,
+        protect_content=None,
         reply_to_message_id=None,
         allow_sending_without_reply=None,
         attachment0=file0,
@@ -391,19 +397,19 @@ async def test_send_media_group(bot: Bot, make_message: _MakeMessage) -> None:
 
 @pytest.mark.asyncio
 async def test_edit_message_media(
-    bot: Bot, make_message: _MakeMessage
+    _bot: Bot, make_message: _MakeMessage
 ) -> None:
     file = stream_file('bytes1')
-    bot.request_mock.return_value = APIResponse.from_dict({
+    _bot.request_mock.return_value = APIResponse.from_dict({
         'ok': True,
         'result': make_message().to_dict()
     })
-    await bot.edit_message_media(
+    await _bot.edit_message_media(
         media=InputMediaPhoto(media=file, caption='f1'),
         chat_id=1,
         message_id=1
     )
-    assert bot.request_mock.call_args_list == [call(
+    assert _bot.request_mock.call_args_list == [call(
         RequestMethod.POST,
         'editMessageMedia',
         chat_id=1,
