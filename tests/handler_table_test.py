@@ -1,6 +1,7 @@
 import re
 
 import pytest
+
 from aiotgbot.api_types import Message, Update
 from aiotgbot.bot import (Bot, Handler, HandlerCallable, HandlerTableProtocol,
                           PollBot)

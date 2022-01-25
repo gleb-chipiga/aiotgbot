@@ -1,8 +1,9 @@
 import asyncio
 from typing import AsyncIterator, cast
 
-import aiotgbot.runner
 import pytest
+
+import aiotgbot.runner
 from aiotgbot import Runner
 
 

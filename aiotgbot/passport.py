@@ -4,8 +4,6 @@ from enum import Enum, unique
 from typing import AsyncIterator, Final, Optional, Tuple, Union, cast
 
 import attr
-from aiotgbot import BaseTelegram
-from aiotgbot.api_types import EncryptedCredentials
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.padding import MGF1, OAEP
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
@@ -15,6 +13,9 @@ from cryptography.hazmat.primitives.ciphers.modes import CBC
 from cryptography.hazmat.primitives.constant_time import bytes_eq
 from cryptography.hazmat.primitives.hashes import SHA1, SHA256, SHA512, Hash
 from yarl import URL
+
+from aiotgbot import BaseTelegram
+from aiotgbot.api_types import EncryptedCredentials
 
 __all__ = ('passport_request', 'PassportKey', 'PassportCipher',
            'PassportScopeType', 'PassportScopeElementOne',

@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import attr
 import pytest
+
 from aiotgbot import api_types
 from aiotgbot.api_types import (BaseTelegram, CallbackQuery,
                                 ChosenInlineResult, DataMappingError,

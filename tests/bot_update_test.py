@@ -1,6 +1,7 @@
 from typing import Dict, Union
 
 import pytest
+
 from aiotgbot.api_types import (CallbackQuery, ChatMemberUpdated,
                                 ChosenInlineResult, InlineQuery, Message, Poll,
                                 PollAnswer, PreCheckoutQuery, ShippingQuery,

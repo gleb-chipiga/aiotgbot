@@ -1,8 +1,9 @@
 import asyncio
-from weakref import ref
 from typing import List, Tuple, cast
+from weakref import ref
 
 import pytest
+
 from aiotgbot.helpers import KeyLock
 
 
