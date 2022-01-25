@@ -64,7 +64,8 @@ class Runner:
             raise RuntimeError('Not started')
         if self._stopped:
             raise RuntimeError('Already stopped')
-        assert self._wait_task is not None
+        if self._wait_task is None:
+            raise RuntimeError('Wait task not spawned')
         self._stopped = True
         self._wait_task.cancel()
 
