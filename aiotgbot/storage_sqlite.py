@@ -85,3 +85,6 @@ class SQLiteStorage(StorageProtocol):
         async with self.connection.cursor() as cursor:
             await cursor.execute('DELETE FROM kv')
             await cursor.execute('VACUUM')
+
+    def raw_connection(self) -> Any:
+        return self.connection

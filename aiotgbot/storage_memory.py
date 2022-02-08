@@ -32,3 +32,6 @@ class MemoryStorage(StorageProtocol):
 
     async def clear(self) -> None:
         self._data.clear()
+
+    def raw_connection(self) -> Any:
+        return None

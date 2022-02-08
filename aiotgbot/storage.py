@@ -30,3 +30,6 @@ class StorageProtocol(Protocol):
 
     @abstractmethod
     async def clear(self) -> None: ...
+
+    @abstractmethod
+    def raw_connection(self) -> Any: ...

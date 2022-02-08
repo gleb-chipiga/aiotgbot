@@ -48,4 +48,6 @@ async def test_sqlite_storage() -> None:
         items4.append(item)
     assert items4 == []
 
+    assert storage.raw_connection() is None
+
     assert await storage.close() is None

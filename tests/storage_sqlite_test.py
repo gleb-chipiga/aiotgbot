@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import aiosqlite
 import pytest
 
 from aiotgbot import StorageProtocol
@@ -55,5 +56,7 @@ async def test_sqlite_storage(tmpdir: Path) -> None:
     async for item in storage.iterate():
         items4.append(item)
     assert items4 == []
+
+    assert isinstance(storage.raw_connection(), aiosqlite.Connection)
 
     assert await storage.close() is None
