@@ -1195,6 +1195,7 @@ class ApiMethods(ABC):
         self, user_id: int, name: str, title: str, emojis: str,
         png_sticker: Union[InputFile, str, None] = None,
         tgs_sticker: Optional[InputFile] = None,
+        webm_sticker: Optional[InputFile] = None,
         contains_masks: Optional[bool] = None,
         mask_position: Optional[MaskPosition] = None
     ) -> bool:
@@ -1203,21 +1204,25 @@ class ApiMethods(ABC):
             RequestMethod.POST, 'createNewStickerSet',
             user_id=user_id, name=name, title=title, emojis=emojis,
             png_sticker=png_sticker, tgs_sticker=tgs_sticker,
-            contains_masks=contains_masks,
+            webm_sticker=webm_sticker, contains_masks=contains_masks,
             mask_position=_json_dumps(mask_position))
         assert isinstance(response.result, bool)
         return response.result
 
     async def add_sticker_to_set(
-        self, user_id: int, name: str, title: str,
-        png_sticker: Union[InputFile, str], emojis: str,
+        self, user_id: int, name: str, title: str, emojis: str,
+        png_sticker: Union[InputFile, str],
+        tgs_sticker: Optional[InputFile] = None,
+        webm_sticker: Optional[InputFile] = None,
         mask_position: Optional[MaskPosition] = None
     ) -> File:
         api_logger.debug('Add sticker to set "%s" for %s', name, user_id)
         response = await self._request(
             RequestMethod.POST, 'addStickerToSet',
-            user_id=user_id, name=name, title=title, png_sticker=png_sticker,
-            emojis=emojis, mask_position=_json_dumps(mask_position))
+            user_id=user_id, name=name, title=title, emojis=emojis,
+            png_sticker=png_sticker, tgs_sticker=tgs_sticker,
+            webm_sticker=webm_sticker,
+            mask_position=_json_dumps(mask_position))
 
         return File.from_dict(response.result)
 

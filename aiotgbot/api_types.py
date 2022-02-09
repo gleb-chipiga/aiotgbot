@@ -871,6 +871,7 @@ class Sticker(BaseTelegram):
     width: int
     height: int
     is_animated: bool
+    is_video: bool
     thumb: Optional[PhotoSize] = None
     emoji: Optional[str] = None
     set_name: Optional[str] = None
@@ -883,6 +884,7 @@ class StickerSet(BaseTelegram):
     name: str
     title: str
     is_animated: bool
+    is_video: bool
     contains_masks: bool
     stickers: Tuple[Sticker, ...]
     thumb: Optional[PhotoSize] = None
