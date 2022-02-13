@@ -2,6 +2,18 @@
 Asynchronous library for Telegram bot API
 =========================================
 
+.. image:: https://badge.fury.io/py/aiotgbot.svg
+   :target: https://pypi.org/project/aiotgbot
+   :alt: Latest PyPI package version
+
+.. image:: https://img.shields.io/badge/license-MIT-blue.svg
+   :target: https://github.com/gleb-chipiga/aiotgbot/blob/master/LICENSE
+   :alt: License
+
+.. image:: https://img.shields.io/pypi/dm/aiotgbot
+   :target: https://pypistats.org/packages/aiotgbot
+   :alt: Downloads count
+
 Key Features
 ============
 
