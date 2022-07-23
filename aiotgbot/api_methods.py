@@ -7,14 +7,15 @@ from typing import Any, Dict, Final, Iterable, Optional, Tuple, Union
 import attr
 
 from .api_types import (APIResponse, BaseTelegram, BotCommand, BotCommandScope,
-                        Chat, ChatInviteLink, ChatMember, ChatPermissions,
-                        File, GameHighScore, InlineKeyboardMarkup,
-                        InlineQueryResult, InputFile, InputMedia,
-                        InputMediaAudio, InputMediaDocument, InputMediaPhoto,
-                        InputMediaVideo, LabeledPrice, MaskPosition, Message,
-                        MessageEntity, MessageId, PassportElementError, Poll,
-                        ReplyMarkup, ShippingOption, StickerSet, Update, User,
-                        UserProfilePhotos, WebhookInfo)
+                        Chat, ChatAdministratorRights, ChatInviteLink,
+                        ChatMember, ChatPermissions, File, GameHighScore,
+                        InlineKeyboardMarkup, InlineQueryResult, InputFile,
+                        InputMedia, InputMediaAudio, InputMediaDocument,
+                        InputMediaPhoto, InputMediaVideo, LabeledPrice,
+                        MaskPosition, MenuButton, Message, MessageEntity,
+                        MessageId, PassportElementError, Poll, ReplyMarkup,
+                        SentWebAppMessage, ShippingOption, StickerSet, Update,
+                        User, UserProfilePhotos, WebhookInfo)
 from .constants import (ChatAction, DiceEmoji, ParseMode, PollType,
                         RequestMethod, UpdateType)
 from .helpers import json_dumps
@@ -698,7 +699,7 @@ class ApiMethods(ABC):
         can_post_messages: Optional[bool] = None,
         can_edit_messages: Optional[bool] = None,
         can_delete_messages: Optional[bool] = None,
-        can_manage_voice_chats: Optional[bool] = None,
+        can_manage_video_chats: Optional[bool] = None,
         can_invite_users: Optional[bool] = None,
         can_restrict_members: Optional[bool] = None,
         can_pin_messages: Optional[bool] = None,
@@ -713,7 +714,7 @@ class ApiMethods(ABC):
             can_post_messages=can_post_messages,
             can_edit_messages=can_edit_messages,
             can_delete_messages=can_delete_messages,
-            can_manage_voice_chats=can_manage_voice_chats,
+            can_manage_video_chats=can_manage_video_chats,
             can_invite_users=can_invite_users,
             can_restrict_members=can_restrict_members,
             can_pin_messages=can_pin_messages,
@@ -976,6 +977,60 @@ class ApiMethods(ABC):
             language_code=language_code)
         assert isinstance(response.result, bool)
         return response.result
+
+    async def set_chat_menu_button(
+        self,
+            chat_id: Optional[int],
+            menu_button: Optional[MenuButton]
+    ) -> bool:
+        api_logger.debug('Set chat menu button "%r"', menu_button)
+        response = await self._request(
+            RequestMethod.POST,
+            'setChatMenuButton',
+            chat_id=chat_id,
+            menu_button=_json_dumps(menu_button)
+        )
+        assert isinstance(response.result, bool)
+        return response.result
+
+    async def get_chat_menu_button(
+        self,
+        chat_id: Optional[int],
+    ) -> MenuButton:
+        api_logger.debug('Get chat menu button "%r"', chat_id)
+        response = await self._request(
+            RequestMethod.POST,
+            'getChatMenuButton',
+            chat_id=chat_id,
+        )
+        return MenuButton.from_dict(response.result)
+
+    async def set_my_default_administrator_rights(
+        self,
+        rights: Optional[ChatAdministratorRights],
+        for_channels: Optional[bool],
+    ) -> bool:
+        api_logger.debug('Set my default administrator rights %r', rights)
+        response = await self._request(
+            RequestMethod.POST,
+            'setMyDefaultAdministratorRights',
+            rights=_json_dumps(rights),
+            for_channels=for_channels
+        )
+        assert isinstance(response.result, bool)
+        return response.result
+
+    async def get_my_default_administrator_rights(
+        self,
+        for_channels: Optional[bool],
+    ) -> ChatAdministratorRights:
+        api_logger.debug('Get my default administrator rights')
+        response = await self._request(
+            RequestMethod.POST,
+            'getMyDefaultAdministratorRights',
+            for_channels=for_channels
+        )
+        return ChatAdministratorRights.from_dict(response.result)
 
     async def get_my_commands(
         self, scope: Optional[BotCommandScope] = None,
@@ -1271,6 +1326,20 @@ class ApiMethods(ABC):
             switch_pm_parameter=switch_pm_parameter)
         assert isinstance(response.result, bool)
         return response.result
+
+    async def answer_web_app_query(
+        self,
+        web_app_query_id: str,
+        results: Iterable[InlineQueryResult],
+    ) -> SentWebAppMessage:
+        api_logger.debug('Answer web app query "%s"', web_app_query_id)
+        response = await self._request(
+            RequestMethod.POST,
+            'answerWebAppQuery',
+            web_app_query_id=web_app_query_id,
+            results=_json_dumps(results)
+        )
+        return SentWebAppMessage.from_dict(response.result)
 
     async def send_invoice(
         self, chat_id: int, title: str, description: str, payload: str,

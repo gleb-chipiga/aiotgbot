@@ -20,13 +20,14 @@ __all__ = ('DataMappingError', 'StreamFile', 'LocalFile', 'BaseTelegram',
            'KeyboardButton', 'KeyboardButtonPollType', 'ReplyKeyboardRemove',
            'InlineKeyboardMarkup', 'InlineKeyboardButton', 'LoginUrl',
            'CallbackQuery', 'ForceReply', 'ChatPhoto', 'ChatInviteLink',
-           'ChatMember', 'ChatMemberUpdated', 'ChatPermissions',
-           'ChatLocation', 'BotCommand', 'BotCommandScopeDefault',
-           'BotCommandScopeAllPrivateChats', 'BotCommandScopeAllGroupChats',
-           'BotCommandScopeChatAdministrators', 'BotCommandScopeChat',
-           'BotCommandScopeAllChatAdministrators', 'BotCommandScopeChatMember',
-           'InputFile', 'BotCommandScope', 'InputMedia', 'InputMediaPhoto',
-           'InputMediaVideo', 'InputMediaAnimation', 'InputMediaAudio',
+           'ChatAdministratorRights', 'ChatMember', 'ChatMemberUpdated',
+           'ChatPermissions', 'ChatLocation', 'BotCommand',
+           'BotCommandScopeDefault', 'BotCommandScopeAllPrivateChats',
+           'BotCommandScopeAllGroupChats', 'BotCommandScopeChatAdministrators',
+           'BotCommandScopeChat', 'BotCommandScopeAllChatAdministrators',
+           'BotCommandScopeChatMember', 'BotCommandScope', 'MenuButton',
+           'InputFile', 'InputMedia', 'InputMediaPhoto', 'InputMediaVideo',
+           'InputMediaAnimation', 'InputMediaAudio',
            'InputMediaDocument', 'Sticker', 'StickerSet', 'MaskPosition',
            'InlineQuery', 'InlineQueryResult', 'InlineQueryResultArticle',
            'InlineQueryResultPhoto', 'InlineQueryResultGif',
@@ -41,14 +42,15 @@ __all__ = ('DataMappingError', 'StreamFile', 'LocalFile', 'BaseTelegram',
            'InlineQueryResultCachedAudio', 'InputMessageContent',
            'InputTextMessageContent', 'InputLocationMessageContent',
            'InputVenueMessageContent', 'InputContactMessageContent',
-           'ChosenInlineResult', 'LabeledPrice', 'Invoice', 'ShippingAddress',
-           'OrderInfo', 'ShippingOption', 'SuccessfulPayment', 'ShippingQuery',
-           'PreCheckoutQuery', 'PassportData', 'PassportFile',
-           'EncryptedPassportElement', 'EncryptedCredentials',
-           'PassportElementError', 'PassportElementErrorDataField',
-           'PassportElementErrorFrontSide', 'PassportElementErrorReverseSide',
-           'PassportElementErrorSelfie', 'PassportElementErrorFile',
-           'PassportElementErrorFiles', 'PassportElementErrorTranslationFile',
+           'ChosenInlineResult', 'SentWebAppMessage', 'LabeledPrice',
+           'Invoice', 'ShippingAddress', 'OrderInfo', 'ShippingOption',
+           'SuccessfulPayment', 'ShippingQuery', 'PreCheckoutQuery',
+           'PassportData', 'PassportFile', 'EncryptedPassportElement',
+           'EncryptedCredentials', 'PassportElementError',
+           'PassportElementErrorDataField', 'PassportElementErrorFrontSide',
+           'PassportElementErrorReverseSide', 'PassportElementErrorSelfie',
+           'PassportElementErrorFile', 'PassportElementErrorFiles',
+           'PassportElementErrorTranslationFile',
            'PassportElementErrorTranslationFiles',
            'PassportElementErrorUnspecified', 'Game', 'CallbackGame',
            'GameHighScore')
@@ -285,6 +287,7 @@ class WebhookInfo(BaseTelegram):
     ip_address: Optional[str] = None
     last_error_date: Optional[int] = None
     last_error_message: Optional[str] = None
+    last_synchronization_error_date: Optional[int] = None
     max_connections: Optional[int] = None
 
 
@@ -379,10 +382,11 @@ class Message(BaseTelegram):
     connected_website: Optional[str] = None
     passport_data: Optional['PassportData'] = None
     proximity_alert_triggered: Optional['ProximityAlertTriggered'] = None
-    voice_chat_scheduled: Optional['VoiceChatScheduled'] = None
-    voice_chat_started: Optional['VoiceChatStarted'] = None
-    voice_chat_ended: Optional['VoiceChatEnded'] = None
-    voice_chat_participants_invited: Optional['VCPI'] = None
+    video_chat_scheduled: Optional['VideoChatScheduled'] = None
+    video_chat_started: Optional['VideoChatStarted'] = None
+    video_chat_ended: Optional['VideoChatEnded'] = None
+    video_chat_participants_invited: Optional['VCPI'] = None
+    web_app_data: Optional['WebAppData'] = None
     reply_markup: Optional['InlineKeyboardMarkup'] = None
 
 
@@ -512,21 +516,27 @@ class Venue(BaseTelegram):
 
 
 @attr.s(auto_attribs=True)
-class VoiceChatStarted(BaseTelegram):
+class WebAppData(BaseTelegram):
+    data: str
+    button_text: str
+
+
+@attr.s(auto_attribs=True)
+class VideoChatStarted(BaseTelegram):
     pass
 
 
 @attr.s(auto_attribs=True)
-class VoiceChatEnded(BaseTelegram):
+class VideoChatEnded(BaseTelegram):
     duration: int
 
 
 @attr.s(auto_attribs=True)
-class VoiceChatParticipantsInvited(BaseTelegram):
+class VideoChatParticipantsInvited(BaseTelegram):
     users: Optional[Tuple[User, ...]] = None
 
 
-VCPI = VoiceChatParticipantsInvited
+VCPI = VideoChatParticipantsInvited
 
 
 @attr.s(auto_attribs=True)
@@ -545,7 +555,7 @@ MADTC = MessageAutoDeleteTimerChanged
 
 
 @attr.s(auto_attribs=True)
-class VoiceChatScheduled(BaseTelegram):
+class VideoChatScheduled(BaseTelegram):
     start_date: int
 
 
@@ -593,6 +603,11 @@ class File(BaseTelegram):
     file_path: Optional[str] = None
 
 
+@attr.s(auto_attribs=True)
+class WebAppInfo(BaseTelegram):
+    url: str
+
+
 ReplyMarkup = Union['InlineKeyboardMarkup',
                     'ReplyKeyboardMarkup',
                     'ReplyKeyboardRemove',
@@ -614,6 +629,7 @@ class KeyboardButton(BaseTelegram):
     request_contact: Optional[bool] = None
     request_location: Optional[bool] = None
     request_poll: Optional['KeyboardButtonPollType'] = None
+    web_app: Optional[WebAppInfo] = None
 
 
 @attr.s(auto_attribs=True)
@@ -638,6 +654,7 @@ class InlineKeyboardButton(BaseTelegram):
     url: Optional[str] = None
     login_url: Optional['LoginUrl'] = None
     callback_data: Optional[str] = None
+    web_app: Optional[WebAppInfo] = None
     switch_inline_query: Optional[str] = None
     switch_inline_query_current_chat: Optional[str] = None
     callback_game: Optional['CallbackGame'] = None
@@ -692,6 +709,21 @@ class ChatInviteLink(BaseTelegram):
 
 
 @attr.s(auto_attribs=True)
+class ChatAdministratorRights(BaseTelegram):
+    is_anonymous: bool
+    can_manage_chat: bool
+    can_delete_messages: bool
+    can_manage_video_chats: bool
+    can_restrict_members: bool
+    can_promote_members: bool
+    can_change_info: bool
+    can_invite_users: bool
+    can_post_messages: Optional[bool]
+    can_edit_messages: Optional[bool]
+    can_pin_messages: Optional[bool]
+
+
+@attr.s(auto_attribs=True)
 class ChatMember(BaseTelegram):
     user: User
     status: str
@@ -704,7 +736,7 @@ class ChatMember(BaseTelegram):
     can_post_messages: Optional[bool] = None
     can_edit_messages: Optional[bool] = None
     can_delete_messages: Optional[bool] = None
-    can_manage_voice_chats: Optional[bool] = None
+    can_manage_video_chats: Optional[bool] = None
     can_invite_users: Optional[bool] = None
     can_restrict_members: Optional[bool] = None
     can_pin_messages: Optional[bool] = None
@@ -806,6 +838,14 @@ BotCommandScope = Union[BotCommandScopeDefault,
                         BotCommandScopeChat,
                         BotCommandScopeChatAdministrators,
                         BotCommandScopeChatMember]
+
+
+@attr.s(auto_attribs=True)
+class MenuButton(BaseTelegram):
+    type: str
+    text: Optional[str]
+    web_app: Optional[WebAppInfo]
+
 
 InputFile = Union[LocalFile, StreamFile]
 
@@ -1297,6 +1337,11 @@ class ChosenInlineResult(BaseTelegram):
     query: str
     location: Optional[Location] = None
     inline_message_id: Optional[str] = None
+
+
+@attr.s(auto_attribs=True)
+class SentWebAppMessage(BaseTelegram):
+    inline_message_id: Optional[str]
 
 
 @attr.s(auto_attribs=True)
