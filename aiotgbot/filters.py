@@ -123,9 +123,10 @@ class ORFilter:
         self._filters: Final[Tuple[FilterProtocol, ...]] = filters
 
     async def check(self, bot: Bot, update: BotUpdate) -> bool:
-        return any(
-            [await _filter.check(bot, update) for _filter in self._filters]
-        )
+        for filter_item in self._filters:
+            if await filter_item.check(bot, update):
+                return True
+        return False
 
 
 class ANDFilter:
@@ -133,6 +134,7 @@ class ANDFilter:
         self._filters: Final[Tuple[FilterProtocol, ...]] = filters
 
     async def check(self, bot: Bot, update: BotUpdate) -> bool:
-        return all(
-            [await _filter.check(bot, update) for _filter in self._filters]
-        )
+        for filter_item in self._filters:
+            if not await filter_item.check(bot, update):
+                return False
+        return True
