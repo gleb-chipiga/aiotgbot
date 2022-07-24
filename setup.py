@@ -42,7 +42,7 @@ setup(
         "aiojobs",
         "aiojobs-stubs>=1.0.0.post0",
         "attrs",
-        "backoff",
+        "backoff>=2",
         "frozenlist",
         "aiofreqlimit>=0.0.10",
         "yarl",
