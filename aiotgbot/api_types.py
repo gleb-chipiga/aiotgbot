@@ -495,7 +495,9 @@ class Message(BaseTelegram):
     group_chat_created: Optional[bool] = None
     supergroup_chat_created: Optional[bool] = None
     channel_chat_created: Optional[bool] = None
-    message_auto_delete_timer_changed: Optional["MADTC"] = None
+    message_auto_delete_timer_changed: Optional[
+        "MessageAutoDeleteTimerChanged"
+    ] = None
     migrate_to_chat_id: Optional[int] = None
     migrate_from_chat_id: Optional[int] = None
     pinned_message: Optional["Message"] = None
@@ -507,7 +509,9 @@ class Message(BaseTelegram):
     video_chat_scheduled: Optional["VideoChatScheduled"] = None
     video_chat_started: Optional["VideoChatStarted"] = None
     video_chat_ended: Optional["VideoChatEnded"] = None
-    video_chat_participants_invited: Optional["VCPI"] = None
+    video_chat_participants_invited: Optional[
+        "VideoChatParticipantsInvited"
+    ] = None
     web_app_data: Optional["WebAppData"] = None
     reply_markup: Optional["InlineKeyboardMarkup"] = None
 
@@ -658,9 +662,6 @@ class VideoChatParticipantsInvited(BaseTelegram):
     users: Optional[Tuple[User, ...]] = None
 
 
-VCPI = VideoChatParticipantsInvited
-
-
 @attr.s(auto_attribs=True)
 class ProximityAlertTriggered(BaseTelegram):
     traveler: User
@@ -671,9 +672,6 @@ class ProximityAlertTriggered(BaseTelegram):
 @attr.s(auto_attribs=True)
 class MessageAutoDeleteTimerChanged(BaseTelegram):
     message_auto_delete_time: int
-
-
-MADTC = MessageAutoDeleteTimerChanged
 
 
 @attr.s(auto_attribs=True)
