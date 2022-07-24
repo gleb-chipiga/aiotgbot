@@ -14,43 +14,43 @@ from aiotgbot.storage_memory import MemoryStorage
 async def _bot() -> Bot:
     table = HandlerTable()
     table.freeze()
-    bot = PollBot('token', table, MemoryStorage())
-    bot['key1'] = 'str1'
-    bot['key2'] = 'str2'
-    bot['key3'] = 4
+    bot = PollBot("token", table, MemoryStorage())
+    bot["key1"] = "str1"
+    bot["key2"] = "str2"
+    bot["key3"] = 4
 
     return bot
 
 
 @pytest.mark.asyncio
 async def test_bot_get_item(_bot: Bot) -> None:
-    assert _bot['key2'] == 'str2'
-    assert _bot.get('key4') is None
+    assert _bot["key2"] == "str2"
+    assert _bot.get("key4") is None
 
 
 @pytest.mark.asyncio
 async def test_bot_set_item(_bot: Bot) -> None:
-    _bot['key5'] = 6
-    assert _bot['key5'] == 6
+    _bot["key5"] = 6
+    assert _bot["key5"] == 6
 
 
 @pytest.mark.asyncio
 async def test_bot_delitem(_bot: Bot) -> None:
-    assert _bot['key3'] == 4
-    del _bot['key3']
-    assert _bot.get('key3') is None
+    assert _bot["key3"] == 4
+    del _bot["key3"]
+    assert _bot.get("key3") is None
 
 
 @pytest.mark.asyncio
 async def test_bot_len(_bot: Bot) -> None:
     assert len(_bot) == 3
-    _bot['key6'] = 7
+    _bot["key6"] = 7
     assert len(_bot) == 4
 
 
 @pytest.mark.asyncio
 async def test_bot_iter(_bot: Bot) -> None:
-    assert tuple(_bot) == ('key1', 'key2', 'key3')
+    assert tuple(_bot) == ("key1", "key2", "key3")
 
 
 @pytest.mark.asyncio
@@ -60,20 +60,25 @@ async def test_bot_storage(_bot: Bot) -> None:
 
 @pytest.mark.asyncio
 async def test_handler_check() -> None:
-    async def func1(_: Bot, __: BotUpdate) -> None: ...
+    async def func1(_: Bot, __: BotUpdate) -> None:
+        ...
 
-    handler = Handler(func1, (
-        UpdateTypeFilter(UpdateType.MESSAGE),
-        StateFilter('state1'),
-    ))
+    handler = Handler(
+        func1,
+        (
+            UpdateTypeFilter(UpdateType.MESSAGE),
+            StateFilter("state1"),
+        ),
+    )
 
     table = HandlerTable()
     table.freeze()
-    bot = PollBot('token', table, MemoryStorage())
-    ctx = Context({'key1': 'str1', 'key2': 'str2', 'key3': 4})
-    message = Message.from_dict({'message_id': 1, 'date': 1,
-                                'chat': {'id': 1, 'type': 'private'}})
-    bu1 = BotUpdate('state1', ctx, Update(update_id=1, message=message))
+    bot = PollBot("token", table, MemoryStorage())
+    ctx = Context({"key1": "str1", "key2": "str2", "key3": 4})
+    message = Message.from_dict(
+        {"message_id": 1, "date": 1, "chat": {"id": 1, "type": "private"}}
+    )
+    bu1 = BotUpdate("state1", ctx, Update(update_id=1, message=message))
     assert await handler.check(bot, bu1)
-    bu2 = BotUpdate('state2', ctx, Update(update_id=2, message=message))
+    bu2 = BotUpdate("state2", ctx, Update(update_id=2, message=message))
     assert not await handler.check(bot, bu2)

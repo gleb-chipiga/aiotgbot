@@ -2,58 +2,153 @@ import asyncio
 from enum import Enum
 from io import BufferedReader
 from pathlib import Path
-from typing import (Any, AsyncIterator, Dict, Final, Generator, Iterable, List,
-                    Optional, Set, Tuple, Type, TypeVar, Union, cast, get_args,
-                    get_origin, get_type_hints)
+from typing import (
+    Any,
+    AsyncIterator,
+    Dict,
+    Final,
+    Generator,
+    Iterable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 import attr
 
 from aiotgbot.constants import InputMediaType, ParseMode, PollType
 
-__all__ = ('DataMappingError', 'StreamFile', 'LocalFile', 'BaseTelegram',
-           'ResponseParameters', 'APIResponse', 'Update', 'WebhookInfo',
-           'User', 'Chat', 'Message', 'MessageId', 'MessageEntity',
-           'PhotoSize', 'Audio', 'Document', 'Video', 'Animation', 'Voice',
-           'VideoNote', 'Contact', 'Dice', 'Location', 'Venue',
-           'ProximityAlertTriggered', 'PollOption', 'PollAnswer', 'Poll',
-           'UserProfilePhotos', 'File', 'ReplyMarkup', 'ReplyKeyboardMarkup',
-           'KeyboardButton', 'KeyboardButtonPollType', 'ReplyKeyboardRemove',
-           'InlineKeyboardMarkup', 'InlineKeyboardButton', 'LoginUrl',
-           'CallbackQuery', 'ForceReply', 'ChatPhoto', 'ChatInviteLink',
-           'ChatAdministratorRights', 'ChatMember', 'ChatMemberUpdated',
-           'ChatPermissions', 'ChatLocation', 'BotCommand',
-           'BotCommandScopeDefault', 'BotCommandScopeAllPrivateChats',
-           'BotCommandScopeAllGroupChats', 'BotCommandScopeChatAdministrators',
-           'BotCommandScopeChat', 'BotCommandScopeAllChatAdministrators',
-           'BotCommandScopeChatMember', 'BotCommandScope', 'MenuButton',
-           'InputFile', 'InputMedia', 'InputMediaPhoto', 'InputMediaVideo',
-           'InputMediaAnimation', 'InputMediaAudio',
-           'InputMediaDocument', 'Sticker', 'StickerSet', 'MaskPosition',
-           'InlineQuery', 'InlineQueryResult', 'InlineQueryResultArticle',
-           'InlineQueryResultPhoto', 'InlineQueryResultGif',
-           'InlineQueryResultMpeg4Gif', 'InlineQueryResultVideo',
-           'InlineQueryResultAudio', 'InlineQueryResultVoice',
-           'InlineQueryResultDocument', 'InlineQueryResultLocation',
-           'InlineQueryResultVenue', 'InlineQueryResultContact',
-           'InlineQueryResultGame', 'InlineQueryResultCachedPhoto',
-           'InlineQueryResultCachedGif', 'InlineQueryResultCachedMpeg4Gif',
-           'InlineQueryResultCachedSticker', 'InlineQueryResultCachedDocument',
-           'InlineQueryResultCachedVideo', 'InlineQueryResultCachedVoice',
-           'InlineQueryResultCachedAudio', 'InputMessageContent',
-           'InputTextMessageContent', 'InputLocationMessageContent',
-           'InputVenueMessageContent', 'InputContactMessageContent',
-           'ChosenInlineResult', 'SentWebAppMessage', 'LabeledPrice',
-           'Invoice', 'ShippingAddress', 'OrderInfo', 'ShippingOption',
-           'SuccessfulPayment', 'ShippingQuery', 'PreCheckoutQuery',
-           'PassportData', 'PassportFile', 'EncryptedPassportElement',
-           'EncryptedCredentials', 'PassportElementError',
-           'PassportElementErrorDataField', 'PassportElementErrorFrontSide',
-           'PassportElementErrorReverseSide', 'PassportElementErrorSelfie',
-           'PassportElementErrorFile', 'PassportElementErrorFiles',
-           'PassportElementErrorTranslationFile',
-           'PassportElementErrorTranslationFiles',
-           'PassportElementErrorUnspecified', 'Game', 'CallbackGame',
-           'GameHighScore')
+__all__ = (
+    "DataMappingError",
+    "StreamFile",
+    "LocalFile",
+    "BaseTelegram",
+    "ResponseParameters",
+    "APIResponse",
+    "Update",
+    "WebhookInfo",
+    "User",
+    "Chat",
+    "Message",
+    "MessageId",
+    "MessageEntity",
+    "PhotoSize",
+    "Audio",
+    "Document",
+    "Video",
+    "Animation",
+    "Voice",
+    "VideoNote",
+    "Contact",
+    "Dice",
+    "Location",
+    "Venue",
+    "ProximityAlertTriggered",
+    "PollOption",
+    "PollAnswer",
+    "Poll",
+    "UserProfilePhotos",
+    "File",
+    "ReplyMarkup",
+    "ReplyKeyboardMarkup",
+    "KeyboardButton",
+    "KeyboardButtonPollType",
+    "ReplyKeyboardRemove",
+    "InlineKeyboardMarkup",
+    "InlineKeyboardButton",
+    "LoginUrl",
+    "CallbackQuery",
+    "ForceReply",
+    "ChatPhoto",
+    "ChatInviteLink",
+    "ChatAdministratorRights",
+    "ChatMember",
+    "ChatMemberUpdated",
+    "ChatPermissions",
+    "ChatLocation",
+    "BotCommand",
+    "BotCommandScopeDefault",
+    "BotCommandScopeAllPrivateChats",
+    "BotCommandScopeAllGroupChats",
+    "BotCommandScopeChatAdministrators",
+    "BotCommandScopeChat",
+    "BotCommandScopeAllChatAdministrators",
+    "BotCommandScopeChatMember",
+    "BotCommandScope",
+    "MenuButton",
+    "InputFile",
+    "InputMedia",
+    "InputMediaPhoto",
+    "InputMediaVideo",
+    "InputMediaAnimation",
+    "InputMediaAudio",
+    "InputMediaDocument",
+    "Sticker",
+    "StickerSet",
+    "MaskPosition",
+    "InlineQuery",
+    "InlineQueryResult",
+    "InlineQueryResultArticle",
+    "InlineQueryResultPhoto",
+    "InlineQueryResultGif",
+    "InlineQueryResultMpeg4Gif",
+    "InlineQueryResultVideo",
+    "InlineQueryResultAudio",
+    "InlineQueryResultVoice",
+    "InlineQueryResultDocument",
+    "InlineQueryResultLocation",
+    "InlineQueryResultVenue",
+    "InlineQueryResultContact",
+    "InlineQueryResultGame",
+    "InlineQueryResultCachedPhoto",
+    "InlineQueryResultCachedGif",
+    "InlineQueryResultCachedMpeg4Gif",
+    "InlineQueryResultCachedSticker",
+    "InlineQueryResultCachedDocument",
+    "InlineQueryResultCachedVideo",
+    "InlineQueryResultCachedVoice",
+    "InlineQueryResultCachedAudio",
+    "InputMessageContent",
+    "InputTextMessageContent",
+    "InputLocationMessageContent",
+    "InputVenueMessageContent",
+    "InputContactMessageContent",
+    "ChosenInlineResult",
+    "SentWebAppMessage",
+    "LabeledPrice",
+    "Invoice",
+    "ShippingAddress",
+    "OrderInfo",
+    "ShippingOption",
+    "SuccessfulPayment",
+    "ShippingQuery",
+    "PreCheckoutQuery",
+    "PassportData",
+    "PassportFile",
+    "EncryptedPassportElement",
+    "EncryptedCredentials",
+    "PassportElementError",
+    "PassportElementErrorDataField",
+    "PassportElementErrorFrontSide",
+    "PassportElementErrorReverseSide",
+    "PassportElementErrorSelfie",
+    "PassportElementErrorFile",
+    "PassportElementErrorFiles",
+    "PassportElementErrorTranslationFile",
+    "PassportElementErrorTranslationFiles",
+    "PassportElementErrorUnspecified",
+    "Game",
+    "CallbackGame",
+    "GameHighScore",
+)
 
 
 class DataMappingError(BaseException):
@@ -68,12 +163,14 @@ class StreamFile:
 
 
 class LocalFile:
-
     def __init__(
-        self, path: Union[str, Path], content_type: Optional[str] = None,
+        self,
+        path: Union[str, Path],
+        content_type: Optional[str] = None,
     ) -> None:
-        self._path: Final[Path] = (path if isinstance(path, Path)
-                                   else Path(path))
+        self._path: Final[Path] = (
+            path if isinstance(path, Path) else Path(path)
+        )
         self._content_type: Final[Optional[str]] = content_type
 
     @property
@@ -87,13 +184,15 @@ class LocalFile:
     @property
     async def content(self) -> AsyncIterator[bytes]:
         loop = asyncio.get_running_loop()
-        reader = cast(BufferedReader, await loop.run_in_executor(
-            None, self._path.open, 'rb'))
+        reader = cast(
+            BufferedReader,
+            await loop.run_in_executor(None, self._path.open, "rb"),
+        )
         try:
-            chunk = await loop.run_in_executor(None, reader.read, 2 ** 16)
+            chunk = await loop.run_in_executor(None, reader.read, 2**16)
             while len(chunk) > 0:
                 yield chunk
-                chunk = await loop.run_in_executor(None, reader.read, 2 ** 16)
+                chunk = await loop.run_in_executor(None, reader.read, 2**16)
         finally:
             await loop.run_in_executor(None, reader.close)
 
@@ -115,24 +214,33 @@ def _is_optional(_type: Any) -> bool:
 
 
 def _is_attr_union(_type: Any) -> bool:
-    return _is_union(_type) and all(attr.has(arg_type) or arg_type is _NoneType
-                                    for arg_type in get_args(_type))
+    return _is_union(_type) and all(
+        attr.has(arg_type) or arg_type is _NoneType
+        for arg_type in get_args(_type)
+    )
 
 
 _NoneType: Type[None] = type(None)
-_FieldType = Union[int, str, bool, float, Tuple[Any, ...], List[Any],
-                   Dict[str, Any], 'BaseTelegram']
+_FieldType = Union[
+    int,
+    str,
+    bool,
+    float,
+    Tuple[Any, ...],
+    List[Any],
+    Dict[str, Any],
+    "BaseTelegram",
+]
 _HintsGenerator = Generator[Tuple[str, str, Any], None, None]
 
 
 @attr.s(frozen=True)
 class BaseTelegram:
-
     def to_dict(self) -> Dict[str, Any]:
         _dict: Dict[str, Any] = {}
         for _attr in attr.fields(type(self)):
             value = getattr(self, _attr.name)
-            key = _attr.name.rstrip('_')
+            key = _attr.name.rstrip("_")
             if isinstance(value, BaseTelegram):
                 _dict[key] = value.to_dict()
             elif isinstance(value, (tuple, list)):
@@ -149,7 +257,7 @@ class BaseTelegram:
         return _dict
 
     @classmethod
-    def from_dict(cls: Type['_Telegram'], data: Dict[str, Any]) -> '_Telegram':
+    def from_dict(cls: Type["_Telegram"], data: Dict[str, Any]) -> "_Telegram":
         return cast(_Telegram, BaseTelegram._handle_object(cls, data))
 
     @staticmethod
@@ -171,23 +279,29 @@ class BaseTelegram:
 
     @staticmethod
     def _get_type_hints(_type: Any) -> Tuple[Tuple[str, str, Any], ...]:
-        return tuple((field.rstrip('_'), field, _type)
-                     for field, _type in get_type_hints(_type).items())
+        return tuple(
+            (field.rstrip("_"), field, _type)
+            for field, _type in get_type_hints(_type).items()
+        )
 
     @staticmethod
     def _handle_object(_type: Any, data: Dict[str, Any]) -> Any:
         assert issubclass(_type, BaseTelegram)
         assert attr.has(_type)
         type_hints = _type._get_type_hints(_type)
-        required = frozenset(field for field, _, _type in type_hints
-                             if not _is_optional(_type))
-        filled = frozenset(key for key, value in data.items()
-                           if value is not None)
+        required = frozenset(
+            field for field, _, _type in type_hints if not _is_optional(_type)
+        )
+        filled = frozenset(
+            key for key, value in data.items() if value is not None
+        )
         if not required <= filled:
-            keys = ', '.join(required - filled)
-            raise DataMappingError(f'Data without required keys: {keys}')
-        params = {field: BaseTelegram._handle_field(_type, data.get(key))
-                  for key, field, _type in type_hints}
+            keys = ", ".join(required - filled)
+            raise DataMappingError(f"Data without required keys: {keys}")
+        params = {
+            field: BaseTelegram._handle_field(_type, data.get(key))
+            for key, field, _type in type_hints
+        }
 
         return cast(Any, _type)(**params)
 
@@ -205,11 +319,15 @@ class BaseTelegram:
         elif _type is Any:
             return cast(_FieldType, value)
         elif _is_tuple(_type) and isinstance(value, list):
-            return tuple(BaseTelegram._handle_field(get_args(_type)[0], item)
-                         for item in value)
+            return tuple(
+                BaseTelegram._handle_field(get_args(_type)[0], item)
+                for item in value
+            )
         elif _is_list(_type) and isinstance(value, list):
-            return [BaseTelegram._handle_field(get_args(_type)[0], item)
-                    for item in value]
+            return [
+                BaseTelegram._handle_field(get_args(_type)[0], item)
+                for item in value
+            ]
         elif _is_list(_type) or _is_tuple(_type):
             raise DataMappingError(f'Data "{value}" is not list')
         elif _is_optional(_type) and value is None:
@@ -219,29 +337,29 @@ class BaseTelegram:
         elif _is_attr_union(_type) and isinstance(value, dict):
             types: List[Tuple[int, Any]] = []
             for arg_type in get_args(_type):
-                fields: Set[str] = set(key.rstrip('_') for key
-                                       in get_type_hints(arg_type).keys())
+                fields: Set[str] = set(
+                    key.rstrip("_") for key in get_type_hints(arg_type).keys()
+                )
                 data_keys: Set[str] = set(value.keys())
                 if not data_keys <= fields:
                     continue
                 types.append((len(fields & data_keys), arg_type))
             if len(types) == 0:
-                arg_types = ', '.join(t.__name__ for t in get_args(_type))
+                arg_types = ", ".join(t.__name__ for t in get_args(_type))
                 message = f'Data "{value}" not match any of "{arg_types}"'
                 raise DataMappingError(message)
             types = sorted(types, key=lambda t: t[0], reverse=True)
             return BaseTelegram._handle_field(types[0][1], value)
         elif attr.has(_type) and isinstance(value, dict):
             return cast(
-                BaseTelegram,
-                BaseTelegram._handle_object(_type, value)
+                BaseTelegram, BaseTelegram._handle_object(_type, value)
             )
         else:
             message = f'Data "{value}" not match field type "{_type}"'
             raise DataMappingError(message)
 
 
-_Telegram = TypeVar('_Telegram', bound=BaseTelegram)
+_Telegram = TypeVar("_Telegram", bound=BaseTelegram)
 
 
 @attr.s(auto_attribs=True)
@@ -262,20 +380,20 @@ class APIResponse(BaseTelegram):
 @attr.s(auto_attribs=True)
 class Update(BaseTelegram):
     update_id: int
-    message: Optional['Message'] = None
-    edited_message: Optional['Message'] = None
-    channel_post: Optional['Message'] = None
-    edited_channel_post: Optional['Message'] = None
-    inline_query: Optional['InlineQuery'] = None
-    chosen_inline_result: Optional['ChosenInlineResult'] = None
-    callback_query: Optional['CallbackQuery'] = None
-    shipping_query: Optional['ShippingQuery'] = None
-    pre_checkout_query: Optional['PreCheckoutQuery'] = None
-    poll: Optional['Poll'] = None
-    poll_answer: Optional['PollAnswer'] = None
-    my_chat_member: Optional['ChatMemberUpdated'] = None
-    chat_member: Optional['ChatMemberUpdated'] = None
-    chat_join_request: Optional['ChatJoinRequest'] = None
+    message: Optional["Message"] = None
+    edited_message: Optional["Message"] = None
+    channel_post: Optional["Message"] = None
+    edited_channel_post: Optional["Message"] = None
+    inline_query: Optional["InlineQuery"] = None
+    chosen_inline_result: Optional["ChosenInlineResult"] = None
+    callback_query: Optional["CallbackQuery"] = None
+    shipping_query: Optional["ShippingQuery"] = None
+    pre_checkout_query: Optional["PreCheckoutQuery"] = None
+    poll: Optional["Poll"] = None
+    poll_answer: Optional["PollAnswer"] = None
+    my_chat_member: Optional["ChatMemberUpdated"] = None
+    chat_member: Optional["ChatMemberUpdated"] = None
+    chat_join_request: Optional["ChatJoinRequest"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -314,21 +432,21 @@ class Chat(BaseTelegram):
     username: Optional[str] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
-    photo: Optional['ChatPhoto'] = None
+    photo: Optional["ChatPhoto"] = None
     bio: Optional[str] = None
     has_private_forwards: Optional[bool] = None
     join_to_send_messages: Optional[bool] = None
     join_by_request: Optional[bool] = None
     description: Optional[str] = None
     invite_link: Optional[str] = None
-    pinned_message: Optional['Message'] = None
-    permissions: Optional['ChatPermissions'] = None
+    pinned_message: Optional["Message"] = None
+    permissions: Optional["ChatPermissions"] = None
     slow_mode_delay: Optional[int] = None
     has_protected_content: Optional[bool] = None
     sticker_set_name: Optional[str] = None
     can_set_sticker_set: Optional[bool] = None
     linked_chat_id: Optional[int] = None
-    location: Optional['ChatLocation'] = None
+    location: Optional["ChatLocation"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -345,53 +463,53 @@ class Message(BaseTelegram):
     forward_sender_name: Optional[str] = None
     forward_date: Optional[int] = None
     is_automatic_forward: Optional[bool] = None
-    reply_to_message: Optional['Message'] = None
+    reply_to_message: Optional["Message"] = None
     via_bot: Optional[User] = None
     edit_date: Optional[int] = None
     has_protected_content: Optional[bool] = None
     media_group_id: Optional[str] = None
     author_signature: Optional[str] = None
     text: Optional[str] = None
-    entities: Optional[Tuple['MessageEntity', ...]] = None
-    caption_entities: Optional[Tuple['MessageEntity', ...]] = None
-    audio: Optional['Audio'] = None
-    document: Optional['Document'] = None
-    animation: Optional['Animation'] = None
-    game: Optional['Game'] = None
-    photo: Optional[Tuple['PhotoSize', ...]] = None
-    sticker: Optional['Sticker'] = None
-    video: Optional['Video'] = None
-    voice: Optional['Voice'] = None
-    video_note: Optional['VideoNote'] = None
+    entities: Optional[Tuple["MessageEntity", ...]] = None
+    caption_entities: Optional[Tuple["MessageEntity", ...]] = None
+    audio: Optional["Audio"] = None
+    document: Optional["Document"] = None
+    animation: Optional["Animation"] = None
+    game: Optional["Game"] = None
+    photo: Optional[Tuple["PhotoSize", ...]] = None
+    sticker: Optional["Sticker"] = None
+    video: Optional["Video"] = None
+    voice: Optional["Voice"] = None
+    video_note: Optional["VideoNote"] = None
     caption: Optional[str] = None
-    contact: Optional['Contact'] = None
-    dice: Optional['Dice'] = None
-    location: Optional['Location'] = None
-    venue: Optional['Venue'] = None
-    poll: Optional['Poll'] = None
+    contact: Optional["Contact"] = None
+    dice: Optional["Dice"] = None
+    location: Optional["Location"] = None
+    venue: Optional["Venue"] = None
+    poll: Optional["Poll"] = None
     new_chat_members: Optional[Tuple[User, ...]] = None
     left_chat_member: Optional[User] = None
     new_chat_title: Optional[str] = None
-    new_chat_photo: Optional[Tuple['PhotoSize', ...]] = None
+    new_chat_photo: Optional[Tuple["PhotoSize", ...]] = None
     delete_chat_photo: Optional[bool] = None
     group_chat_created: Optional[bool] = None
     supergroup_chat_created: Optional[bool] = None
     channel_chat_created: Optional[bool] = None
-    message_auto_delete_timer_changed: Optional['MADTC'] = None
+    message_auto_delete_timer_changed: Optional["MADTC"] = None
     migrate_to_chat_id: Optional[int] = None
     migrate_from_chat_id: Optional[int] = None
-    pinned_message: Optional['Message'] = None
-    invoice: Optional['Invoice'] = None
-    successful_payment: Optional['SuccessfulPayment'] = None
+    pinned_message: Optional["Message"] = None
+    invoice: Optional["Invoice"] = None
+    successful_payment: Optional["SuccessfulPayment"] = None
     connected_website: Optional[str] = None
-    passport_data: Optional['PassportData'] = None
-    proximity_alert_triggered: Optional['ProximityAlertTriggered'] = None
-    video_chat_scheduled: Optional['VideoChatScheduled'] = None
-    video_chat_started: Optional['VideoChatStarted'] = None
-    video_chat_ended: Optional['VideoChatEnded'] = None
-    video_chat_participants_invited: Optional['VCPI'] = None
-    web_app_data: Optional['WebAppData'] = None
-    reply_markup: Optional['InlineKeyboardMarkup'] = None
+    passport_data: Optional["PassportData"] = None
+    proximity_alert_triggered: Optional["ProximityAlertTriggered"] = None
+    video_chat_scheduled: Optional["VideoChatScheduled"] = None
+    video_chat_started: Optional["VideoChatStarted"] = None
+    video_chat_ended: Optional["VideoChatEnded"] = None
+    video_chat_participants_invited: Optional["VCPI"] = None
+    web_app_data: Optional["WebAppData"] = None
+    reply_markup: Optional["InlineKeyboardMarkup"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -612,15 +730,17 @@ class WebAppInfo(BaseTelegram):
     url: str
 
 
-ReplyMarkup = Union['InlineKeyboardMarkup',
-                    'ReplyKeyboardMarkup',
-                    'ReplyKeyboardRemove',
-                    'ForceReply']
+ReplyMarkup = Union[
+    "InlineKeyboardMarkup",
+    "ReplyKeyboardMarkup",
+    "ReplyKeyboardRemove",
+    "ForceReply",
+]
 
 
 @attr.s(auto_attribs=True)
 class ReplyKeyboardMarkup(BaseTelegram):
-    keyboard: List[List['KeyboardButton']]
+    keyboard: List[List["KeyboardButton"]]
     resize_keyboard: Optional[bool] = None
     one_time_keyboard: Optional[bool] = None
     input_field_placeholder: Optional[str] = None
@@ -632,7 +752,7 @@ class KeyboardButton(BaseTelegram):
     text: str
     request_contact: Optional[bool] = None
     request_location: Optional[bool] = None
-    request_poll: Optional['KeyboardButtonPollType'] = None
+    request_poll: Optional["KeyboardButtonPollType"] = None
     web_app: Optional[WebAppInfo] = None
 
 
@@ -649,19 +769,19 @@ class ReplyKeyboardRemove(BaseTelegram):
 
 @attr.s(auto_attribs=True)
 class InlineKeyboardMarkup(BaseTelegram):
-    inline_keyboard: List[List['InlineKeyboardButton']]
+    inline_keyboard: List[List["InlineKeyboardButton"]]
 
 
 @attr.s(auto_attribs=True)
 class InlineKeyboardButton(BaseTelegram):
     text: str
     url: Optional[str] = None
-    login_url: Optional['LoginUrl'] = None
+    login_url: Optional["LoginUrl"] = None
     callback_data: Optional[str] = None
     web_app: Optional[WebAppInfo] = None
     switch_inline_query: Optional[str] = None
     switch_inline_query_current_chat: Optional[str] = None
-    callback_game: Optional['CallbackGame'] = None
+    callback_game: Optional["CallbackGame"] = None
     pay: Optional[bool] = None
 
 
@@ -798,50 +918,52 @@ class BotCommand(BaseTelegram):
 
 @attr.s(auto_attribs=True)
 class BotCommandScopeDefault(BaseTelegram):
-    type: str = 'default'
+    type: str = "default"
 
 
 @attr.s(auto_attribs=True)
 class BotCommandScopeAllPrivateChats(BaseTelegram):
-    type: str = 'all_private_chats'
+    type: str = "all_private_chats"
 
 
 @attr.s(auto_attribs=True)
 class BotCommandScopeAllGroupChats(BaseTelegram):
-    type: str = 'all_group_chats'
+    type: str = "all_group_chats"
 
 
 @attr.s(auto_attribs=True)
 class BotCommandScopeAllChatAdministrators(BaseTelegram):
-    type: str = 'all_chat_administrators'
+    type: str = "all_chat_administrators"
 
 
 @attr.s(auto_attribs=True)
 class BotCommandScopeChat(BaseTelegram):
     chat_id: Union[int, str]
-    type: str = 'chat'
+    type: str = "chat"
 
 
 @attr.s(auto_attribs=True)
 class BotCommandScopeChatAdministrators(BaseTelegram):
     chat_id: Union[int, str]
-    type: str = 'chat'
+    type: str = "chat"
 
 
 @attr.s(auto_attribs=True)
 class BotCommandScopeChatMember(BaseTelegram):
     chat_id: Union[int, str]
     user_id: int
-    type: str = 'chat'
+    type: str = "chat"
 
 
-BotCommandScope = Union[BotCommandScopeDefault,
-                        BotCommandScopeAllPrivateChats,
-                        BotCommandScopeAllGroupChats,
-                        BotCommandScopeAllChatAdministrators,
-                        BotCommandScopeChat,
-                        BotCommandScopeChatAdministrators,
-                        BotCommandScopeChatMember]
+BotCommandScope = Union[
+    BotCommandScopeDefault,
+    BotCommandScopeAllPrivateChats,
+    BotCommandScopeAllGroupChats,
+    BotCommandScopeAllChatAdministrators,
+    BotCommandScopeChat,
+    BotCommandScopeChatAdministrators,
+    BotCommandScopeChatMember,
+]
 
 
 @attr.s(auto_attribs=True)
@@ -863,8 +985,10 @@ class InputMedia(BaseTelegram):
 
     def to_dict(self) -> Dict[str, Any]:
         if not isinstance(self.media, str):
-            raise TypeError('To serialize this object, the media attribute '
-                            'type must be a string')
+            raise TypeError(
+                "To serialize this object, the media attribute "
+                "type must be a string"
+            )
         return super().to_dict()
 
 
@@ -920,7 +1044,7 @@ class Sticker(BaseTelegram):
     emoji: Optional[str] = None
     set_name: Optional[str] = None
     premium_animation: Optional[File] = None
-    mask_position: Optional['MaskPosition'] = None
+    mask_position: Optional["MaskPosition"] = None
     file_size: Optional[int] = None
 
 
@@ -953,26 +1077,28 @@ class InlineQuery(BaseTelegram):
     location: Optional[Location] = None
 
 
-InlineQueryResult = Union['InlineQueryResultCachedAudio',
-                          'InlineQueryResultCachedDocument',
-                          'InlineQueryResultCachedGif',
-                          'InlineQueryResultCachedMpeg4Gif',
-                          'InlineQueryResultCachedPhoto',
-                          'InlineQueryResultCachedSticker',
-                          'InlineQueryResultCachedVideo',
-                          'InlineQueryResultCachedVoice',
-                          'InlineQueryResultArticle',
-                          'InlineQueryResultAudio',
-                          'InlineQueryResultContact',
-                          'InlineQueryResultGame',
-                          'InlineQueryResultDocument',
-                          'InlineQueryResultGif',
-                          'InlineQueryResultLocation',
-                          'InlineQueryResultMpeg4Gif',
-                          'InlineQueryResultPhoto',
-                          'InlineQueryResultVenue',
-                          'InlineQueryResultVideo',
-                          'InlineQueryResultVoice']
+InlineQueryResult = Union[
+    "InlineQueryResultCachedAudio",
+    "InlineQueryResultCachedDocument",
+    "InlineQueryResultCachedGif",
+    "InlineQueryResultCachedMpeg4Gif",
+    "InlineQueryResultCachedPhoto",
+    "InlineQueryResultCachedSticker",
+    "InlineQueryResultCachedVideo",
+    "InlineQueryResultCachedVoice",
+    "InlineQueryResultArticle",
+    "InlineQueryResultAudio",
+    "InlineQueryResultContact",
+    "InlineQueryResultGame",
+    "InlineQueryResultDocument",
+    "InlineQueryResultGif",
+    "InlineQueryResultLocation",
+    "InlineQueryResultMpeg4Gif",
+    "InlineQueryResultPhoto",
+    "InlineQueryResultVenue",
+    "InlineQueryResultVideo",
+    "InlineQueryResultVoice",
+]
 
 
 @attr.s(auto_attribs=True)
@@ -980,7 +1106,7 @@ class InlineQueryResultArticle(BaseTelegram):
     type: str
     id: str
     title: str
-    input_message_content: 'InputMessageContent'
+    input_message_content: "InputMessageContent"
     reply_markup: Optional[InlineKeyboardMarkup] = None
     url: Optional[str] = None
     hide_url: Optional[bool] = None
@@ -1004,7 +1130,7 @@ class InlineQueryResultPhoto(BaseTelegram):
     parse_mode: Optional[ParseMode] = None
     caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1020,7 +1146,7 @@ class InlineQueryResultGif(BaseTelegram):
     parse_mode: Optional[ParseMode] = None
     caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1036,7 +1162,7 @@ class InlineQueryResultMpeg4Gif(BaseTelegram):
     parse_mode: Optional[ParseMode] = None
     caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1055,7 +1181,7 @@ class InlineQueryResultVideo(BaseTelegram):
     video_duration: Optional[int] = None
     description: Optional[str] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1070,7 +1196,7 @@ class InlineQueryResultAudio(BaseTelegram):
     performer: Optional[str] = None
     audio_duration: Optional[int] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1084,7 +1210,7 @@ class InlineQueryResultVoice(BaseTelegram):
     caption_entities: Optional[Iterable[MessageEntity]] = None
     voice_duration: Optional[int] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1099,7 +1225,7 @@ class InlineQueryResultDocument(BaseTelegram):
     caption_entities: Optional[Iterable[MessageEntity]] = None
     description: Optional[str] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
     thumb_url: Optional[str] = None
     thumb_width: Optional[int] = None
     thumb_height: Optional[int] = None
@@ -1117,7 +1243,7 @@ class InlineQueryResultLocation(BaseTelegram):
     heading: Optional[int] = None
     proximity_alert_radius: Optional[int] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
     thumb_url: Optional[str] = None
     thumb_width: Optional[int] = None
     thumb_height: Optional[int] = None
@@ -1136,7 +1262,7 @@ class InlineQueryResultVenue(BaseTelegram):
     google_place_id: Optional[str] = None
     google_place_type: Optional[str] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
     thumb_url: Optional[str] = None
     thumb_width: Optional[int] = None
     thumb_height: Optional[int] = None
@@ -1151,7 +1277,7 @@ class InlineQueryResultContact(BaseTelegram):
     last_name: Optional[str] = None
     vcard: Optional[str] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
     thumb_url: Optional[str] = None
     thumb_width: Optional[int] = None
     thumb_height: Optional[int] = None
@@ -1176,7 +1302,7 @@ class InlineQueryResultCachedPhoto(BaseTelegram):
     parse_mode: Optional[ParseMode] = None
     caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1189,7 +1315,7 @@ class InlineQueryResultCachedGif(BaseTelegram):
     parse_mode: Optional[ParseMode] = None
     caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1202,7 +1328,7 @@ class InlineQueryResultCachedMpeg4Gif(BaseTelegram):
     parse_mode: Optional[ParseMode] = None
     caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1211,7 +1337,7 @@ class InlineQueryResultCachedSticker(BaseTelegram):
     id: str
     sticker_file_id: str
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1225,7 +1351,7 @@ class InlineQueryResultCachedDocument(BaseTelegram):
     parse_mode: Optional[ParseMode] = None
     caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1239,7 +1365,7 @@ class InlineQueryResultCachedVideo(BaseTelegram):
     parse_mode: Optional[ParseMode] = None
     caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1252,7 +1378,7 @@ class InlineQueryResultCachedVoice(BaseTelegram):
     parse_mode: Optional[ParseMode] = None
     caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1264,13 +1390,15 @@ class InlineQueryResultCachedAudio(BaseTelegram):
     parse_mode: Optional[ParseMode] = None
     caption_entities: Optional[Iterable[MessageEntity]] = None
     reply_markup: Optional[InlineKeyboardMarkup] = None
-    input_message_content: Optional['InputMessageContent'] = None
+    input_message_content: Optional["InputMessageContent"] = None
 
 
-InputMessageContent = Union['InputTextMessageContent',
-                            'InputLocationMessageContent',
-                            'InputVenueMessageContent',
-                            'InputContactMessageContent']
+InputMessageContent = Union[
+    "InputTextMessageContent",
+    "InputLocationMessageContent",
+    "InputVenueMessageContent",
+    "InputContactMessageContent",
+]
 
 
 @attr.s(auto_attribs=True)
@@ -1318,7 +1446,7 @@ class InputInvoiceMessageContent:
     payload: str
     provider_token: str
     currency: str
-    prices: Tuple['LabeledPrice', ...]
+    prices: Tuple["LabeledPrice", ...]
     max_tip_amount: Optional[int] = None
     suggested_tip_amounts: Optional[Tuple[int, ...]] = None
     provider_data: Optional[str] = None
@@ -1421,8 +1549,8 @@ class PreCheckoutQuery(BaseTelegram):
 
 @attr.s(auto_attribs=True)
 class PassportData(BaseTelegram):
-    data: Tuple['EncryptedPassportElement', ...]
-    credentials: 'EncryptedCredentials'
+    data: Tuple["EncryptedPassportElement", ...]
+    credentials: "EncryptedCredentials"
 
 
 @attr.s(auto_attribs=True)
@@ -1454,15 +1582,17 @@ class EncryptedCredentials(BaseTelegram):
     secret: str
 
 
-PassportElementError = Union['PassportElementErrorDataField',
-                             'PassportElementErrorFrontSide',
-                             'PassportElementErrorReverseSide',
-                             'PassportElementErrorSelfie',
-                             'PassportElementErrorFile',
-                             'PassportElementErrorFiles',
-                             'PassportElementErrorTranslationFile',
-                             'PassportElementErrorTranslationFiles',
-                             'PassportElementErrorUnspecified']
+PassportElementError = Union[
+    "PassportElementErrorDataField",
+    "PassportElementErrorFrontSide",
+    "PassportElementErrorReverseSide",
+    "PassportElementErrorSelfie",
+    "PassportElementErrorFile",
+    "PassportElementErrorFiles",
+    "PassportElementErrorTranslationFile",
+    "PassportElementErrorTranslationFiles",
+    "PassportElementErrorUnspecified",
+]
 
 
 @attr.s(auto_attribs=True)
@@ -1545,7 +1675,7 @@ class Game(BaseTelegram):
     photo: Tuple[PhotoSize, ...]
     text: Optional[str] = None
     text_entities: Optional[Tuple[MessageEntity, ...]] = None
-    animation: Optional['Animation'] = None
+    animation: Optional["Animation"] = None
 
 
 @attr.s(auto_attribs=True)

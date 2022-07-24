@@ -17,51 +17,67 @@ from yarl import URL
 from aiotgbot import BaseTelegram
 from aiotgbot.api_types import EncryptedCredentials
 
-__all__ = ('passport_request', 'PassportKey', 'PassportCipher',
-           'PassportScopeType', 'PassportScopeElementOne',
-           'PassportScopeElementOneOfSeveral', 'PassportScopeElement',
-           'PassportScope', 'FileCredentials', 'DataCredentials',
-           'SecureValue', 'SecureData', 'Credentials', 'PersonalDetails',
-           'ResidentialAddress', 'IdDocumentData')
+__all__ = (
+    "passport_request",
+    "PassportKey",
+    "PassportCipher",
+    "PassportScopeType",
+    "PassportScopeElementOne",
+    "PassportScopeElementOneOfSeveral",
+    "PassportScopeElement",
+    "PassportScope",
+    "FileCredentials",
+    "DataCredentials",
+    "SecureValue",
+    "SecureData",
+    "Credentials",
+    "PersonalDetails",
+    "ResidentialAddress",
+    "IdDocumentData",
+)
 
 
-def passport_request(bot_id: int, scope: 'PassportScope', public_key: str,
-                     nonce: str) -> str:
-    url = URL('tg://resolve').with_query(
-        domain='telegrampassport',
+def passport_request(
+    bot_id: int, scope: "PassportScope", public_key: str, nonce: str
+) -> str:
+    url = URL("tg://resolve").with_query(
+        domain="telegrampassport",
         bot_id=bot_id,
         scope=json.dumps(scope.to_dict()),
         public_key=public_key,
-        nonce=nonce
+        nonce=nonce,
     )
     return str(url)
 
 
 class PassportKey:
-    _padding: Final[OAEP] = OAEP(mgf=MGF1(algorithm=SHA1()), algorithm=SHA1(),
-                                 label=None)
+    _padding: Final[OAEP] = OAEP(
+        mgf=MGF1(algorithm=SHA1()), algorithm=SHA1(), label=None
+    )
 
     def __init__(self, private_key: RSAPrivateKey) -> None:
         if not isinstance(private_key, RSAPrivateKey):
-            raise RuntimeError('Key is not RSA private key')
+            raise RuntimeError("Key is not RSA private key")
         self._private_key: Final[RSAPrivateKey] = private_key
         public_key = self._private_key.public_key()
         public_bytes = public_key.public_bytes(
             serialization.Encoding.PEM,
-            serialization.PublicFormat.SubjectPublicKeyInfo
+            serialization.PublicFormat.SubjectPublicKeyInfo,
         )
         self._public_key_pem: Final[str] = public_bytes.decode()
 
     @staticmethod
-    def load_der(private_bytes: bytes) -> 'PassportKey':
+    def load_der(private_bytes: bytes) -> "PassportKey":
         private_key = serialization.load_der_private_key(
-            private_bytes, password=None)
+            private_bytes, password=None
+        )
         return PassportKey(cast(RSAPrivateKey, private_key))
 
     @staticmethod
-    def load_pem(private_text: str) -> 'PassportKey':
+    def load_pem(private_text: str) -> "PassportKey":
         private_key = serialization.load_pem_private_key(
-            private_text.encode(), password=None)
+            private_text.encode(), password=None
+        )
         return PassportKey(cast(RSAPrivateKey, private_key))
 
     def decrypt(self, ciphertext: bytes) -> bytes:
@@ -81,8 +97,10 @@ class PassportCipher:
         digest.update(data_secret)
         digest.update(data_hash)
         secret_hash = digest.finalize()
-        key = secret_hash[:self._key_size]
-        iv = secret_hash[self._key_size:self._key_size + self._iv_size]
+        key = secret_hash[: self._key_size]
+        iv = secret_hash[
+            self._key_size : self._key_size + self._iv_size  # noqa: E203
+        ]
         self._data_hash: Final[bytes] = data_hash
         self._cipher: Final[Cipher] = Cipher(AES(key), CBC(iv))
 
@@ -94,8 +112,8 @@ class PassportCipher:
         digest.update(plaintext)
         computed_hash = digest.finalize()
         if not bytes_eq(computed_hash, self._data_hash):
-            raise RuntimeError('Decryption error')
-        return plaintext[plaintext[0]:]
+            raise RuntimeError("Decryption error")
+        return plaintext[plaintext[0] :]  # noqa: E203
 
     async def decrypt_stream(
         self, stream: AsyncIterator[bytes]
@@ -118,25 +136,25 @@ class PassportCipher:
         digest.update(decrypted)
         computed_hash = digest.finalize()
         if not bytes_eq(computed_hash, self._data_hash):
-            raise RuntimeError('Decryption error')
+            raise RuntimeError("Decryption error")
         yield decrypted[skip:]
 
 
 @unique
 class PassportScopeType(Enum):
-    PERSONAL_DETAILS = 'personal_details'
-    PASSPORT = 'passport'
-    DRIVER_LICENSE = 'driver_license'
-    IDENTITY_CARD = 'identity_card'
-    INTERNAL_PASSPORT = 'internal_passport'
-    ADDRESS = 'address'
-    UTILITY_BILL = 'utility_bill'
-    BANK_STATEMENT = 'bank_statement'
-    RENTAL_AGREEMENT = 'rental_agreement'
-    PASSPORT_REGISTRATION = 'passport_registration'
-    TEMPORARY_REGISTRATION = 'temporary_registration'
-    PHONE_NUMBER = 'phone_number'
-    EMAIL = 'email'
+    PERSONAL_DETAILS = "personal_details"
+    PASSPORT = "passport"
+    DRIVER_LICENSE = "driver_license"
+    IDENTITY_CARD = "identity_card"
+    INTERNAL_PASSPORT = "internal_passport"
+    ADDRESS = "address"
+    UTILITY_BILL = "utility_bill"
+    BANK_STATEMENT = "bank_statement"
+    RENTAL_AGREEMENT = "rental_agreement"
+    PASSPORT_REGISTRATION = "passport_registration"
+    TEMPORARY_REGISTRATION = "temporary_registration"
+    PHONE_NUMBER = "phone_number"
+    EMAIL = "email"
 
 
 @attr.s(auto_attribs=True)
@@ -154,8 +172,9 @@ class PassportScopeElementOneOfSeveral(BaseTelegram):
     translation: Optional[bool] = None
 
 
-PassportScopeElement = Union[PassportScopeElementOne,
-                             PassportScopeElementOneOfSeveral]
+PassportScopeElement = Union[
+    PassportScopeElementOne, PassportScopeElementOneOfSeveral
+]
 
 
 @attr.s(auto_attribs=True)
@@ -176,8 +195,9 @@ class DataCredentials(BaseTelegram):
     secret: str
 
     def decrypt(self, ciphertext: str) -> bytes:
-        cipher = PassportCipher(b64decode(self.secret),
-                                b64decode(self.data_hash))
+        cipher = PassportCipher(
+            b64decode(self.secret), b64decode(self.data_hash)
+        )
         return cipher.decrypt(b64decode(ciphertext))
 
 
@@ -212,8 +232,9 @@ class Credentials(BaseTelegram):
     nonce: str
 
     @staticmethod
-    def from_encrypted(encrypted: EncryptedCredentials,
-                       passport_key: PassportKey) -> 'Credentials':
+    def from_encrypted(
+        encrypted: EncryptedCredentials, passport_key: PassportKey
+    ) -> "Credentials":
         data_secret = passport_key.decrypt(b64decode(encrypted.secret))
         data_hash = b64decode(encrypted.hash)
         ciphertext = b64decode(encrypted.data)

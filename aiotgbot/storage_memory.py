@@ -2,17 +2,18 @@ from typing import Any, AsyncIterator, Dict, Final, Tuple
 
 from aiotgbot.storage import Json, StorageProtocol
 
-__all__ = ('MemoryStorage',)
+__all__ = ("MemoryStorage",)
 
 
 class MemoryStorage(StorageProtocol):
-
     def __init__(self) -> None:
         self._data: Final[Dict[str, Any]] = {}
 
-    async def connect(self) -> None: ...
+    async def connect(self) -> None:
+        ...
 
-    async def close(self) -> None: ...
+    async def close(self) -> None:
+        ...
 
     async def set(self, key: str, value: Json = None) -> None:
         self._data[key] = value
@@ -24,7 +25,7 @@ class MemoryStorage(StorageProtocol):
         self._data.pop(key)
 
     async def iterate(
-        self, prefix: str = ''
+        self, prefix: str = ""
     ) -> AsyncIterator[Tuple[str, Json]]:
         for key, value in self._data.items():
             if key.startswith(prefix):

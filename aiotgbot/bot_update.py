@@ -1,14 +1,22 @@
 from typing import Any, Dict, Final, Iterator, MutableMapping, Optional
 
-from .api_types import (CallbackQuery, ChatMemberUpdated, ChosenInlineResult,
-                        InlineQuery, Message, Poll, PollAnswer,
-                        PreCheckoutQuery, ShippingQuery, Update)
+from .api_types import (
+    CallbackQuery,
+    ChatMemberUpdated,
+    ChosenInlineResult,
+    InlineQuery,
+    Message,
+    Poll,
+    PollAnswer,
+    PreCheckoutQuery,
+    ShippingQuery,
+    Update,
+)
 
-__all__ = ('Context', 'BotUpdate')
+__all__ = ("Context", "BotUpdate")
 
 
 class Context(MutableMapping[str, Any]):
-
     def __init__(self, data: Dict[str, Any]) -> None:
         self._data: Final[Dict[str, Any]] = data
 
@@ -35,9 +43,9 @@ class Context(MutableMapping[str, Any]):
 
 
 class BotUpdate(MutableMapping[str, Any]):
-
-    def __init__(self, state: Optional[str], context: Context,
-                 update: Update) -> None:
+    def __init__(
+        self, state: Optional[str], context: Context, update: Update
+    ) -> None:
         self._state: Optional[str] = state
         self._context: Final[Context] = context
         self._update: Final[Update] = update
