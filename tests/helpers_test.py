@@ -11,7 +11,7 @@ from aiotgbot.helpers import KeyLock
 async def test_sleep() -> None:
     loop = asyncio.get_running_loop()
     time1 = loop.time()
-    assert await asyncio.sleep(0.1) is None
+    await asyncio.sleep(0.1)
     time2 = loop.time()
 
     assert 0.09 < time2 - time1 < 0.11

@@ -12,11 +12,11 @@ def test_storage_protocol() -> None:
 @pytest.mark.asyncio
 async def test_sqlite_storage() -> None:
     storage: StorageProtocol = MemoryStorage()
-    assert await storage.connect() is None
-    assert await storage.set("key1", {"key2": "value2"}) is None
+    await storage.connect()
+    await storage.set("key1", {"key2": "value2"})
     assert await storage.get("key1") == {"key2": "value2"}
-    assert await storage.get("key2") is None
-    assert await storage.set("key2", {"key3": "value3"}) is None
+    await storage.get("key2")
+    await storage.set("key2", {"key3": "value3"})
 
     items1 = []
     async for item in storage.iterate("k"):
@@ -39,9 +39,9 @@ async def test_sqlite_storage() -> None:
         ("key2", {"key3": "value3"}),
     ]
 
-    assert await storage.delete("key1") is None
+    await storage.delete("key1")
     assert await storage.get("key2") == {"key3": "value3"}
-    assert await storage.clear() is None
+    await storage.clear()
 
     items4 = []
     async for item in storage.iterate():
@@ -50,4 +50,4 @@ async def test_sqlite_storage() -> None:
 
     assert storage.raw_connection() is None
 
-    assert await storage.close() is None
+    await storage.close()

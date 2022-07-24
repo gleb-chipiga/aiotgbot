@@ -19,13 +19,13 @@ async def test_sqlite_storage(tmpdir: Path) -> None:
         await storage.set("key1", "value1")
     with pytest.raises(RuntimeError, match="Not connected"):
         await storage.close()
-    assert await storage.connect() is None
+    await storage.connect()
     with pytest.raises(RuntimeError, match="Already connected"):
         await storage.connect()
-    assert await storage.set("key1", {"key2": "value2"}) is None
+    await storage.set("key1", {"key2": "value2"})
     assert await storage.get("key1") == {"key2": "value2"}
     assert await storage.get("key2") is None
-    assert await storage.set("key2", {"key3": "value3"}) is None
+    await storage.set("key2", {"key3": "value3"})
 
     items1 = []
     async for item in storage.iterate("k"):
@@ -48,9 +48,9 @@ async def test_sqlite_storage(tmpdir: Path) -> None:
         ("key2", {"key3": "value3"}),
     ]
 
-    assert await storage.delete("key1") is None
+    await storage.delete("key1")
     assert await storage.get("key2") == {"key3": "value3"}
-    assert await storage.clear() is None
+    await storage.clear()
 
     items4 = []
     async for item in storage.iterate():
@@ -59,4 +59,4 @@ async def test_sqlite_storage(tmpdir: Path) -> None:
 
     assert isinstance(storage.raw_connection(), aiosqlite.Connection)
 
-    assert await storage.close() is None
+    await storage.close()
