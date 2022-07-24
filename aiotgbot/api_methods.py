@@ -92,19 +92,27 @@ class ApiMethods(ABC):
         return tuple(Update.from_dict(item) for item in response.result)
 
     async def set_webhook(
-        self, url: Optional[str] = None,
+        self,
+        url: Optional[str] = None,
         certificate: Optional[InputFile] = None,
         ip_address: Optional[str] = None,
         max_connections: Optional[int] = None,
         allowed_updates: Optional[Iterable[UpdateType]] = None,
-        drop_pending_updates: Optional[bool] = None
+        drop_pending_updates: Optional[bool] = None,
+        secret_token: Optional[str] = None
     ) -> bool:
         api_logger.debug('Set webhook')
         response = await self._request(
-            RequestMethod.POST, 'setWebhook', url=url, certificate=certificate,
-            ip_address=ip_address, max_connections=max_connections,
+            RequestMethod.POST,
+            'setWebhook',
+            url=url,
+            certificate=certificate,
+            ip_address=ip_address,
+            max_connections=max_connections,
             allowed_updates=_json_dumps(allowed_updates),
-            drop_pending_updates=drop_pending_updates)
+            drop_pending_updates=drop_pending_updates,
+            secret_token=secret_token
+        )
         assert isinstance(response.result, bool)
         return response.result
 
@@ -1388,6 +1396,59 @@ class ApiMethods(ABC):
             reply_markup=_json_dumps(reply_markup))
 
         return Message.from_dict(response.result)
+
+    async def create_invoice_link(
+        self,
+        title: str,
+        description: str,
+        payload: str,
+        provider_token: str,
+        currency: str,
+        prices: Iterable[LabeledPrice],
+        max_tip_amount: Optional[int] = None,
+        suggested_tip_amounts: Optional[Tuple[int, ...]] = None,
+        start_parameter: Optional[str] = None,
+        provider_data: Optional[str] = None,
+        photo_url: Optional[str] = None,
+        photo_size: Optional[int] = None,
+        photo_width: Optional[int] = None,
+        photo_height: Optional[int] = None,
+        need_name: Optional[bool] = None,
+        need_phone_number: Optional[bool] = None,
+        need_email: Optional[bool] = None,
+        need_shipping_address: Optional[bool] = None,
+        send_phone_number_to_provider: Optional[bool] = None,
+        send_email_to_provider: Optional[bool] = None,
+        is_flexible: Optional[bool] = None,
+    ) -> str:
+        api_logger.debug('Create invoice link')
+        response = await self._request(
+            RequestMethod.POST,
+            'createInvoiceLink',
+            title=title,
+            description=description,
+            payload=payload,
+            provider_token=provider_token,
+            currency=currency,
+            prices=_json_dumps(prices),
+            max_tip_amount=max_tip_amount,
+            suggested_tip_amounts=_json_dumps(suggested_tip_amounts),
+            start_parameter=start_parameter,
+            provider_data=provider_data,
+            photo_url=photo_url,
+            photo_size=photo_size,
+            photo_width=photo_width,
+            photo_height=photo_height,
+            need_name=need_name,
+            need_phone_number=need_phone_number,
+            need_email=need_email,
+            need_shipping_address=need_shipping_address,
+            send_phone_number_to_provider=send_phone_number_to_provider,
+            send_email_to_provider=send_email_to_provider,
+            is_flexible=is_flexible,
+        )
+        assert isinstance(response.result, str)
+        return response.result
 
     async def answer_shipping_query(
         self, inline_query_id: str, ok: bool,

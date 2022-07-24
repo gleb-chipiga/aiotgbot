@@ -299,6 +299,8 @@ class User(BaseTelegram):
     last_name: Optional[str] = None
     username: Optional[str] = None
     language_code: Optional[str] = None
+    is_premium: Optional[bool] = None
+    added_to_attachment_menu: Optional[bool] = None
     can_join_groups: Optional[bool] = None
     can_read_all_group_messages: Optional[bool] = None
     supports_inline_queries: Optional[bool] = None
@@ -315,6 +317,8 @@ class Chat(BaseTelegram):
     photo: Optional['ChatPhoto'] = None
     bio: Optional[str] = None
     has_private_forwards: Optional[bool] = None
+    join_to_send_messages: Optional[bool] = None
+    join_by_request: Optional[bool] = None
     description: Optional[str] = None
     invite_link: Optional[str] = None
     pinned_message: Optional['Message'] = None
@@ -915,6 +919,7 @@ class Sticker(BaseTelegram):
     thumb: Optional[PhotoSize] = None
     emoji: Optional[str] = None
     set_name: Optional[str] = None
+    premium_animation: Optional[File] = None
     mask_position: Optional['MaskPosition'] = None
     file_size: Optional[int] = None
 
