@@ -44,9 +44,9 @@ setup(
         "attrs",
         "backoff",
         "frozenlist",
-        "aiofreqlimit>=0.0.7",
+        "aiofreqlimit>=0.0.10",
         "yarl",
     ],
-    tests_require=["pytest", "pytest-asyncio>=0.17.1", "hypothesis"],
+    tests_require=["pytest", "pytest-asyncio>=0.19", "hypothesis"],
     extras_require={"sqlite": ["aiosqlite"], "passport": ["cryptography<=38"]},
 )
