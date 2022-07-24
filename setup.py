@@ -48,5 +48,5 @@ setup(
         "yarl",
     ],
     tests_require=["pytest", "pytest-asyncio>=0.17.1", "hypothesis"],
-    extras_require={"sqlite": ["aiosqlite"], "passport": ["cryptography"]},
+    extras_require={"sqlite": ["aiosqlite"], "passport": ["cryptography<=38"]},
 )

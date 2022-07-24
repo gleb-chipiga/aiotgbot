@@ -102,10 +102,10 @@ class PassportCipher:
             self._key_size : self._key_size + self._iv_size  # noqa: E203
         ]
         self._data_hash: Final[bytes] = data_hash
-        self._cipher: Final[Cipher] = Cipher(AES(key), CBC(iv))
+        self._cipher: Final[Cipher[CBC]] = Cipher(AES(key), CBC(iv))
 
     def decrypt(self, ciphertext: bytes) -> bytes:
-        decryptor = self._cipher.decryptor()  # type: ignore
+        decryptor = self._cipher.decryptor()
         assert isinstance(decryptor, CipherContext)
         plaintext = decryptor.update(ciphertext) + decryptor.finalize()
         digest = Hash(SHA256())
@@ -118,7 +118,7 @@ class PassportCipher:
     async def decrypt_stream(
         self, stream: AsyncIterator[bytes]
     ) -> AsyncIterator[bytes]:
-        decryptor = self._cipher.decryptor()  # type: ignore
+        decryptor = self._cipher.decryptor()
         assert isinstance(decryptor, CipherContext)
         digest = Hash(SHA256())
         skip = None
