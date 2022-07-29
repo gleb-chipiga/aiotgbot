@@ -3,6 +3,7 @@ cryptography<=38
 
 flake8
 mypy
+types-setuptools
 isort
 black
 pytest

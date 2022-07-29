@@ -1,7 +1,7 @@
 import re
 from pathlib import Path
 
-from setuptools import setup  # type: ignore
+from setuptools import setup
 
 path = Path(__file__).parent
 txt = (path / "aiotgbot" / "__init__.py").read_text("utf-8")
