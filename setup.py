@@ -48,6 +48,11 @@ setup(
         "aiofreqlimit>=0.0.10",
         "yarl",
     ],
-    tests_require=["pytest", "pytest-asyncio>=0.19", "hypothesis"],
+    tests_require=[
+        "pytest",
+        "pytest-asyncio>=0.19",
+        "pytest-cov",
+        "hypothesis",
+    ],
     extras_require={"sqlite": ["aiosqlite"], "passport": ["cryptography<=38"]},
 )
