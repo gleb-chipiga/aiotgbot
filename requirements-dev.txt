@@ -1,0 +1,12 @@
+aiosqlite
+cryptography<=38
+
+flake8
+mypy
+isort
+black
+pytest
+pytest-asyncio>=0.19
+hypothesis
+build
+upload
