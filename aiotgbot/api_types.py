@@ -1036,9 +1036,9 @@ class InputMediaDocument(InputMedia):
 @attr.s(auto_attribs=True)
 class InputSticker(BaseTelegram):
     sticker: Union[str, InputFile]
-    emoji_list: tuple[str, ...]
+    emoji_list: Tuple[str, ...]
     mask_position: Optional["MaskPosition"]
-    keywords: Optional[tuple[str, ...]]
+    keywords: Optional[Tuple[str, ...]]
 
 
 @attr.s(auto_attribs=True)

@@ -1609,7 +1609,7 @@ class ApiMethods(ABC):
 
     async def get_custom_emoji_stickers(
         self, custom_emoji_ids: Iterable[str]
-    ) -> tuple[Sticker, ...]:
+    ) -> Tuple[Sticker, ...]:
         api_logger.debug("Get custom emoji stickers")
         response = await self._request(
             RequestMethod.GET,
