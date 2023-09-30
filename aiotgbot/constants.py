@@ -14,6 +14,8 @@ __all__ = (
     "InputMediaType",
     "InlineQueryResultType",
     "PassportElementType",
+    "StickerFormat",
+    "StickerType",
 )
 
 
@@ -74,6 +76,7 @@ class MessageEntityType(str, Enum):
     UNDERLINE = "underline"
     STRIKETHROUGH = "strikethrough"
     SPOILER = "spoiler"
+    CUSTOM_EMOJI = "custom_emoji"
 
 
 @unique
@@ -187,3 +190,17 @@ class PassportElementType(str, Enum):
     TEMPORARY_REGISTRATION = "temporary_registration"
     PHONE_NUMBER = "phone_number"
     EMAIL = "email"
+
+
+@unique
+class StickerFormat(str, Enum):
+    STATIC = "static"
+    ANIMATED = "animated"
+    VIDEO = "video"
+
+
+@unique
+class StickerType(str, Enum):
+    REGULAR = "regular"
+    MASK = "mask"
+    CUSTOM_EMOJI = "custom_emoji"

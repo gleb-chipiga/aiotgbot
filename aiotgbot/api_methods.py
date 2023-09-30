@@ -51,6 +51,8 @@ from .constants import (
     ParseMode,
     PollType,
     RequestMethod,
+    StickerFormat,
+    StickerType,
     UpdateType,
 )
 from .helpers import json_dumps
@@ -1604,6 +1606,18 @@ class ApiMethods(ABC):
         )
 
         return StickerSet.from_dict(response.result)
+
+    async def get_custom_emoji_stickers(
+        self, custom_emoji_ids: Iterable[str]
+    ) -> tuple[Sticker, ...]:
+        api_logger.debug("Get custom emoji stickers")
+        response = await self._request(
+            RequestMethod.GET,
+            "getCustomEmojiStickers",
+            custom_emoji_ids=_json_dumps(custom_emoji_ids),
+        )
+
+        return tuple(Sticker(**sticker) for sticker in response.result)
 
     async def upload_sticker_file(
         self, user_id: int, png_sticker: InputFile

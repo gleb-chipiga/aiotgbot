@@ -287,8 +287,8 @@ class BaseTelegram:
 
     @staticmethod
     def _handle_object(_type: Any, data: Dict[str, Any]) -> Any:
-        assert issubclass(_type, BaseTelegram)
         assert attr.has(_type)
+        assert issubclass(_type, BaseTelegram)
         type_hints = _type._get_type_hints(_type)
         required = frozenset(
             field for field, _, _type in type_hints if not _is_optional(_type)
@@ -444,6 +444,7 @@ class Chat(BaseTelegram):
     permissions: Optional["ChatPermissions"] = None
     slow_mode_delay: Optional[int] = None
     has_protected_content: Optional[bool] = None
+    has_restricted_voice_and_video_messages: Optional[bool] = None
     sticker_set_name: Optional[str] = None
     can_set_sticker_set: Optional[bool] = None
     linked_chat_id: Optional[int] = None
@@ -530,6 +531,7 @@ class MessageEntity(BaseTelegram):
     url: Optional[str] = None
     user: Optional[User] = None
     language: Optional[str] = None
+    custom_emoji_id: Optional[str] = None
 
 
 @attr.s(auto_attribs=True)
@@ -1043,6 +1045,7 @@ class InputSticker(BaseTelegram):
 class Sticker(BaseTelegram):
     file_id: str
     file_unique_id: str
+    type: str
     width: int
     height: int
     is_animated: bool
@@ -1052,6 +1055,7 @@ class Sticker(BaseTelegram):
     set_name: Optional[str] = None
     premium_animation: Optional[File] = None
     mask_position: Optional["MaskPosition"] = None
+    custom_emoji_id: Optional[str] = None
     file_size: Optional[int] = None
 
 
@@ -1059,9 +1063,9 @@ class Sticker(BaseTelegram):
 class StickerSet(BaseTelegram):
     name: str
     title: str
+    sticker_type: str
     is_animated: bool
     is_video: bool
-    contains_masks: bool
     stickers: Tuple[Sticker, ...]
     thumb: Optional[PhotoSize] = None
 
