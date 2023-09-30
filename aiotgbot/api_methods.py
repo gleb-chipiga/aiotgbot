@@ -26,6 +26,7 @@ from .api_types import (
     InputMediaDocument,
     InputMediaPhoto,
     InputMediaVideo,
+    InputSticker,
     LabeledPrice,
     MaskPosition,
     MenuButton,
@@ -37,6 +38,7 @@ from .api_types import (
     ReplyMarkup,
     SentWebAppMessage,
     ShippingOption,
+    Sticker,
     StickerSet,
     Update,
     User,
@@ -1622,13 +1624,24 @@ class ApiMethods(ABC):
         name: str,
         title: str,
         emojis: str,
-        png_sticker: Union[InputFile, str, None] = None,
-        tgs_sticker: Optional[InputFile] = None,
-        webm_sticker: Optional[InputFile] = None,
-        contains_masks: Optional[bool] = None,
-        mask_position: Optional[MaskPosition] = None,
+        stickers: Iterable[InputSticker],
+        sticker_format: StickerFormat,
+        sticker_type: Optional[StickerType] = None,
+        needs_repainting: Optional[bool] = None,
     ) -> bool:
         api_logger.debug('Create new sticker set "%s" for %s', name, user_id)
+        attached_media = []
+        attachments = {}
+        counter = count()
+        for sticker in stickers:
+            if isinstance(sticker.sticker, str):
+                attached_media.append(sticker)
+            else:
+                attachment_name = f"attachment{next(counter)}"
+                attachments[attachment_name] = sticker.sticker
+                attached_media.append(
+                    attr.evolve(sticker, sticker=f"attach://{attachment_name}")
+                )
         response = await self._request(
             RequestMethod.POST,
             "createNewStickerSet",
@@ -1636,11 +1649,10 @@ class ApiMethods(ABC):
             name=name,
             title=title,
             emojis=emojis,
-            png_sticker=png_sticker,
-            tgs_sticker=tgs_sticker,
-            webm_sticker=webm_sticker,
-            contains_masks=contains_masks,
-            mask_position=_json_dumps(mask_position),
+            stickers=_json_dumps(attached_media),
+            sticker_format=_enum_to_str(sticker_format),
+            sticker_type=_enum_to_str(sticker_type),
+            needs_repainting=needs_repainting,
         )
         assert isinstance(response.result, bool)
         return response.result

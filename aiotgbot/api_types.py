@@ -91,6 +91,7 @@ __all__ = (
     "InputMediaAnimation",
     "InputMediaAudio",
     "InputMediaDocument",
+    "InputSticker",
     "Sticker",
     "StickerSet",
     "MaskPosition",
@@ -1028,6 +1029,14 @@ class InputMediaDocument(InputMedia):
     type: str = attr.ib(default=InputMediaType.DOCUMENT, init=False)
     thumb: Optional[str] = None
     disable_content_type_detection: Optional[bool] = None
+
+
+@attr.s(auto_attribs=True)
+class InputSticker(BaseTelegram):
+    sticker: Union[str, InputFile]
+    emoji_list: tuple[str, ...]
+    mask_position: Optional["MaskPosition"]
+    keywords: Optional[tuple[str, ...]]
 
 
 @attr.s(auto_attribs=True)
