@@ -23,9 +23,9 @@ setup(
         "Intended Audience :: Developers",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "License :: OSI Approved :: MIT License",
         "Development Status :: 4 - Beta",
         "Operating System :: POSIX",
@@ -37,7 +37,7 @@ setup(
     ],
     packages=["aiotgbot"],
     package_data={"aiotgbot": ["py.typed"]},
-    python_requires=">=3.8,<3.11",
+    python_requires=">=3.9,<3.12",
     install_requires=[
         "aiohttp",
         "aiojobs",
@@ -45,7 +45,7 @@ setup(
         "attrs",
         "backoff>=2",
         "frozenlist",
-        "aiofreqlimit>=0.0.10",
+        "aiofreqlimit>=0.0.12",
         "yarl",
     ],
     tests_require=[
