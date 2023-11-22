@@ -491,7 +491,7 @@ class HandlerTableProtocol(Protocol):
 
     @property
     def frozen(self) -> bool:
-        ...  # noqa
+        ...
 
     @abstractmethod
     async def get_handler(
