@@ -1,5 +1,5 @@
 flake8:
-    flake8 --exclude .tox,.env .
+    flake8 --exclude .tox .
 
 mypy:
     mypy --strict .
