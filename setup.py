@@ -52,6 +52,11 @@ setup(
         "pytest-asyncio>=0.19",
         "pytest-cov",
         "hypothesis",
+        "sqlalchemy[aiosqlite]",
     ],
-    extras_require={"sqlite": ["aiosqlite"], "passport": ["cryptography<=38"]},
+    extras_require={
+        "sqlite": ["aiosqlite"],
+        "passport": ["cryptography<=38"],
+        "sqlalchemy": ["sqlalchemy"],
+    },
 )

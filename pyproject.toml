@@ -15,13 +15,14 @@ legacy_tox_ini = """
 
     [testenv]
     deps =
-        flake8
         aiosqlite
         cryptography
-        pytest
-        pytest-asyncio
+        flake8
         hypothesis
         mypy
+        pytest
+        pytest-asyncio
+        sqlalchemy
         types-setuptools
         uvloop
 
