@@ -40,8 +40,7 @@ setup(
     python_requires=">=3.9,<3.12",
     install_requires=[
         "aiohttp>=3.9",
-        "aiojobs",
-        "aiojobs-stubs>=1.0.0.post0",
+        "aiojobs>=1.1.0",
         "attrs",
         "backoff>=2",
         "frozenlist",
