@@ -39,7 +39,7 @@ setup(
     package_data={"aiotgbot": ["py.typed"]},
     python_requires=">=3.9,<3.12",
     install_requires=[
-        "aiohttp",
+        "aiohttp>=3.9",
         "aiojobs",
         "aiojobs-stubs>=1.0.0.post0",
         "attrs",
