@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import aiosqlite
 import pytest
 
@@ -7,14 +5,14 @@ from aiotgbot import StorageProtocol
 from aiotgbot.storage_sqlite import SQLiteStorage
 
 
-def test_storage_protocol(tmpdir: Path) -> None:
-    storage: StorageProtocol = SQLiteStorage(tmpdir / "test.sqlite")
+def test_storage_protocol() -> None:
+    storage: StorageProtocol = SQLiteStorage(":memory:")
     assert isinstance(storage, StorageProtocol)
 
 
 @pytest.mark.asyncio
-async def test_sqlite_storage(tmpdir: Path) -> None:
-    storage: StorageProtocol = SQLiteStorage(tmpdir / "test.sqlite")
+async def test_sqlite_storage() -> None:
+    storage: StorageProtocol = SQLiteStorage(":memory:")
     with pytest.raises(RuntimeError, match="Not connected"):
         await storage.set("key1", "value1")
     with pytest.raises(RuntimeError, match="Not connected"):
