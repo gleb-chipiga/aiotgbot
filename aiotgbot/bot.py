@@ -32,7 +32,6 @@ from aiohttp import (
     FormData,
     TCPConnector,
 )
-from aiojobs_protocols import SchedulerProtocol
 
 from .api_methods import ApiMethods, ParamType
 from .api_types import APIResponse, LocalFile, StreamFile, Update, User
@@ -111,7 +110,7 @@ class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
         self._message_limit: Final[FreqLimit] = FreqLimit(MESSAGE_INTERVAL)
         self._chat_limit: Final[FreqLimit] = FreqLimit(CHAT_INTERVAL)
         self._group_limit: Final[FreqLimit] = FreqLimit(GROUP_INTERVAL)
-        self._scheduler: Optional[SchedulerProtocol] = None
+        self._scheduler: Optional[aiojobs.Scheduler] = None
         self._started: bool = False
         self._stopped: bool = False
         self._updates_offset: int = 0
@@ -169,7 +168,7 @@ class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
 
     @staticmethod
     def _scheduler_exception_handler(
-        _: SchedulerProtocol, context: Dict[str, Any]
+        _: aiojobs.Scheduler, context: Dict[str, Any]
     ) -> None:
         bot_logger.exception(
             "Update handle error", exc_info=context["exception"]
@@ -384,7 +383,7 @@ class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
         self._started = True
 
         self._me = await self.get_me()
-        self._scheduler = await aiojobs.create_scheduler(
+        self._scheduler = aiojobs.Scheduler(
             exception_handler=self._scheduler_exception_handler
         )
 
@@ -462,7 +461,10 @@ class PollBot(Bot):
                 offset=self._updates_offset, timeout=TG_GET_UPDATES_TIMEOUT
             )
             for update in updates:
-                await self._scheduler.spawn(self._handle_update(update))
+                await self._scheduler.spawn(
+                    self._handle_update(update),
+                    f"handle_update_{update.update_id}",
+                )
             if len(updates) > 0:
                 self._updates_offset = updates[-1].update_id + 1
 
