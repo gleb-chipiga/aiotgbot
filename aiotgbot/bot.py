@@ -15,7 +15,9 @@ from typing import (
     Optional,
     Protocol,
     Tuple,
+    TypeVar,
     Union,
+    overload,
     runtime_checkable,
 )
 
@@ -45,7 +47,7 @@ from .exceptions import (
     RetryAfter,
     TelegramError,
 )
-from .helpers import KeyLock, get_software, json_dumps
+from .helpers import BotKey, KeyLock, get_software, json_dumps
 from .storage import StorageProtocol
 
 __all__ = (
@@ -72,8 +74,10 @@ response_logger: Final[logging.Logger] = logging.getLogger("aiotgbot.response")
 
 EventHandler = Callable[["Bot"], Awaitable[None]]
 
+_T = TypeVar("_T")
 
-class Bot(MutableMapping[str, Any], ApiMethods):
+
+class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
     def __init__(
         self,
         token: str,
@@ -112,21 +116,37 @@ class Bot(MutableMapping[str, Any], ApiMethods):
         self._stopped: bool = False
         self._updates_offset: int = 0
         self._me: Optional[User] = None
-        self._data: Final[Dict[str, Any]] = {}
+        self._data: Final[Dict[Union[BotKey[Any], str], object]] = {}
 
+    @overload  # type: ignore[override]
+    def __getitem__(self, key: BotKey[_T]) -> _T:
+        ...
+
+    @overload
     def __getitem__(self, key: str) -> Any:
+        ...
+
+    def __getitem__(self, key: Union[str, BotKey[_T]]) -> Any:
         return self._data[key]
 
+    @overload  # type: ignore[override]
+    def __setitem__(self, key: BotKey[_T], value: _T) -> None:
+        ...
+
+    @overload
     def __setitem__(self, key: str, value: Any) -> None:
+        ...
+
+    def __setitem__(self, key: Union[str, BotKey[_T]], value: Any) -> None:
         self._data[key] = value
 
-    def __delitem__(self, key: str) -> None:
+    def __delitem__(self, key: Union[str, BotKey[_T]]) -> None:
         del self._data[key]
 
     def __len__(self) -> int:
         return len(self._data)
 
-    def __iter__(self) -> Iterator[str]:
+    def __iter__(self) -> Iterator[Union[str, BotKey[Any]]]:
         return iter(self._data)
 
     @property

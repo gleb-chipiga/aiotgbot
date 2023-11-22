@@ -5,7 +5,15 @@ from functools import partial
 from typing import AsyncIterator, Final, Hashable
 from weakref import WeakValueDictionary
 
-__all__ = ("json_dumps", "get_python_version", "get_software", "KeyLock")
+from aiohttp import web
+
+__all__ = (
+    "json_dumps",
+    "get_python_version",
+    "get_software",
+    "BotKey",
+    "KeyLock",
+)
 
 
 json_dumps: Final = partial(json.dumps, ensure_ascii=False)
@@ -38,3 +46,6 @@ class KeyLock:
             lock = self._locks[key]
         async with lock:
             yield
+
+
+BotKey = web.AppKey
