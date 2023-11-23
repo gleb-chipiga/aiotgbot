@@ -15,6 +15,7 @@ async def test_sqlalchemy_storage() -> None:
     storage: StorageProtocol = SqlalchemyStorage("sqlite+aiosqlite://")
     await storage.connect()
     await storage.set("key1", {"key2": "value2"})
+    await storage.set("key1", {"key2": "value2"})
     assert await storage.get("key1") == {"key2": "value2"}
     assert await storage.get("key2") is None
     await storage.set("key2", {"key3": "value3"})

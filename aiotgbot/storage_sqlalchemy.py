@@ -1,7 +1,8 @@
 import json
 from typing import Annotated, Any, AsyncIterator, Final, Tuple, cast
 
-from sqlalchemy import delete, insert, select
+from sqlalchemy import delete, insert, select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -34,10 +35,16 @@ class SqlalchemyStorage(StorageProtocol):
         await self._engine.dispose()
 
     async def set(self, key: str, value: Json = None) -> None:
+        json_value = json_dumps(value)
         async with self._engine.begin() as connection:
-            await connection.execute(
-                insert(KV).values(key=key, value=json_dumps(value))
-            )
+            try:
+                await connection.execute(
+                    insert(KV).values(key=key, value=json_value)
+                )
+            except IntegrityError:
+                await connection.execute(
+                    update(KV).where(KV.key == key).values(value=json_value)
+                )
 
     async def get(self, key: str) -> Json:
         async with self._engine.begin() as connection:
