@@ -1,12 +1,10 @@
-import json
-from typing import Annotated, Any, AsyncIterator, Final, Tuple, cast
+from typing import Annotated, Any, AsyncIterator, Final, Tuple
 
-from sqlalchemy import delete, insert, select, update
+from sqlalchemy import JSON, Text, delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from aiotgbot.helpers import json_dumps
 from aiotgbot.storage import Json, StorageProtocol
 
 __all__ = ("SqlalchemyStorage",)
@@ -19,8 +17,8 @@ class Base(DeclarativeBase):
 class KV(Base):
     __tablename__ = "kv"
 
-    key: Mapped[Annotated[str, mapped_column(primary_key=True)]]
-    value: Mapped[str]
+    key: Mapped[Annotated[str, mapped_column(Text, primary_key=True)]]
+    value: Mapped[Annotated[Json, mapped_column(JSON)]]
 
 
 class SqlalchemyStorage(StorageProtocol):
@@ -35,16 +33,15 @@ class SqlalchemyStorage(StorageProtocol):
         await self._engine.dispose()
 
     async def set(self, key: str, value: Json = None) -> None:
-        json_value = json_dumps(value)
         async with self._engine.begin() as connection:
             try:
                 async with connection.begin_nested():
                     await connection.execute(
-                        insert(KV).values(key=key, value=json_value)
+                        insert(KV).values(key=key, value=value)
                     )
             except IntegrityError:
                 await connection.execute(
-                    update(KV).where(KV.key == key).values(value=json_value)
+                    update(KV).where(KV.key == key).values(value=value)
                 )
 
     async def get(self, key: str) -> Json:
@@ -52,11 +49,7 @@ class SqlalchemyStorage(StorageProtocol):
             result = await connection.execute(
                 select(KV.value).where(KV.key == key)
             )
-            value = result.scalar()
-            if value is not None:
-                return cast(Json, json.loads(value))
-            else:
-                return None
+            return result.scalar()
 
     async def delete(self, key: str) -> None:
         async with self._engine.begin() as connection:
@@ -70,7 +63,7 @@ class SqlalchemyStorage(StorageProtocol):
                 select(KV.key, KV.value).where(KV.key.startswith(prefix))
             )
             async for key, value in result:
-                yield key, json.loads(value)
+                yield key, value
 
     async def clear(self) -> None:
         async with self._engine.begin() as connection:
