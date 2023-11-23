@@ -38,9 +38,10 @@ class SqlalchemyStorage(StorageProtocol):
         json_value = json_dumps(value)
         async with self._engine.begin() as connection:
             try:
-                await connection.execute(
-                    insert(KV).values(key=key, value=json_value)
-                )
+                async with connection.begin_nested():
+                    await connection.execute(
+                        insert(KV).values(key=key, value=json_value)
+                    )
             except IntegrityError:
                 await connection.execute(
                     update(KV).where(KV.key == key).values(value=json_value)
