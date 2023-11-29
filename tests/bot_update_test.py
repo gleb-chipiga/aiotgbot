@@ -1,5 +1,4 @@
-from typing import Dict, Union
-
+import msgspec
 import pytest
 
 from aiotgbot.api_types import (
@@ -24,8 +23,9 @@ def context() -> Context:
 
 @pytest.fixture
 def message() -> Message:
-    return Message.from_dict(
-        {"message_id": 1, "date": 1, "chat": {"id": 1, "type": "private"}}
+    return msgspec.convert(
+        {"message_id": 1, "date": 1, "chat": {"id": 1, "type": "private"}},
+        Message,
     )
 
 
@@ -43,7 +43,7 @@ def bot_update(context: Context, update: Update) -> BotUpdate:
     return bu
 
 
-_UserDict = Dict[str, Union[int, bool, str]]
+_UserDict = dict[str, int | bool | str]
 
 
 @pytest.fixture
@@ -174,8 +174,9 @@ def test_bot_update_edited_channel_post(
 def test_bot_update_inline_query(
     user_dict: _UserDict, context: Context
 ) -> None:
-    inline_query = InlineQuery.from_dict(
-        {"id": "1", "from": user_dict, "query": "q", "offset": "o"}
+    inline_query = msgspec.convert(
+        {"id": "1", "from": user_dict, "query": "q", "offset": "o"},
+        InlineQuery,
     )
     _update = Update(update_id=1, inline_query=inline_query)
     _bot_update = BotUpdate("state1", context, _update)
@@ -185,8 +186,8 @@ def test_bot_update_inline_query(
 def test_bot_update_chosen_inline_result(
     user_dict: _UserDict, context: Context
 ) -> None:
-    chosen_inline_result = ChosenInlineResult.from_dict(
-        {"result_id": "1", "from": user_dict, "query": "q"}
+    chosen_inline_result = msgspec.convert(
+        {"result_id": "1", "from": user_dict, "query": "q"}, ChosenInlineResult
     )
     _update = Update(update_id=1, chosen_inline_result=chosen_inline_result)
     _bot_update = BotUpdate("state1", context, _update)
@@ -196,8 +197,8 @@ def test_bot_update_chosen_inline_result(
 def test_bot_update_callback_query(
     user_dict: _UserDict, context: Context
 ) -> None:
-    callback_query = CallbackQuery.from_dict(
-        {"id": "1", "from": user_dict, "chat_instance": "ci"}
+    callback_query = msgspec.convert(
+        {"id": "1", "from": user_dict, "chat_instance": "ci"}, CallbackQuery
     )
     _update = Update(update_id=1, callback_query=callback_query)
     _bot_update = BotUpdate("state1", context, _update)
@@ -215,13 +216,14 @@ def test_bot_update_shipping_query(
         "street_line2": "sl2",
         "post_code": "pc",
     }
-    shipping_query = ShippingQuery.from_dict(
+    shipping_query = msgspec.convert(
         {
             "id": "1",
             "from": user_dict,
             "invoice_payload": "ip",
             "shipping_address": shipping_address,
-        }
+        },
+        ShippingQuery,
     )
     _update = Update(update_id=1, shipping_query=shipping_query)
     _bot_update = BotUpdate("state1", context, _update)
@@ -231,14 +233,15 @@ def test_bot_update_shipping_query(
 def test_bot_update_pre_checkout_query(
     user_dict: _UserDict, context: Context
 ) -> None:
-    pre_checkout_query = PreCheckoutQuery.from_dict(
+    pre_checkout_query = msgspec.convert(
         {
             "id": "1",
             "from": user_dict,
             "currency": "c",
             "total_amount": 1,
             "invoice_payload": "ip",
-        }
+        },
+        PreCheckoutQuery,
     )
     _update = Update(update_id=1, pre_checkout_query=pre_checkout_query)
     _bot_update = BotUpdate("state1", context, _update)
@@ -246,7 +249,7 @@ def test_bot_update_pre_checkout_query(
 
 
 def test_bot_update_poll(user_dict: _UserDict, context: Context) -> None:
-    poll = Poll.from_dict(
+    poll = msgspec.convert(
         {
             "id": "id",
             "question": "question",
@@ -257,7 +260,8 @@ def test_bot_update_poll(user_dict: _UserDict, context: Context) -> None:
             "type": "quiz",
             "allows_multiple_answers": False,
             "explanation_entities": [],
-        }
+        },
+        Poll,
     )
     _update = Update(update_id=1, poll=poll)
     _bot_update = BotUpdate("state1", context, _update)
@@ -267,12 +271,13 @@ def test_bot_update_poll(user_dict: _UserDict, context: Context) -> None:
 def test_bot_update_poll_answer(
     user_dict: _UserDict, context: Context
 ) -> None:
-    poll_answer = PollAnswer.from_dict(
+    poll_answer = msgspec.convert(
         {
             "poll_id": "id",
             "user": {"id": 1, "is_bot": False, "first_name": "name"},
             "option_ids": [],
-        }
+        },
+        PollAnswer,
     )
     _update = Update(update_id=1, poll_answer=poll_answer)
     _bot_update = BotUpdate("state1", context, _update)
@@ -282,7 +287,7 @@ def test_bot_update_poll_answer(
 def test_bot_update_my_chat_member(
     user_dict: _UserDict, context: Context
 ) -> None:
-    my_chat_member = ChatMemberUpdated.from_dict(
+    my_chat_member = msgspec.convert(
         {
             "chat": {"id": 111, "type": "group"},
             "from": {"id": 1, "is_bot": False, "first_name": "name"},
@@ -295,7 +300,8 @@ def test_bot_update_my_chat_member(
                 "user": {"id": 1, "is_bot": False, "first_name": "name2"},
                 "status": "status2",
             },
-        }
+        },
+        ChatMemberUpdated,
     )
     _update = Update(update_id=1, my_chat_member=my_chat_member)
     _bot_update = BotUpdate("state1", context, _update)
@@ -305,7 +311,7 @@ def test_bot_update_my_chat_member(
 def test_bot_update_chat_member(
     user_dict: _UserDict, context: Context
 ) -> None:
-    chat_member = ChatMemberUpdated.from_dict(
+    chat_member = msgspec.convert(
         {
             "chat": {"id": 111, "type": "group"},
             "from": {"id": 1, "is_bot": False, "first_name": "name"},
@@ -318,7 +324,8 @@ def test_bot_update_chat_member(
                 "user": {"id": 1, "is_bot": False, "first_name": "name2"},
                 "status": "status2",
             },
-        }
+        },
+        ChatMemberUpdated,
     )
     _update = Update(update_id=1, chat_member=chat_member)
     _bot_update = BotUpdate("state1", context, _update)

@@ -1,7 +1,8 @@
 import re
-from typing import Any, Callable, Optional
+from dataclasses import dataclass
+from typing import Any, Callable
 
-import attr
+import msgspec
 import pytest
 import pytest_asyncio
 
@@ -38,13 +39,14 @@ _MakeMessage = Callable[..., Message]
 @pytest.fixture
 def make_message() -> _MakeMessage:
     def _make_message(**kwargs: Any) -> Message:
-        return Message.from_dict(
+        return msgspec.convert(
             {
                 "message_id": 1,
                 "date": 1,
                 "chat": {"id": 1, "type": "private"},
                 **kwargs,
-            }
+            },
+            Message,
         )
 
     return _make_message
@@ -56,10 +58,7 @@ _MakeBotUpdate = Callable[..., BotUpdate]
 @pytest.fixture
 def make_bot_update() -> _MakeBotUpdate:
     def _make_bot_update(
-        state: Optional[str],
-        context: Context,
-        update_id: int = 1,
-        **params: Any
+        state: str | None, context: Context, update_id: int = 1, **params: Any
     ) -> BotUpdate:
         params = {
             "message": None,
@@ -208,14 +207,16 @@ async def test_callback_query_data_filter(
 ) -> None:
     _filter = CallbackQueryDataFilter(re.compile(r"\d{2}\.\d{2}"))
     user = {"id": 1, "is_bot": False, "first_name": "2"}
-    cq = CallbackQuery.from_dict(
-        {"id": "1", "from": user, "data": "01.02", "chat_instance": "1"}
+    cq = msgspec.convert(
+        {"id": "1", "from": user, "data": "01.02", "chat_instance": "1"},
+        CallbackQuery,
     )
     assert await _filter.check(
         _bot, make_bot_update(None, Context({}), callback_query=cq)
     )
-    cq = CallbackQuery.from_dict(
-        {"id": "1", "from": user, "date": 1, "chat_instance": "1"}
+    cq = msgspec.convert(
+        {"id": "1", "from": user, "date": 1, "chat_instance": "1"},
+        CallbackQuery,
     )
     assert not await _filter.check(
         _bot, make_bot_update(None, Context({}), callback_query=cq)
@@ -268,7 +269,7 @@ async def test_group_chat_filter(
     )
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@dataclass(frozen=True)
 class FlagFilter:
     flag: bool
 

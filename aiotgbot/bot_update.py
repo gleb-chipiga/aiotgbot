@@ -1,4 +1,4 @@
-from typing import Any, Dict, Final, Iterator, MutableMapping, Optional
+from typing import Any, Final, Iterator, MutableMapping
 
 from .api_types import (
     CallbackQuery,
@@ -17,8 +17,8 @@ __all__ = ("Context", "BotUpdate")
 
 
 class Context(MutableMapping[str, Any]):
-    def __init__(self, data: Dict[str, Any]) -> None:
-        self._data: Final[Dict[str, Any]] = data
+    def __init__(self, data: dict[str, Any]) -> None:
+        self._data: Final[dict[str, Any]] = data
 
     def __getitem__(self, key: str) -> Any:
         return self._data[key]
@@ -38,18 +38,18 @@ class Context(MutableMapping[str, Any]):
     def clear(self) -> None:
         self._data.clear()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return self._data
 
 
 class BotUpdate(MutableMapping[str, Any]):
     def __init__(
-        self, state: Optional[str], context: Context, update: Update
+        self, state: str | None, context: Context, update: Update
     ) -> None:
-        self._state: Optional[str] = state
+        self._state: str | None = state
         self._context: Final[Context] = context
         self._update: Final[Update] = update
-        self._data: Final[Dict[str, Any]] = {}
+        self._data: Final[dict[str, Any]] = {}
 
     def __getitem__(self, key: str) -> Any:
         return self._data[key]
@@ -67,7 +67,7 @@ class BotUpdate(MutableMapping[str, Any]):
         return iter(self._data)
 
     @property
-    def state(self) -> Optional[str]:
+    def state(self) -> str | None:
         return self._state
 
     @state.setter
@@ -83,53 +83,53 @@ class BotUpdate(MutableMapping[str, Any]):
         return self._update.update_id
 
     @property
-    def message(self) -> Optional[Message]:
+    def message(self) -> Message | None:
         return self._update.message
 
     @property
-    def edited_message(self) -> Optional[Message]:
+    def edited_message(self) -> Message | None:
         return self._update.edited_message
 
     @property
-    def channel_post(self) -> Optional[Message]:
+    def channel_post(self) -> Message | None:
         return self._update.channel_post
 
     @property
-    def edited_channel_post(self) -> Optional[Message]:
+    def edited_channel_post(self) -> Message | None:
         return self._update.edited_channel_post
 
     @property
-    def inline_query(self) -> Optional[InlineQuery]:
+    def inline_query(self) -> InlineQuery | None:
         return self._update.inline_query
 
     @property
-    def chosen_inline_result(self) -> Optional[ChosenInlineResult]:
+    def chosen_inline_result(self) -> ChosenInlineResult | None:
         return self._update.chosen_inline_result
 
     @property
-    def callback_query(self) -> Optional[CallbackQuery]:
+    def callback_query(self) -> CallbackQuery | None:
         return self._update.callback_query
 
     @property
-    def shipping_query(self) -> Optional[ShippingQuery]:
+    def shipping_query(self) -> ShippingQuery | None:
         return self._update.shipping_query
 
     @property
-    def pre_checkout_query(self) -> Optional[PreCheckoutQuery]:
+    def pre_checkout_query(self) -> PreCheckoutQuery | None:
         return self._update.pre_checkout_query
 
     @property
-    def poll(self) -> Optional[Poll]:
+    def poll(self) -> Poll | None:
         return self._update.poll
 
     @property
-    def poll_answer(self) -> Optional[PollAnswer]:
+    def poll_answer(self) -> PollAnswer | None:
         return self._update.poll_answer
 
     @property
-    def my_chat_member(self) -> Optional[ChatMemberUpdated]:
+    def my_chat_member(self) -> ChatMemberUpdated | None:
         return self._update.my_chat_member
 
     @property
-    def chat_member(self) -> Optional[ChatMemberUpdated]:
+    def chat_member(self) -> ChatMemberUpdated | None:
         return self._update.chat_member

@@ -1,29 +1,26 @@
 import asyncio
-import json
 import logging
 from abc import abstractmethod
+from dataclasses import dataclass
 from functools import partial
 from http import HTTPStatus
 from typing import (
     Any,
     Awaitable,
     Callable,
-    Dict,
     Final,
     Iterator,
     MutableMapping,
-    Optional,
     Protocol,
-    Tuple,
+    Type,
     TypeVar,
-    Union,
     overload,
     runtime_checkable,
 )
 
 import aiojobs
-import attr
 import backoff
+import msgspec
 from aiofreqlimit import FreqLimit
 from aiohttp import (
     BaseConnector,
@@ -74,15 +71,16 @@ response_logger: Final[logging.Logger] = logging.getLogger("aiotgbot.response")
 EventHandler = Callable[["Bot"], Awaitable[None]]
 
 _T = TypeVar("_T")
+T = TypeVar("T")
 
 
-class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
+class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
     def __init__(
         self,
         token: str,
         handler_table: "HandlerTableProtocol",
         storage: StorageProtocol,
-        connector: Optional[BaseConnector] = None,
+        connector: BaseConnector | None = None,
     ) -> None:
         if not handler_table.frozen:
             raise RuntimeError("Can't use unfrozen handler table")
@@ -110,12 +108,12 @@ class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
         self._message_limit: Final[FreqLimit] = FreqLimit(MESSAGE_INTERVAL)
         self._chat_limit: Final[FreqLimit] = FreqLimit(CHAT_INTERVAL)
         self._group_limit: Final[FreqLimit] = FreqLimit(GROUP_INTERVAL)
-        self._scheduler: Optional[aiojobs.Scheduler] = None
+        self._scheduler: aiojobs.Scheduler | None = None
         self._started: bool = False
         self._stopped: bool = False
         self._updates_offset: int = 0
-        self._me: Optional[User] = None
-        self._data: Final[Dict[Union[BotKey[Any], str], object]] = {}
+        self._me: User | None = None
+        self._data: Final[dict[BotKey[Any] | str, object]] = {}
 
     @overload  # type: ignore[override]
     def __getitem__(self, key: BotKey[_T]) -> _T:
@@ -125,7 +123,7 @@ class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
     def __getitem__(self, key: str) -> Any:
         ...
 
-    def __getitem__(self, key: Union[str, BotKey[_T]]) -> Any:
+    def __getitem__(self, key: str | BotKey[_T]) -> Any:
         return self._data[key]
 
     @overload  # type: ignore[override]
@@ -136,16 +134,16 @@ class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
     def __setitem__(self, key: str, value: Any) -> None:
         ...
 
-    def __setitem__(self, key: Union[str, BotKey[_T]], value: Any) -> None:
+    def __setitem__(self, key: str | BotKey[_T], value: Any) -> None:
         self._data[key] = value
 
-    def __delitem__(self, key: Union[str, BotKey[_T]]) -> None:
+    def __delitem__(self, key: str | BotKey[_T]) -> None:
         del self._data[key]
 
     def __len__(self) -> int:
         return len(self._data)
 
-    def __iter__(self) -> Iterator[Union[str, BotKey[Any]]]:
+    def __iter__(self) -> Iterator[str | BotKey[Any]]:
         return iter(self._data)
 
     @property
@@ -168,14 +166,14 @@ class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
 
     @staticmethod
     def _scheduler_exception_handler(
-        _: aiojobs.Scheduler, context: Dict[str, Any]
+        _: aiojobs.Scheduler, context: dict[str, Any]
     ) -> None:
         bot_logger.exception(
             "Update handle error", exc_info=context["exception"]
         )
 
     @staticmethod
-    def _telegram_exception(api_response: APIResponse) -> TelegramError:
+    def _telegram_exception(api_response: APIResponse[T]) -> TelegramError:
         assert api_response.error_code is not None
         assert api_response.description is not None
         error_code = api_response.error_code
@@ -212,8 +210,12 @@ class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
 
     @backoff.on_exception(backoff.expo, ClientError)
     async def _request(
-        self, http_method: RequestMethod, api_method: str, **params: ParamType
-    ) -> APIResponse:
+        self,
+        http_method: RequestMethod,
+        api_method: str,
+        type_: Type[T],
+        **params: ParamType,
+    ) -> T:
         data = {
             name: str(value) if isinstance(value, (int, float)) else value
             for name, value in params.items()
@@ -242,12 +244,12 @@ class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
 
         url = TG_API_URL.format(token=self._token, method=api_method)
         async with request(url) as response:
-            response_dict = json.loads(await response.read())
-        response_logger.debug(response_dict)
-        api_response = APIResponse.from_dict(response_dict)
+            response_dict = await response.read()
+        decode_type = APIResponse[type_]  # type: ignore
+        api_response = msgspec.json.decode(response_dict, type=decode_type)
 
         if api_response.ok:
-            return api_response
+            return api_response.result
         else:
             raise Bot._telegram_exception(api_response)
 
@@ -255,14 +257,20 @@ class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
         self,
         http_method: RequestMethod,
         api_method: str,
-        chat_id: Union[int, str],
+        chat_id: int | str,
+        type_: Type[T],
         **params: ParamType,
-    ) -> APIResponse:
+    ) -> T:
         retry_allowed = all(
             not isinstance(param, StreamFile) for param in params.values()
         )
-        request = partial(
-            self._request, http_method, api_method, chat_id=chat_id, **params
+        request: Callable[[], Awaitable[T]] = partial(
+            self._request,
+            http_method,
+            api_method,
+            type_,
+            chat_id=chat_id,
+            **params,
         )
 
         chat = await self.get_chat(chat_id)
@@ -288,8 +296,8 @@ class Bot(MutableMapping[Union[str, BotKey[Any]], Any], ApiMethods):
 
     @staticmethod
     def _update_state(update: Update) -> str:
-        user_id: Optional[int] = None
-        chat_id: Optional[int] = None
+        user_id: int | None = None
+        chat_id: int | None = None
 
         if update.message is not None:
             assert update.message.from_ is not None
@@ -411,10 +419,10 @@ class PollBot(Bot):
         token: str,
         handler_table: "HandlerTableProtocol",
         storage: StorageProtocol,
-        connector: Optional[BaseConnector] = None,
+        connector: BaseConnector | None = None,
     ) -> None:
         super().__init__(token, handler_table, storage, connector)
-        self._poll_task: Optional[asyncio.Task[None]] = None
+        self._poll_task: asyncio.Task[None] | None = None
 
     async def start(self) -> None:
         if self._started:
@@ -470,10 +478,10 @@ class PollBot(Bot):
 
 
 HandlerCallable = Callable[[Bot, BotUpdate], Awaitable[None]]
-FiltersType = Tuple["FilterProtocol", ...]
+FiltersType = tuple["FilterProtocol", ...]
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@dataclass(frozen=True)
 class Handler:
     callable: HandlerCallable
     filters: FiltersType
@@ -496,7 +504,7 @@ class HandlerTableProtocol(Protocol):
     @abstractmethod
     async def get_handler(
         self, bot: Bot, update: BotUpdate
-    ) -> Optional[HandlerCallable]:
+    ) -> HandlerCallable | None:
         ...
 
 

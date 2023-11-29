@@ -1,4 +1,4 @@
-from typing import Annotated, Any, AsyncIterator, Final, Tuple
+from typing import Annotated, Any, AsyncIterator, Final
 
 from sqlalchemy import JSON, Text, delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
@@ -57,7 +57,7 @@ class SqlalchemyStorage(StorageProtocol):
 
     async def iterate(
         self, prefix: str = ""
-    ) -> AsyncIterator[Tuple[str, Json]]:
+    ) -> AsyncIterator[tuple[str, Json]]:
         async with self._engine.begin() as connection:
             result = await connection.stream(
                 select(KV.key, KV.value).where(KV.key.startswith(prefix))

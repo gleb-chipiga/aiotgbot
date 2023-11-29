@@ -1,10 +1,9 @@
 import asyncio
-import json
 from contextlib import asynccontextmanager
-from functools import partial
-from typing import AsyncIterator, Final, Hashable
+from typing import Any, AsyncIterator, Final, Hashable
 from weakref import WeakValueDictionary
 
+import msgspec.json
 from aiohttp import web
 
 __all__ = (
@@ -16,7 +15,8 @@ __all__ = (
 )
 
 
-json_dumps: Final = partial(json.dumps, ensure_ascii=False)
+def json_dumps(obj: Any) -> str:
+    return msgspec.json.encode(obj).decode()
 
 
 def get_python_version() -> str:

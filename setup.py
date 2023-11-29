@@ -37,14 +37,14 @@ setup(
     ],
     packages=["aiotgbot"],
     package_data={"aiotgbot": ["py.typed"]},
-    python_requires=">=3.9,<3.12",
+    python_requires=">=3.11,<3.12",
     install_requires=[
+        "aiofreqlimit>=0.0.12",
         "aiohttp>=3.9",
         "aiojobs>=1.2.1",
-        "attrs",
         "backoff>=2",
         "frozenlist",
-        "aiofreqlimit>=0.0.12",
+        "msgspec",
         "yarl",
     ],
     tests_require=[

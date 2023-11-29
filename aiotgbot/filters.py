@@ -1,7 +1,6 @@
 import re
-from typing import Final, Tuple
-
-import attr
+from dataclasses import dataclass
+from typing import Final
 
 from . import Bot, FilterProtocol
 from .bot_update import BotUpdate
@@ -21,7 +20,7 @@ __all__ = (
 )
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@dataclass(frozen=True)
 class UpdateTypeFilter:
     update_type: UpdateType
 
@@ -29,7 +28,7 @@ class UpdateTypeFilter:
         return getattr(update, self.update_type.value) is not None
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@dataclass(frozen=True)
 class StateFilter:
     state: str
 
@@ -37,9 +36,9 @@ class StateFilter:
         return update.state == self.state
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@dataclass(frozen=True)
 class CommandsFilter:
-    commands: Tuple[str, ...]
+    commands: tuple[str, ...]
 
     async def check(self, _: Bot, update: BotUpdate) -> bool:
         if update.message is None or update.message.text is None:
@@ -52,9 +51,9 @@ class CommandsFilter:
         return False
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@dataclass(frozen=True)
 class ContentTypeFilter:
-    content_types: Tuple[ContentType, ...]
+    content_types: tuple[ContentType, ...]
 
     async def check(self, _: Bot, update: BotUpdate) -> bool:
         if update.message is not None:
@@ -73,7 +72,7 @@ class ContentTypeFilter:
         return False
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@dataclass(frozen=True)
 class MessageTextFilter:
     pattern: "re.Pattern[str]"
 
@@ -85,7 +84,7 @@ class MessageTextFilter:
         )
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@dataclass(frozen=True)
 class CallbackQueryDataFilter:
     pattern: "re.Pattern[str]"
 
@@ -97,7 +96,7 @@ class CallbackQueryDataFilter:
         )
 
 
-@attr.s(frozen=True)
+@dataclass(frozen=True)
 class PrivateChatFilter:
     async def check(self, _: Bot, update: BotUpdate) -> bool:  # noqa
         return (
@@ -107,7 +106,7 @@ class PrivateChatFilter:
         )
 
 
-@attr.s(frozen=True)
+@dataclass(frozen=True)
 class GroupChatFilter:
     async def check(self, _: Bot, update: BotUpdate) -> bool:  # noqa
         group_types = (ChatType.GROUP, ChatType.SUPERGROUP)
@@ -120,7 +119,7 @@ class GroupChatFilter:
 
 class ORFilter:
     def __init__(self, *filters: FilterProtocol) -> None:
-        self._filters: Final[Tuple[FilterProtocol, ...]] = filters
+        self._filters: Final[tuple[FilterProtocol, ...]] = filters
 
     async def check(self, bot: Bot, update: BotUpdate) -> bool:
         for filter_item in self._filters:
@@ -131,7 +130,7 @@ class ORFilter:
 
 class ANDFilter:
     def __init__(self, *filters: FilterProtocol) -> None:
-        self._filters: Final[Tuple[FilterProtocol, ...]] = filters
+        self._filters: Final[tuple[FilterProtocol, ...]] = filters
 
     async def check(self, bot: Bot, update: BotUpdate) -> bool:
         for filter_item in self._filters:

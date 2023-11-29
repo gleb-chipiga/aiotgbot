@@ -1,4 +1,4 @@
-from enum import Enum, unique
+from enum import StrEnum, unique
 
 __all__ = (
     "RequestMethod",
@@ -20,13 +20,13 @@ __all__ = (
 
 
 @unique
-class RequestMethod(str, Enum):
+class RequestMethod(StrEnum):
     GET = "GET"
     POST = "POST"
 
 
 @unique
-class ChatType(str, Enum):
+class ChatType(StrEnum):
     PRIVATE = "private"
     GROUP = "group"
     SUPERGROUP = "supergroup"
@@ -34,7 +34,7 @@ class ChatType(str, Enum):
 
 
 @unique
-class ChatAction(str, Enum):
+class ChatAction(StrEnum):
     TYPING = "typing"
     UPLOAD_PHOTO = "upload_photo"
     RECORD_VIDEO = "record_video"
@@ -49,7 +49,7 @@ class ChatAction(str, Enum):
 
 
 @unique
-class ChatMemberStatus(str, Enum):
+class ChatMemberStatus(StrEnum):
     CREATOR = "creator"
     ADMINISTRATOR = "administrator"
     MEMBER = "member"
@@ -59,7 +59,7 @@ class ChatMemberStatus(str, Enum):
 
 
 @unique
-class MessageEntityType(str, Enum):
+class MessageEntityType(StrEnum):
     MENTION = "mention"
     HASHTAG = "hashtag"
     CASHTAG = "cashtag"
@@ -80,7 +80,7 @@ class MessageEntityType(str, Enum):
 
 
 @unique
-class UpdateType(str, Enum):
+class UpdateType(StrEnum):
     MESSAGE = "message"
     EDITED_MESSAGE = "edited_message"
     CHANNEL_POST = "channel_post"
@@ -97,7 +97,7 @@ class UpdateType(str, Enum):
 
 
 @unique
-class ContentType(str, Enum):
+class ContentType(StrEnum):
     TEXT = "text"
     AUDIO = "audio"
     DOCUMENT = "document"
@@ -127,20 +127,20 @@ class ContentType(str, Enum):
 
 
 @unique
-class ParseMode(str, Enum):
+class ParseMode(StrEnum):
     MARKDOWN = "Markdown"
     HTML = "HTML"
     MARKDOWN2 = "Markdown2"
 
 
 @unique
-class PollType(str, Enum):
+class PollType(StrEnum):
     QUIZ = "quiz"
     REGULAR = "regular"
 
 
 @unique
-class DiceEmoji(str, Enum):
+class DiceEmoji(StrEnum):
     DICE = "🎲"
     DARTS = "🎯"
     BASKETBALL = "🏀"
@@ -150,7 +150,7 @@ class DiceEmoji(str, Enum):
 
 
 @unique
-class InputMediaType(str, Enum):
+class InputMediaType(StrEnum):
     PHOTO = "photo"
     VIDEO = "video"
     ANIMATION = "animation"
@@ -159,7 +159,7 @@ class InputMediaType(str, Enum):
 
 
 @unique
-class InlineQueryResultType(str, Enum):
+class InlineQueryResultType(StrEnum):
     ARTICLE = "article"
     PHOTO = "photo"
     GIF = "gif"
@@ -176,7 +176,7 @@ class InlineQueryResultType(str, Enum):
 
 
 @unique
-class PassportElementType(str, Enum):
+class PassportElementType(StrEnum):
     PERSONAL_DETAILS = "personal_details"
     PASSPORT = "passport"
     DRIVER_LICENSE = "driver_license"
@@ -193,14 +193,14 @@ class PassportElementType(str, Enum):
 
 
 @unique
-class StickerFormat(str, Enum):
+class StickerFormat(StrEnum):
     STATIC = "static"
     ANIMATED = "animated"
     VIDEO = "video"
 
 
 @unique
-class StickerType(str, Enum):
+class StickerType(StrEnum):
     REGULAR = "regular"
     MASK = "mask"
     CUSTOM_EMOJI = "custom_emoji"

@@ -1,3 +1,4 @@
+import msgspec
 import pytest
 import pytest_asyncio
 
@@ -75,8 +76,9 @@ async def test_handler_check() -> None:
     table.freeze()
     bot = PollBot("token", table, MemoryStorage())
     ctx = Context({"key1": "str1", "key2": "str2", "key3": 4})
-    message = Message.from_dict(
-        {"message_id": 1, "date": 1, "chat": {"id": 1, "type": "private"}}
+    message = msgspec.convert(
+        {"message_id": 1, "date": 1, "chat": {"id": 1, "type": "private"}},
+        Message,
     )
     bu1 = BotUpdate("state1", ctx, Update(update_id=1, message=message))
     assert await handler.check(bot, bu1)

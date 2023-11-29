@@ -1,16 +1,7 @@
 import json
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
-from typing import (
-    Any,
-    AsyncIterator,
-    Dict,
-    Final,
-    Optional,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import Any, AsyncIterator, Final, cast
 
 import aiosqlite
 
@@ -20,7 +11,7 @@ from .storage import Json, StorageProtocol
 __all__ = ("IsolationLevel", "SQLiteStorage")
 
 
-class IsolationLevel(str, Enum):
+class IsolationLevel(StrEnum):
     DEFERRED = "DEFERRED"
     IMMEDIATE = "IMMEDIATE"
     EXCLUSIVE = "EXCLUSIVE"
@@ -29,16 +20,16 @@ class IsolationLevel(str, Enum):
 class SQLiteStorage(StorageProtocol):
     def __init__(
         self,
-        database: Union[str, Path],
-        isolation_level: Optional[IsolationLevel] = None,
+        database: str | Path,
+        isolation_level: IsolationLevel | None = None,
         **kwargs: Any,
     ) -> None:
-        self._database: Final[Union[str, Path]] = database
-        self._isolation_level: Final[Optional[str]] = (
+        self._database: Final[str | Path] = database
+        self._isolation_level: Final[str | None] = (
             isolation_level.value if isolation_level is not None else None
         )
-        self._kwargs: Final[Dict[str, Any]] = kwargs
-        self._connection: Optional[aiosqlite.Connection] = None
+        self._kwargs: Final[dict[str, Any]] = kwargs
+        self._connection: aiosqlite.Connection | None = None
 
     async def connect(self) -> None:
         if self._connection is not None:
@@ -88,7 +79,7 @@ class SQLiteStorage(StorageProtocol):
 
     async def iterate(
         self, prefix: str = ""
-    ) -> AsyncIterator[Tuple[str, Json]]:
+    ) -> AsyncIterator[tuple[str, Json]]:
         async with self.connection.execute(
             "SELECT key, value FROM kv WHERE key LIKE ? ORDER BY key",
             (f"{prefix}%",),

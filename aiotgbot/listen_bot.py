@@ -1,10 +1,10 @@
 import asyncio
-import json
 import logging
 from ipaddress import IPv4Address, IPv4Network
 from secrets import compare_digest, token_urlsafe
-from typing import Any, Final, Optional, Tuple, Union
+from typing import Any, Final
 
+import msgspec.json
 from aiohttp import BaseConnector
 from aiohttp.web import (
     Application,
@@ -20,7 +20,7 @@ from .api_types import InputFile, Update
 from .bot import Bot, HandlerTableProtocol
 from .storage import StorageProtocol
 
-NETWORKS: Final[Tuple[IPv4Network, ...]] = (
+NETWORKS: Final[tuple[IPv4Network, ...]] = (
     IPv4Network("149.154.160.0/20"),
     IPv4Network("91.108.4.0/22"),
 )
@@ -31,24 +31,24 @@ bot_logger: Final[logging.Logger] = logging.getLogger("aiotgbot.bot")
 class ListenBot(Bot):
     def __init__(
         self,
-        url: Union[str, URL],
+        url: str | URL,
         token: str,
         handler_table: "HandlerTableProtocol",
         storage: StorageProtocol,
-        certificate: Optional[InputFile] = None,
-        ip_address: Optional[str] = None,
-        connector: Optional[BaseConnector] = None,
+        certificate: InputFile | None = None,
+        ip_address: str | None = None,
+        connector: BaseConnector | None = None,
         check_address: bool = False,
-        address_header: Optional[str] = None,
+        address_header: str | None = None,
         **application_args: Any
     ) -> None:
         super().__init__(token, handler_table, storage, connector)
         self._url: URL = URL(url) if isinstance(url, str) else url
         self._certificate = certificate
         self._ip_address = ip_address
-        self._webhook_token: Optional[str] = None
+        self._webhook_token: str | None = None
         self._check_address: Final[bool] = check_address
-        self._address_header: Final[Optional[str]] = address_header
+        self._address_header: Final[str | None] = address_header
         self._application = Application(**application_args)
         self._application.router.add_post("/{token}", self._handler)
 
@@ -74,8 +74,8 @@ class ListenBot(Bot):
             self._webhook_token, request.match_info["token"]
         ):
             raise HTTPNotFound()
-        update_data = json.loads(await request.read())
-        update = Update.from_dict(update_data)
+        update_data = await request.read()
+        update = msgspec.json.decode(update_data, type=Update)
         await self._scheduler.spawn(self._handle_update(update))
         return Response()
 

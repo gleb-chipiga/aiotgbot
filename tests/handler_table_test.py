@@ -1,5 +1,6 @@
 import re
 
+import msgspec
 import pytest
 
 from aiotgbot.api_types import Message, Update
@@ -539,8 +540,9 @@ async def test_get_handler(handler: HandlerCallable) -> None:
     ht.freeze()
     _bot = PollBot("token", ht, MemoryStorage())
     ctx = Context({"key1": "str1", "key2": "str2", "key3": 4})
-    message = Message.from_dict(
-        {"message_id": 1, "date": 1, "chat": {"id": 1, "type": "private"}}
+    message = msgspec.convert(
+        {"message_id": 1, "date": 1, "chat": {"id": 1, "type": "private"}},
+        Message,
     )
     bu1 = BotUpdate("state1", ctx, Update(update_id=1, message=message))
     assert await ht.get_handler(_bot, bu1) == handler

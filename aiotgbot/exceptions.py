@@ -1,5 +1,3 @@
-from typing import Optional
-
 __all__ = (
     "TelegramError",
     "MigrateToChat",
@@ -12,7 +10,7 @@ __all__ = (
 
 
 class TelegramError(Exception):
-    pattern: Optional[str] = None
+    pattern: str | None = None
 
     def __init__(self, error_code: int, description: str) -> None:
         super().__init__(f"{error_code} {description}")

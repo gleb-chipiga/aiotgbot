@@ -1,9 +1,8 @@
-import json
 from base64 import b64decode
-from enum import Enum, unique
-from typing import AsyncIterator, Final, Optional, Tuple, Union, cast
+from enum import StrEnum, unique
+from typing import AsyncIterator, Final, Union, cast
 
-import attr
+import msgspec.json
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.padding import MGF1, OAEP
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
@@ -43,7 +42,7 @@ def passport_request(
     url = URL("tg://resolve").with_query(
         domain="telegrampassport",
         bot_id=bot_id,
-        scope=json.dumps(scope.to_dict()),
+        scope=msgspec.json.encode(scope).decode(),
         public_key=public_key,
         nonce=nonce,
     )
@@ -141,7 +140,7 @@ class PassportCipher:
 
 
 @unique
-class PassportScopeType(Enum):
+class PassportScopeType(StrEnum):
     PERSONAL_DETAILS = "personal_details"
     PASSPORT = "passport"
     DRIVER_LICENSE = "driver_license"
@@ -157,40 +156,36 @@ class PassportScopeType(Enum):
     EMAIL = "email"
 
 
-@attr.s(auto_attribs=True)
-class PassportScopeElementOne(BaseTelegram):
+class PassportScopeElementOne(BaseTelegram, frozen=True):
     type: PassportScopeType
-    selfie: Optional[bool] = None
-    translation: Optional[bool] = None
-    native_names: Optional[bool] = None
+    selfie: bool | None = None
+    translation: bool | None = None
+    native_names: bool | None = None
 
 
-@attr.s(auto_attribs=True)
-class PassportScopeElementOneOfSeveral(BaseTelegram):
-    one_of: Tuple[PassportScopeElementOne, ...]
-    selfie: Optional[bool] = None
-    translation: Optional[bool] = None
+class PassportScopeElementOneOfSeveral(BaseTelegram, frozen=True):
+    one_of: tuple[PassportScopeElementOne, ...]
+    selfie: bool | None = None
+    translation: bool | None = None
 
 
 PassportScopeElement = Union[
-    PassportScopeElementOne, PassportScopeElementOneOfSeveral
+    PassportScopeElementOne,
+    PassportScopeElementOneOfSeveral,
 ]
 
 
-@attr.s(auto_attribs=True)
-class PassportScope(BaseTelegram):
-    data: Tuple[PassportScopeElement, ...]
+class PassportScope(BaseTelegram, frozen=True):
+    data: tuple[PassportScopeElement, ...]
     v: int = 1
 
 
-@attr.s(auto_attribs=True)
-class FileCredentials(BaseTelegram):
+class FileCredentials(BaseTelegram, frozen=True):
     file_hash: str
     secret: str
 
 
-@attr.s(auto_attribs=True)
-class DataCredentials(BaseTelegram):
+class DataCredentials(BaseTelegram, frozen=True):
     data_hash: str
     secret: str
 
@@ -201,33 +196,30 @@ class DataCredentials(BaseTelegram):
         return cipher.decrypt(b64decode(ciphertext))
 
 
-@attr.s(auto_attribs=True)
-class SecureValue(BaseTelegram):
-    data: Optional[DataCredentials] = None
-    front_side: Optional[FileCredentials] = None
-    reverse_side: Optional[FileCredentials] = None
-    selfie: Optional[FileCredentials] = None
-    translation: Optional[Tuple[FileCredentials, ...]] = None
-    files: Optional[Tuple[FileCredentials, ...]] = None
+class SecureValue(BaseTelegram, frozen=True):
+    data: DataCredentials | None = None
+    front_side: FileCredentials | None = None
+    reverse_side: FileCredentials | None = None
+    selfie: FileCredentials | None = None
+    translation: tuple[FileCredentials, ...] | None = None
+    files: tuple[FileCredentials, ...] | None = None
 
 
-@attr.s(auto_attribs=True)
-class SecureData(BaseTelegram):
-    personal_details: Optional[SecureValue] = None
-    passport: Optional[SecureValue] = None
-    internal_passport: Optional[SecureValue] = None
-    driver_license: Optional[SecureValue] = None
-    identity_card: Optional[SecureValue] = None
-    address: Optional[SecureValue] = None
-    utility_bill: Optional[SecureValue] = None
-    bank_statement: Optional[SecureValue] = None
-    rental_agreement: Optional[SecureValue] = None
-    passport_registration: Optional[SecureValue] = None
-    temporary_registration: Optional[SecureValue] = None
+class SecureData(BaseTelegram, frozen=True):
+    personal_details: SecureValue | None = None
+    passport: SecureValue | None = None
+    internal_passport: SecureValue | None = None
+    driver_license: SecureValue | None = None
+    identity_card: SecureValue | None = None
+    address: SecureValue | None = None
+    utility_bill: SecureValue | None = None
+    bank_statement: SecureValue | None = None
+    rental_agreement: SecureValue | None = None
+    passport_registration: SecureValue | None = None
+    temporary_registration: SecureValue | None = None
 
 
-@attr.s(auto_attribs=True)
-class Credentials(BaseTelegram):
+class Credentials(BaseTelegram, frozen=True):
     secure_data: SecureData
     nonce: str
 
@@ -240,34 +232,31 @@ class Credentials(BaseTelegram):
         ciphertext = b64decode(encrypted.data)
         cipher = PassportCipher(data_secret, data_hash)
         plaintext = cipher.decrypt(ciphertext)
-        return Credentials.from_dict(json.loads(plaintext))
+        return msgspec.json.decode(plaintext, type=Credentials)
 
 
-@attr.s(auto_attribs=True)
-class PersonalDetails(BaseTelegram):
+class PersonalDetails(BaseTelegram, frozen=True):
     first_name: str
     last_name: str
     birth_date: str
     gender: str
     country_code: str
     residence_country_code: str
-    middle_name: Optional[str] = None
-    first_name_native: Optional[str] = None
-    last_name_native: Optional[str] = None
-    middle_name_native: Optional[str] = None
+    middle_name: str | None = None
+    first_name_native: str | None = None
+    last_name_native: str | None = None
+    middle_name_native: str | None = None
 
 
-@attr.s(auto_attribs=True)
-class ResidentialAddress(BaseTelegram):
+class ResidentialAddress(BaseTelegram, frozen=True):
     street_line1: str
     city: str
     country_code: str
     post_code: str
-    street_line2: Optional[str] = None
-    state: Optional[str] = None
+    street_line2: str | None = None
+    state: str | None = None
 
 
-@attr.s(auto_attribs=True)
-class IdDocumentData(BaseTelegram):
+class IdDocumentData(BaseTelegram, frozen=True):
     document_no: str
-    expiry_date: Optional[str] = None
+    expiry_date: str | None = None

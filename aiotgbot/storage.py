@@ -1,18 +1,9 @@
 from abc import abstractmethod
-from typing import (
-    Any,
-    AsyncIterator,
-    Dict,
-    List,
-    Protocol,
-    Tuple,
-    Union,
-    runtime_checkable,
-)
+from typing import Any, AsyncIterator, Protocol, runtime_checkable
 
 __all__ = ("Json", "StorageProtocol")
 
-Json = Union[str, int, float, bool, Dict[str, Any], List[Any], None]
+Json = str | int | float | bool | dict[str, Any] | list[Any] | None
 
 
 @runtime_checkable
@@ -38,7 +29,7 @@ class StorageProtocol(Protocol):
         ...
 
     @abstractmethod
-    def iterate(self, prefix: str = "") -> AsyncIterator[Tuple[str, Json]]:
+    def iterate(self, prefix: str = "") -> AsyncIterator[tuple[str, Json]]:
         ...
 
     @abstractmethod
