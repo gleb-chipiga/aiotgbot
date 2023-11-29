@@ -263,7 +263,7 @@ class ApiMethods(ABC):
     async def send_photo(
         self,
         chat_id: int | str,
-        photo: int | str,
+        photo: InputFile | str,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -293,7 +293,7 @@ class ApiMethods(ABC):
     async def send_audio(
         self,
         chat_id: int | str,
-        audio: int | str,
+        audio: InputFile | str,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -331,7 +331,7 @@ class ApiMethods(ABC):
     async def send_document(
         self,
         chat_id: int | str,
-        document: int | str,
+        document: InputFile | str,
         thumb: InputFile | str | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
@@ -371,7 +371,7 @@ class ApiMethods(ABC):
     async def send_video(
         self,
         chat_id: int | str,
-        video: int | str,
+        video: InputFile | str,
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
@@ -411,7 +411,7 @@ class ApiMethods(ABC):
     async def send_animation(
         self,
         chat_id: int | str,
-        animation: int | str,
+        animation: InputFile | str,
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
@@ -449,7 +449,7 @@ class ApiMethods(ABC):
     async def send_voice(
         self,
         chat_id: int | str,
-        voice: int | str,
+        voice: InputFile | str,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -481,7 +481,7 @@ class ApiMethods(ABC):
     async def send_video_note(
         self,
         chat_id: int | str,
-        video_note: int | str,
+        video_note: InputFile | str,
         duration: int | None = None,
         length: int | None = None,
         thumb: InputFile | str | None = None,
