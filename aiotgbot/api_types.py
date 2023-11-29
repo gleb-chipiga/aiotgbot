@@ -1382,7 +1382,7 @@ class PassportElementErrorFile(BaseTelegram, frozen=True):
 class PassportElementErrorFiles(BaseTelegram, frozen=True):
     source: str
     type: str
-    file_hashes: list[str]
+    file_hashes: Sequence[str]
     message: str
 
 
@@ -1396,7 +1396,7 @@ class PassportElementErrorTranslationFile(BaseTelegram, frozen=True):
 class PassportElementErrorTranslationFiles(BaseTelegram, frozen=True):
     source: str
     type: str
-    file_hashes: list[str]
+    file_hashes: Sequence[str]
     message: str
 
 
