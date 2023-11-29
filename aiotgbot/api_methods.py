@@ -630,7 +630,7 @@ class ApiMethods(ABC):
         return await self._request(
             RequestMethod.POST,
             "stopMessageLiveLocation",
-            Message | bool,  # type: ignore
+            Message | bool,  # type: ignore # TODO
             chat_id=chat_id,
             message_id=message_id,
             inline_message_id=inline_message_id,
@@ -1322,7 +1322,7 @@ class ApiMethods(ABC):
         return await self._request(
             RequestMethod.POST,
             "editMessageText",
-            Message | bool,  # type: ignore
+            Message | bool,  # type: ignore # TODO
             chat_id=chat_id,
             message_id=message_id,
             inline_message_id=inline_message_id,
@@ -1360,7 +1360,7 @@ class ApiMethods(ABC):
         return await self._request(
             RequestMethod.POST,
             "editMessageCaption",
-            Message | bool,  # type: ignore
+            Message | bool,  # type: ignore # TODO
             chat_id=chat_id,
             message_id=message_id,
             inline_message_id=inline_message_id,
@@ -1402,7 +1402,7 @@ class ApiMethods(ABC):
         return await self._request(
             RequestMethod.POST,
             "editMessageMedia",
-            Message | bool,  # type: ignore
+            Message | bool,  # type: ignore # TODO
             chat_id=chat_id,
             message_id=message_id,
             inline_message_id=inline_message_id,
@@ -1435,7 +1435,7 @@ class ApiMethods(ABC):
         return await self._request(
             RequestMethod.POST,
             "editMessageReplyMarkup",
-            Message | bool,  # type: ignore
+            Message | bool,  # type: ignore # TODO
             chat_id=chat_id,
             message_id=message_id,
             inline_message_id=inline_message_id,
@@ -1867,7 +1867,7 @@ class ApiMethods(ABC):
         return await self._request(
             RequestMethod.POST,
             "setGameScore",
-            Message | bool,  # type: ignore
+            Message | bool,  # type: ignore # TODO
             user_id=user_id,
             score=score,
             force=force,
