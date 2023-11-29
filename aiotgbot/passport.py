@@ -175,7 +175,7 @@ PassportScopeElement = Union[
 ]
 
 
-class PassportScope(BaseTelegram, frozen=True):
+class PassportScope(BaseTelegram, frozen=True, omit_defaults=False):
     data: tuple[PassportScopeElement, ...]
     v: int = 1
 

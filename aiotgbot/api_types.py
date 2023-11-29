@@ -710,33 +710,43 @@ class BotCommand(BaseTelegram, frozen=True):
     description: str
 
 
-class BotCommandScopeDefault(BaseTelegram, frozen=True):
+class BotCommandScopeDefault(BaseTelegram, frozen=True, omit_defaults=False):
     type: str = "default"
 
 
-class BotCommandScopeAllPrivateChats(BaseTelegram, frozen=True):
+class BotCommandScopeAllPrivateChats(
+    BaseTelegram, frozen=True, omit_defaults=False
+):
     type: str = "all_private_chats"
 
 
-class BotCommandScopeAllGroupChats(BaseTelegram, frozen=True):
+class BotCommandScopeAllGroupChats(
+    BaseTelegram, frozen=True, omit_defaults=False
+):
     type: str = "all_group_chats"
 
 
-class BotCommandScopeAllChatAdministrators(BaseTelegram, frozen=True):
+class BotCommandScopeAllChatAdministrators(
+    BaseTelegram, frozen=True, omit_defaults=False
+):
     type: str = "all_chat_administrators"
 
 
-class BotCommandScopeChat(BaseTelegram, frozen=True):
+class BotCommandScopeChat(BaseTelegram, frozen=True, omit_defaults=False):
     chat_id: int | str
     type: str = "chat"
 
 
-class BotCommandScopeChatAdministrators(BaseTelegram, frozen=True):
+class BotCommandScopeChatAdministrators(
+    BaseTelegram, frozen=True, omit_defaults=False
+):
     chat_id: int | str
     type: str = "chat"
 
 
-class BotCommandScopeChatMember(BaseTelegram, frozen=True):
+class BotCommandScopeChatMember(
+    BaseTelegram, frozen=True, omit_defaults=False
+):
     chat_id: int | str
     user_id: int
     type: str = "chat"
