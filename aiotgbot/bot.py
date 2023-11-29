@@ -422,8 +422,15 @@ class PollBot(Bot):
         handler_table: "HandlerTableProtocol",
         storage: StorageProtocol,
         connector: BaseConnector | None = None,
+        client_trust_env: bool = False,
     ) -> None:
-        super().__init__(token, handler_table, storage, connector)
+        super().__init__(
+            token,
+            handler_table,
+            storage,
+            connector,
+            client_trust_env,
+        )
         self._poll_task: asyncio.Task[None] | None = None
 
     async def start(self) -> None:
