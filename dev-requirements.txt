@@ -13,3 +13,5 @@ hypothesis
 build
 upload
 twine
+black
+tox
