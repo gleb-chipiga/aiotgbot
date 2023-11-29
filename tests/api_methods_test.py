@@ -6,7 +6,6 @@ import msgspec
 import pytest
 import pytest_asyncio
 
-from aiotgbot import api_methods
 from aiotgbot.api_methods import ApiMethods, ParamType
 from aiotgbot.api_types import (
     APIResponse,
@@ -92,12 +91,6 @@ class Bot(ApiMethods):
 @pytest_asyncio.fixture
 async def _bot() -> Bot:
     return Bot()
-
-
-def test_enum_to_str() -> None:
-    parse_mode = ParseMode.HTML
-    assert api_methods._enum_to_str(parse_mode) == parse_mode.value
-    assert api_methods._enum_to_str(None) is None
 
 
 @pytest.mark.asyncio

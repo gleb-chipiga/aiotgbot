@@ -66,12 +66,6 @@ _ItemType = BaseTelegram | str | int | Enum
 ParamType = int | float | str | InputFile | None
 
 
-# TODO: remove
-def _enum_to_str(item: Enum | None) -> str | None:
-    assert item is None or isinstance(item.value, str)
-    return item.value if item is not None else None
-
-
 def _encode_json(obj: Any) -> str | None:
     if obj is not None:
         return msgspec.json.encode(obj).decode()
@@ -292,7 +286,7 @@ class ApiMethods(ABC):
             Message,
             photo=photo,
             caption=caption,
-            parse_mode=_enum_to_str(parse_mode),
+            parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
             disable_notification=disable_notification,
             protect_content=protect_content,
@@ -326,7 +320,7 @@ class ApiMethods(ABC):
             Message,
             audio=audio,
             caption=caption,
-            parse_mode=_enum_to_str(parse_mode),
+            parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
             disable_notification=disable_notification,
             protect_content=protect_content,
@@ -366,7 +360,7 @@ class ApiMethods(ABC):
             document=document,
             thumb=thumb,
             caption=caption,
-            parse_mode=_enum_to_str(parse_mode),
+            parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
             disable_content_type_detection=disable_content_type_detection,
             disable_notification=disable_notification,
@@ -409,7 +403,7 @@ class ApiMethods(ABC):
             height=height,
             thumb=thumb,
             caption=caption,
-            parse_mode=_enum_to_str(parse_mode),
+            parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
             supports_streaming=supports_streaming,
             disable_notification=disable_notification,
@@ -448,7 +442,7 @@ class ApiMethods(ABC):
             height=height,
             thumb=thumb,
             caption=caption,
-            parse_mode=_enum_to_str(parse_mode),
+            parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
             disable_notification=disable_notification,
             protect_content=protect_content,
@@ -479,7 +473,7 @@ class ApiMethods(ABC):
             Message,
             voice=voice,
             caption=caption,
-            parse_mode=_enum_to_str(parse_mode),
+            parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
             duration=duration,
             disable_notification=disable_notification,
@@ -613,7 +607,7 @@ class ApiMethods(ABC):
         return await self._request(
             RequestMethod.POST,
             "editMessageLiveLocation",
-            Message | bool,  # type: ignore
+            Message | bool,  # type: ignore # TODO
             chat_id=chat_id,
             message_id=message_id,
             inline_message_id=inline_message_id,
@@ -769,7 +763,7 @@ class ApiMethods(ABC):
             "sendDice",
             chat_id,
             Message,
-            emoji=_enum_to_str(emoji),
+            emoji=emoji,
             disable_notification=disable_notification,
             protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
@@ -1333,7 +1327,7 @@ class ApiMethods(ABC):
             message_id=message_id,
             inline_message_id=inline_message_id,
             text=text,
-            parse_mode=_enum_to_str(parse_mode),
+            parse_mode=parse_mode,
             entities=_encode_json(entities),
             disable_web_page_preview=disable_web_page_preview,
             reply_markup=_encode_json(reply_markup),
@@ -1371,7 +1365,7 @@ class ApiMethods(ABC):
             message_id=message_id,
             inline_message_id=inline_message_id,
             caption=caption,
-            parse_mode=_enum_to_str(parse_mode),
+            parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
             reply_markup=_encode_json(reply_markup),
         )
@@ -1566,8 +1560,8 @@ class ApiMethods(ABC):
             title=title,
             emojis=emojis,
             stickers=_encode_json(attached_media),
-            sticker_format=_enum_to_str(sticker_format),
-            sticker_type=_enum_to_str(sticker_type),
+            sticker_format=sticker_format,
+            sticker_type=sticker_type,
             needs_repainting=needs_repainting,
         )
 

@@ -177,13 +177,25 @@ class LocalFile:
         loop = asyncio.get_running_loop()
         reader = cast(
             BufferedReader,
-            await loop.run_in_executor(None, self._path.open, "rb"),
+            await loop.run_in_executor(
+                None,
+                self._path.open,
+                "rb",
+            ),
         )
         try:
-            chunk = await loop.run_in_executor(None, reader.read, 2**16)
+            chunk = await loop.run_in_executor(
+                None,
+                reader.read,
+                2**16,
+            )
             while len(chunk) > 0:
                 yield chunk
-                chunk = await loop.run_in_executor(None, reader.read, 2**16)
+                chunk = await loop.run_in_executor(
+                    None,
+                    reader.read,
+                    2**16,
+                )
         finally:
             await loop.run_in_executor(None, reader.close)
 
