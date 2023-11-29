@@ -14,6 +14,9 @@ coverage:
     COVERAGE_FILE=.coverage/.coverage python -m pytest --cov=aiotgbot \
       --cov-report term --cov-report html:.coverage tests
 
+test:
+    python -m pytest tests
+
 build:
     if [ -d dist ]; then rm -rf dist; fi
     python -m build
