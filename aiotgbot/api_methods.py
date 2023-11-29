@@ -1,13 +1,11 @@
 import logging
 from abc import ABC, abstractmethod
-from enum import Enum
 from itertools import count
 from typing import Any, Final, Iterable, Sequence, Type, TypeVar
 
 import msgspec
 
 from .api_types import (
-    BaseTelegram,
     BotCommand,
     BotCommandScope,
     Chat,
@@ -58,9 +56,6 @@ from .constants import (
 __all__ = ("ParamType", "ApiMethods")
 
 api_logger: Final[logging.Logger] = logging.getLogger("aiotgbot.api")
-
-
-_ItemType = BaseTelegram | str | int | Enum
 
 
 ParamType = int | float | str | InputFile | None
