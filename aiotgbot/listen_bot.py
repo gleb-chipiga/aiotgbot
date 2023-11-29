@@ -38,11 +38,18 @@ class ListenBot(Bot):
         certificate: InputFile | None = None,
         ip_address: str | None = None,
         connector: BaseConnector | None = None,
+        client_trust_env: bool = False,
         check_address: bool = False,
         address_header: str | None = None,
         **application_args: Any
     ) -> None:
-        super().__init__(token, handler_table, storage, connector)
+        super().__init__(
+            token,
+            handler_table,
+            storage,
+            connector,
+            client_trust_env,
+        )
         self._url: URL = URL(url) if isinstance(url, str) else url
         self._certificate = certificate
         self._ip_address = ip_address

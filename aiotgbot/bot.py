@@ -81,6 +81,7 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         handler_table: "HandlerTableProtocol",
         storage: StorageProtocol,
         connector: BaseConnector | None = None,
+        client_trust_env: bool = False,
     ) -> None:
         if not handler_table.frozen:
             raise RuntimeError("Can't use unfrozen handler table")
@@ -103,6 +104,7 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
             connector=_connector,
             json_serialize=json_dumps,
             headers={"User-Agent": SOFTWARE},
+            trust_env=client_trust_env,
         )
         self._context_lock: Final[KeyLock] = KeyLock()
         self._message_limit: Final[FreqLimit] = FreqLimit(MESSAGE_INTERVAL)
