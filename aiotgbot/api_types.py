@@ -57,6 +57,7 @@ __all__ = (
     "ChatPermissions",
     "ChatLocation",
     "BotCommand",
+    "BotCommandScope",
     "BotCommandScopeDefault",
     "BotCommandScopeAllPrivateChats",
     "BotCommandScopeAllGroupChats",
@@ -702,57 +703,45 @@ class BotCommand(BaseTelegram, frozen=True):
     description: str
 
 
-class BotCommandScopeDefault(BaseTelegram, frozen=True, omit_defaults=False):
-    type: str = "default"
+class BotCommandScope(BaseTelegram, frozen=True, tag_field="type"):
+    pass
+
+
+class BotCommandScopeDefault(BotCommandScope, frozen=True, tag="default"):
+    pass
 
 
 class BotCommandScopeAllPrivateChats(
-    BaseTelegram, frozen=True, omit_defaults=False
+    BotCommandScope, frozen=True, tag="all_private_chats"
 ):
-    type: str = "all_private_chats"
+    pass
 
 
 class BotCommandScopeAllGroupChats(
-    BaseTelegram, frozen=True, omit_defaults=False
+    BotCommandScope, frozen=True, tag="all_group_chats"
 ):
-    type: str = "all_group_chats"
+    pass
 
 
 class BotCommandScopeAllChatAdministrators(
-    BaseTelegram, frozen=True, omit_defaults=False
+    BotCommandScope, frozen=True, tag="all_chat_administrators"
 ):
-    type: str = "all_chat_administrators"
+    pass
 
 
-class BotCommandScopeChat(BaseTelegram, frozen=True, omit_defaults=False):
+class BotCommandScopeChat(BotCommandScope, frozen=True, tag="chat"):
     chat_id: int | str
-    type: str = "chat"
 
 
 class BotCommandScopeChatAdministrators(
-    BaseTelegram, frozen=True, omit_defaults=False
+    BotCommandScope, frozen=True, tag="chat_administrators"
 ):
     chat_id: int | str
-    type: str = "chat"
 
 
-class BotCommandScopeChatMember(
-    BaseTelegram, frozen=True, omit_defaults=False
-):
+class BotCommandScopeChatMember(BaseTelegram, frozen=True, tag="chat_member"):
     chat_id: int | str
     user_id: int
-    type: str = "chat"
-
-
-BotCommandScope = Union[
-    BotCommandScopeDefault,
-    BotCommandScopeAllPrivateChats,
-    BotCommandScopeAllGroupChats,
-    BotCommandScopeAllChatAdministrators,
-    BotCommandScopeChat,
-    BotCommandScopeChatAdministrators,
-    BotCommandScopeChatMember,
-]
 
 
 class MenuButton(BaseTelegram, frozen=True):

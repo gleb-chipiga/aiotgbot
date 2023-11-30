@@ -8,6 +8,8 @@ import pytest_asyncio
 
 from aiotgbot.api_methods import ApiMethods, ParamType
 from aiotgbot.api_types import (
+    BotCommand,
+    BotCommandScopeChat,
     Chat,
     File,
     InputMediaPhoto,
@@ -383,5 +385,25 @@ async def test_edit_message_media(
             ).decode(),
             reply_markup=None,
             attachment0=file,
+        )
+    ]
+
+
+@pytest.mark.asyncio
+async def test_get_my_commands(_bot: Bot, make_message: _MakeMessage) -> None:
+    commands = (
+        BotCommand("cmd1", "Command 1"),
+        BotCommand("cmd2", "Command 2"),
+    )
+    _bot.request_mock.return_value = commands
+    assert (
+        await _bot.get_my_commands(BotCommandScopeChat(123), "ru") == commands
+    )
+    assert _bot.request_mock.call_args_list == [
+        call(
+            RequestMethod.GET,
+            "getMyCommands",
+            scope='{"type":"chat","chat_id":123}',
+            language_code="ru",
         )
     ]
