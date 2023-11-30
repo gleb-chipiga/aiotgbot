@@ -1,7 +1,7 @@
 __version__ = "0.13.10"
 
 from .api_types import (
-    BaseTelegram,
+    API,
     CallbackQuery,
     Chat,
     ChosenInlineResult,
@@ -57,7 +57,7 @@ from .storage import StorageProtocol
 
 __all__ = (
     "__version__",
-    "BaseTelegram",
+    "API",
     "CallbackQuery",
     "Chat",
     "ChosenInlineResult",

@@ -12,7 +12,7 @@ __all__ = (
     "DataMappingError",
     "StreamFile",
     "LocalFile",
-    "BaseTelegram",
+    "API",
     "ResponseParameters",
     "APIResponse",
     "Update",
@@ -196,16 +196,16 @@ class LocalFile:
 InputFile = LocalFile | StreamFile
 
 
-class BaseTelegram(Struct, frozen=True, omit_defaults=True):
+class API(Struct, frozen=True, omit_defaults=True):
     pass
 
 
-class ResponseParameters(BaseTelegram, frozen=True):
+class ResponseParameters(API, frozen=True):
     migrate_to_chat_id: int | None = None
     retry_after: int | None = None
 
 
-class APIResponse(BaseTelegram, frozen=True):
+class APIResponse(API, frozen=True):
     ok: bool
     result: Raw | UnsetType = UNSET
     error_code: int | None = None
@@ -213,7 +213,7 @@ class APIResponse(BaseTelegram, frozen=True):
     parameters: ResponseParameters | None = None
 
 
-class Update(BaseTelegram, frozen=True):
+class Update(API, frozen=True):
     update_id: int
     message: "Message | None" = None
     edited_message: "Message | None" = None
@@ -231,7 +231,7 @@ class Update(BaseTelegram, frozen=True):
     chat_join_request: "ChatJoinRequest | None" = None
 
 
-class WebhookInfo(BaseTelegram, frozen=True):
+class WebhookInfo(API, frozen=True):
     allowed_updates: tuple[str, ...]
     url: str | None = None
     has_custom_certificate: bool | None = None
@@ -243,7 +243,7 @@ class WebhookInfo(BaseTelegram, frozen=True):
     max_connections: int | None = None
 
 
-class User(BaseTelegram, frozen=True):
+class User(API, frozen=True):
     id: int
     is_bot: bool
     first_name: str
@@ -257,7 +257,7 @@ class User(BaseTelegram, frozen=True):
     supports_inline_queries: bool | None = None
 
 
-class Chat(BaseTelegram, frozen=True):
+class Chat(API, frozen=True):
     id: int
     type: str
     title: str | None = None
@@ -282,7 +282,7 @@ class Chat(BaseTelegram, frozen=True):
     location: "ChatLocation | None" = None
 
 
-class Message(BaseTelegram, frozen=True):
+class Message(API, frozen=True):
     message_id: int
     date: int
     chat: Chat
@@ -348,11 +348,11 @@ class Message(BaseTelegram, frozen=True):
     reply_markup: "InlineKeyboardMarkup | None" = None
 
 
-class MessageId(BaseTelegram, frozen=True):
+class MessageId(API, frozen=True):
     message_id: int
 
 
-class MessageEntity(BaseTelegram, frozen=True):
+class MessageEntity(API, frozen=True):
     type: str
     offset: int
     length: int
@@ -362,7 +362,7 @@ class MessageEntity(BaseTelegram, frozen=True):
     custom_emoji_id: str | None = None
 
 
-class PhotoSize(BaseTelegram, frozen=True):
+class PhotoSize(API, frozen=True):
     file_id: str
     file_unique_id: str
     width: int
@@ -370,7 +370,7 @@ class PhotoSize(BaseTelegram, frozen=True):
     file_size: int
 
 
-class Audio(BaseTelegram, frozen=True):
+class Audio(API, frozen=True):
     file_id: str
     file_unique_id: str
     duration: int
@@ -382,7 +382,7 @@ class Audio(BaseTelegram, frozen=True):
     thumb: PhotoSize | None = None
 
 
-class Document(BaseTelegram, frozen=True):
+class Document(API, frozen=True):
     file_id: str
     file_unique_id: str
     thumb: PhotoSize | None = None
@@ -391,7 +391,7 @@ class Document(BaseTelegram, frozen=True):
     file_size: int | None = None
 
 
-class Video(BaseTelegram, frozen=True):
+class Video(API, frozen=True):
     file_id: str
     file_unique_id: str
     width: int
@@ -403,7 +403,7 @@ class Video(BaseTelegram, frozen=True):
     file_size: int | None = None
 
 
-class Animation(BaseTelegram, frozen=True):
+class Animation(API, frozen=True):
     file_id: str
     file_unique_id: str
     thumb: PhotoSize | None = None
@@ -412,7 +412,7 @@ class Animation(BaseTelegram, frozen=True):
     file_size: int | None = None
 
 
-class Voice(BaseTelegram, frozen=True):
+class Voice(API, frozen=True):
     file_id: str
     file_unique_id: str
     duration: int
@@ -420,7 +420,7 @@ class Voice(BaseTelegram, frozen=True):
     file_size: int | None = None
 
 
-class VideoNote(BaseTelegram, frozen=True):
+class VideoNote(API, frozen=True):
     file_id: str
     file_unique_id: str
     length: int
@@ -429,7 +429,7 @@ class VideoNote(BaseTelegram, frozen=True):
     file_size: int | None = None
 
 
-class Contact(BaseTelegram, frozen=True):
+class Contact(API, frozen=True):
     phone_number: str
     first_name: str
     last_name: str | None = None
@@ -437,12 +437,12 @@ class Contact(BaseTelegram, frozen=True):
     vcard: int | None = None
 
 
-class Dice(BaseTelegram, frozen=True):
+class Dice(API, frozen=True):
     emoji: str
     value: int
 
 
-class Location(BaseTelegram, frozen=True):
+class Location(API, frozen=True):
     longitude: float
     latitude: float
     horizontal_accuracy: float | None = None
@@ -451,7 +451,7 @@ class Location(BaseTelegram, frozen=True):
     proximity_alert_radius: int | None = None
 
 
-class Venue(BaseTelegram, frozen=True):
+class Venue(API, frozen=True):
     location: Location
     title: str
     address: str
@@ -461,49 +461,49 @@ class Venue(BaseTelegram, frozen=True):
     google_place_type: str | None = None
 
 
-class WebAppData(BaseTelegram, frozen=True):
+class WebAppData(API, frozen=True):
     data: str
     button_text: str
 
 
-class VideoChatStarted(BaseTelegram, frozen=True):
+class VideoChatStarted(API, frozen=True):
     pass
 
 
-class VideoChatEnded(BaseTelegram, frozen=True):
+class VideoChatEnded(API, frozen=True):
     duration: int
 
 
-class VideoChatParticipantsInvited(BaseTelegram, frozen=True):
+class VideoChatParticipantsInvited(API, frozen=True):
     users: tuple[User, ...] | None = None
 
 
-class ProximityAlertTriggered(BaseTelegram, frozen=True):
+class ProximityAlertTriggered(API, frozen=True):
     traveler: User
     watcher: User
     distance: int
 
 
-class MessageAutoDeleteTimerChanged(BaseTelegram, frozen=True):
+class MessageAutoDeleteTimerChanged(API, frozen=True):
     message_auto_delete_time: int
 
 
-class VideoChatScheduled(BaseTelegram, frozen=True):
+class VideoChatScheduled(API, frozen=True):
     start_date: int
 
 
-class PollOption(BaseTelegram, frozen=True):
+class PollOption(API, frozen=True):
     text: str
     voter_count: int
 
 
-class PollAnswer(BaseTelegram, frozen=True):
+class PollAnswer(API, frozen=True):
     poll_id: str
     user: User
     option_ids: tuple[int, ...]
 
 
-class Poll(BaseTelegram, frozen=True):
+class Poll(API, frozen=True):
     id: str
     question: str
     options: tuple[PollOption, ...]
@@ -519,19 +519,19 @@ class Poll(BaseTelegram, frozen=True):
     close_date: int | None = None
 
 
-class UserProfilePhotos(BaseTelegram, frozen=True):
+class UserProfilePhotos(API, frozen=True):
     total_count: int
     photos: tuple[tuple[PhotoSize, ...], ...]
 
 
-class File(BaseTelegram, frozen=True):
+class File(API, frozen=True):
     file_id: str
     file_unique_id: str
     file_size: int | None = None
     file_path: str | None = None
 
 
-class WebAppInfo(BaseTelegram, frozen=True):
+class WebAppInfo(API, frozen=True):
     url: str
 
 
@@ -543,7 +543,7 @@ ReplyMarkup = Union[
 ]
 
 
-class ReplyKeyboardMarkup(BaseTelegram, frozen=True):
+class ReplyKeyboardMarkup(API, frozen=True):
     keyboard: Sequence[Sequence["KeyboardButton"]]
     resize_keyboard: bool | None = None
     one_time_keyboard: bool | None = None
@@ -551,7 +551,7 @@ class ReplyKeyboardMarkup(BaseTelegram, frozen=True):
     selective: bool | None = None
 
 
-class KeyboardButton(BaseTelegram, frozen=True):
+class KeyboardButton(API, frozen=True):
     text: str
     request_contact: bool | None = None
     request_location: bool | None = None
@@ -559,20 +559,20 @@ class KeyboardButton(BaseTelegram, frozen=True):
     web_app: WebAppInfo | None = None
 
 
-class KeyboardButtonPollType(BaseTelegram, frozen=True):
+class KeyboardButtonPollType(API, frozen=True):
     type: PollType
 
 
-class ReplyKeyboardRemove(BaseTelegram, frozen=True):
+class ReplyKeyboardRemove(API, frozen=True):
     remove_keyboard: bool
     selective: bool | None = None
 
 
-class InlineKeyboardMarkup(BaseTelegram, frozen=True):
+class InlineKeyboardMarkup(API, frozen=True):
     inline_keyboard: Sequence[Sequence["InlineKeyboardButton"]]
 
 
-class InlineKeyboardButton(BaseTelegram, frozen=True):
+class InlineKeyboardButton(API, frozen=True):
     text: str
     url: str | None = None
     login_url: "LoginUrl | None" = None
@@ -584,14 +584,14 @@ class InlineKeyboardButton(BaseTelegram, frozen=True):
     pay: bool | None = None
 
 
-class LoginUrl(BaseTelegram, frozen=True):
+class LoginUrl(API, frozen=True):
     url: str
     forward_text: str | None = None
     bot_username: str | None = None
     request_write_access: bool | None = None
 
 
-class CallbackQuery(BaseTelegram, frozen=True):
+class CallbackQuery(API, frozen=True):
     id: str
     from_: User = field(name="from")
     chat_instance: str
@@ -601,20 +601,20 @@ class CallbackQuery(BaseTelegram, frozen=True):
     game_short_name: str | None = None
 
 
-class ForceReply(BaseTelegram, frozen=True):
+class ForceReply(API, frozen=True):
     force_reply: bool
     input_field_placeholder: str | None = None
     selective: bool | None = None
 
 
-class ChatPhoto(BaseTelegram, frozen=True):
+class ChatPhoto(API, frozen=True):
     small_file_id: str
     small_file_unique_id: str
     big_file_id: str
     big_file_unique_id: str
 
 
-class ChatInviteLink(BaseTelegram, frozen=True):
+class ChatInviteLink(API, frozen=True):
     invite_link: str
     creator: User
     creates_join_request: bool
@@ -626,7 +626,7 @@ class ChatInviteLink(BaseTelegram, frozen=True):
     pending_join_request_count: int | None = None
 
 
-class ChatAdministratorRights(BaseTelegram, frozen=True):
+class ChatAdministratorRights(API, frozen=True):
     is_anonymous: bool
     can_manage_chat: bool
     can_delete_messages: bool
@@ -640,7 +640,7 @@ class ChatAdministratorRights(BaseTelegram, frozen=True):
     can_pin_messages: bool | None
 
 
-class ChatMember(BaseTelegram, frozen=True):
+class ChatMember(API, frozen=True):
     user: User
     status: str
     custom_title: str | None = None
@@ -665,7 +665,7 @@ class ChatMember(BaseTelegram, frozen=True):
     can_send_polls: bool | None = None
 
 
-class ChatMemberUpdated(BaseTelegram, frozen=True):
+class ChatMemberUpdated(API, frozen=True):
     chat: Chat
     from_: User = field(name="from")
     date: int
@@ -674,7 +674,7 @@ class ChatMemberUpdated(BaseTelegram, frozen=True):
     invite_link: ChatInviteLink | None = None
 
 
-class ChatJoinRequest(BaseTelegram, frozen=True):
+class ChatJoinRequest(API, frozen=True):
     chat: Chat
     from_: User = field(name="from")
     date: int
@@ -682,7 +682,7 @@ class ChatJoinRequest(BaseTelegram, frozen=True):
     invite_link: ChatInviteLink | None = None
 
 
-class ChatPermissions(BaseTelegram, frozen=True):
+class ChatPermissions(API, frozen=True):
     can_send_messages: bool | None = None
     can_send_media_messages: bool | None = None
     can_send_polls: bool | None = None
@@ -693,17 +693,17 @@ class ChatPermissions(BaseTelegram, frozen=True):
     can_pin_messages: bool | None = None
 
 
-class ChatLocation(BaseTelegram, frozen=True):
+class ChatLocation(API, frozen=True):
     location: Location
     address: str
 
 
-class BotCommand(BaseTelegram, frozen=True):
+class BotCommand(API, frozen=True):
     command: str
     description: str
 
 
-class BotCommandScope(BaseTelegram, frozen=True, tag_field="type"):
+class BotCommandScope(API, frozen=True, tag_field="type"):
     pass
 
 
@@ -739,18 +739,18 @@ class BotCommandScopeChatAdministrators(
     chat_id: int | str
 
 
-class BotCommandScopeChatMember(BaseTelegram, frozen=True, tag="chat_member"):
+class BotCommandScopeChatMember(API, frozen=True, tag="chat_member"):
     chat_id: int | str
     user_id: int
 
 
-class MenuButton(BaseTelegram, frozen=True):
+class MenuButton(API, frozen=True):
     type: str
     text: str | None
     web_app: WebAppInfo | None
 
 
-class InputMedia(BaseTelegram, frozen=True):
+class InputMedia(API, frozen=True):
     media: str | InputFile
     caption: str | None = None
     parse_mode: str | None = None
@@ -792,14 +792,14 @@ class InputMediaDocument(InputMedia, frozen=True):
     disable_content_type_detection: bool | None = None
 
 
-class InputSticker(BaseTelegram, frozen=True):
+class InputSticker(API, frozen=True):
     sticker: str | InputFile
     emoji_list: tuple[str, ...]
     mask_position: "MaskPosition | None"
     keywords: tuple[str, ...] | None
 
 
-class Sticker(BaseTelegram, frozen=True):
+class Sticker(API, frozen=True):
     file_id: str
     file_unique_id: str
     type: str
@@ -816,7 +816,7 @@ class Sticker(BaseTelegram, frozen=True):
     file_size: int | None = None
 
 
-class StickerSet(BaseTelegram, frozen=True):
+class StickerSet(API, frozen=True):
     name: str
     title: str
     sticker_type: str
@@ -826,14 +826,14 @@ class StickerSet(BaseTelegram, frozen=True):
     thumb: PhotoSize | None = None
 
 
-class MaskPosition(BaseTelegram, frozen=True):
+class MaskPosition(API, frozen=True):
     point: str
     x_shift: float
     y_shift: float
     scale: float
 
 
-class InlineQuery(BaseTelegram, frozen=True):
+class InlineQuery(API, frozen=True):
     id: str
     from_: User = field(name="from")
     query: str
@@ -866,7 +866,7 @@ InlineQueryResult = Union[
 ]
 
 
-class InlineQueryResultArticle(BaseTelegram, frozen=True):
+class InlineQueryResultArticle(API, frozen=True):
     type: str
     id: str
     title: str
@@ -880,7 +880,7 @@ class InlineQueryResultArticle(BaseTelegram, frozen=True):
     thumb_height: int | None = None
 
 
-class InlineQueryResultPhoto(BaseTelegram, frozen=True):
+class InlineQueryResultPhoto(API, frozen=True):
     type: str
     td: str
     photo_url: str
@@ -896,7 +896,7 @@ class InlineQueryResultPhoto(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultGif(BaseTelegram, frozen=True):
+class InlineQueryResultGif(API, frozen=True):
     type: str
     id: str
     gif_url: str
@@ -911,7 +911,7 @@ class InlineQueryResultGif(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultMpeg4Gif(BaseTelegram, frozen=True):
+class InlineQueryResultMpeg4Gif(API, frozen=True):
     type: str
     id: str
     mpeg4_url: str
@@ -926,7 +926,7 @@ class InlineQueryResultMpeg4Gif(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultVideo(BaseTelegram, frozen=True):
+class InlineQueryResultVideo(API, frozen=True):
     type: str
     id: str
     video_url: str
@@ -944,7 +944,7 @@ class InlineQueryResultVideo(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultAudio(BaseTelegram, frozen=True):
+class InlineQueryResultAudio(API, frozen=True):
     type: str
     id: str
     audio_url: str
@@ -958,7 +958,7 @@ class InlineQueryResultAudio(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultVoice(BaseTelegram, frozen=True):
+class InlineQueryResultVoice(API, frozen=True):
     type: str
     id: str
     voice_url: str
@@ -971,7 +971,7 @@ class InlineQueryResultVoice(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultDocument(BaseTelegram, frozen=True):
+class InlineQueryResultDocument(API, frozen=True):
     type: str
     id: str
     title: str
@@ -988,7 +988,7 @@ class InlineQueryResultDocument(BaseTelegram, frozen=True):
     thumb_height: int | None = None
 
 
-class InlineQueryResultLocation(BaseTelegram, frozen=True):
+class InlineQueryResultLocation(API, frozen=True):
     type: str
     id: str
     latitude: float
@@ -1005,7 +1005,7 @@ class InlineQueryResultLocation(BaseTelegram, frozen=True):
     thumb_height: int | None = None
 
 
-class InlineQueryResultVenue(BaseTelegram, frozen=True):
+class InlineQueryResultVenue(API, frozen=True):
     type: str
     id: str
     latitude: float
@@ -1023,7 +1023,7 @@ class InlineQueryResultVenue(BaseTelegram, frozen=True):
     thumb_height: int | None = None
 
 
-class InlineQueryResultContact(BaseTelegram, frozen=True):
+class InlineQueryResultContact(API, frozen=True):
     type: str
     id: str
     phone_number: str
@@ -1037,14 +1037,14 @@ class InlineQueryResultContact(BaseTelegram, frozen=True):
     thumb_height: int | None = None
 
 
-class InlineQueryResultGame(BaseTelegram, frozen=True):
+class InlineQueryResultGame(API, frozen=True):
     type: str
     id: str
     game_short_name: str
     reply_markup: InlineKeyboardMarkup | None = None
 
 
-class InlineQueryResultCachedPhoto(BaseTelegram, frozen=True):
+class InlineQueryResultCachedPhoto(API, frozen=True):
     type: str
     id: str
     photofileid: str
@@ -1057,7 +1057,7 @@ class InlineQueryResultCachedPhoto(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedGif(BaseTelegram, frozen=True):
+class InlineQueryResultCachedGif(API, frozen=True):
     type: str
     id: str
     gif_file_id: str
@@ -1069,7 +1069,7 @@ class InlineQueryResultCachedGif(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedMpeg4Gif(BaseTelegram, frozen=True):
+class InlineQueryResultCachedMpeg4Gif(API, frozen=True):
     type: str
     id: str
     mpeg4_file_id: str
@@ -1081,7 +1081,7 @@ class InlineQueryResultCachedMpeg4Gif(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedSticker(BaseTelegram, frozen=True):
+class InlineQueryResultCachedSticker(API, frozen=True):
     type: str
     id: str
     sticker_file_id: str
@@ -1089,7 +1089,7 @@ class InlineQueryResultCachedSticker(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedDocument(BaseTelegram, frozen=True):
+class InlineQueryResultCachedDocument(API, frozen=True):
     type: str
     id: str
     title: str
@@ -1102,7 +1102,7 @@ class InlineQueryResultCachedDocument(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedVideo(BaseTelegram, frozen=True):
+class InlineQueryResultCachedVideo(API, frozen=True):
     type: str
     id: str
     video_file_id: str
@@ -1115,7 +1115,7 @@ class InlineQueryResultCachedVideo(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedVoice(BaseTelegram, frozen=True):
+class InlineQueryResultCachedVoice(API, frozen=True):
     type: str
     id: str
     voice_file_id: str
@@ -1127,7 +1127,7 @@ class InlineQueryResultCachedVoice(BaseTelegram, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedAudio(BaseTelegram, frozen=True):
+class InlineQueryResultCachedAudio(API, frozen=True):
     type: str
     id: str
     audio_file_id: str
@@ -1146,14 +1146,14 @@ InputMessageContent = Union[
 ]
 
 
-class InputTextMessageContent(BaseTelegram, frozen=True):
+class InputTextMessageContent(API, frozen=True):
     message_text: str
     parse_mode: ParseMode | None = None
     entities: Sequence[MessageEntity] | None = None
     disable_web_page_preview: bool | None = None
 
 
-class InputLocationMessageContent(BaseTelegram, frozen=True):
+class InputLocationMessageContent(API, frozen=True):
     latitude: float
     longitude: float
     horizontal_accuracy: float | None = None
@@ -1162,7 +1162,7 @@ class InputLocationMessageContent(BaseTelegram, frozen=True):
     proximity_alert_radius: int | None = None
 
 
-class InputVenueMessageContent(BaseTelegram, frozen=True):
+class InputVenueMessageContent(API, frozen=True):
     latitude: float
     longitude: float
     title: str
@@ -1173,7 +1173,7 @@ class InputVenueMessageContent(BaseTelegram, frozen=True):
     google_place_type: str | None = None
 
 
-class InputContactMessageContent(BaseTelegram, frozen=True):
+class InputContactMessageContent(API, frozen=True):
     phone_number: str
     first_name: str
     last_name: str | None = None
@@ -1203,7 +1203,7 @@ class InputInvoiceMessageContent:
     is_flexible: bool | None = None
 
 
-class ChosenInlineResult(BaseTelegram, frozen=True):
+class ChosenInlineResult(API, frozen=True):
     result_id: str
     from_: User = field(name="from")
     query: str
@@ -1211,16 +1211,16 @@ class ChosenInlineResult(BaseTelegram, frozen=True):
     inline_message_id: str | None = None
 
 
-class SentWebAppMessage(BaseTelegram, frozen=True):
+class SentWebAppMessage(API, frozen=True):
     inline_message_id: str | None
 
 
-class LabeledPrice(BaseTelegram, frozen=True):
+class LabeledPrice(API, frozen=True):
     label: str
     amount: int
 
 
-class Invoice(BaseTelegram, frozen=True):
+class Invoice(API, frozen=True):
     title: str
     description: str
     start_parameter: str
@@ -1228,7 +1228,7 @@ class Invoice(BaseTelegram, frozen=True):
     total_amount: int
 
 
-class ShippingAddress(BaseTelegram, frozen=True):
+class ShippingAddress(API, frozen=True):
     country_code: str
     state: str
     city: str
@@ -1237,20 +1237,20 @@ class ShippingAddress(BaseTelegram, frozen=True):
     post_code: str
 
 
-class OrderInfo(BaseTelegram, frozen=True):
+class OrderInfo(API, frozen=True):
     name: str | None = None
     phone_number: str | None = None
     email: str | None = None
     shipping_address: ShippingAddress | None = None
 
 
-class ShippingOption(BaseTelegram, frozen=True):
+class ShippingOption(API, frozen=True):
     id: str
     title: str
     prices: tuple[LabeledPrice, ...]
 
 
-class SuccessfulPayment(BaseTelegram, frozen=True):
+class SuccessfulPayment(API, frozen=True):
     currency: str
     total_amount: int
     invoice_payload: str
@@ -1260,14 +1260,14 @@ class SuccessfulPayment(BaseTelegram, frozen=True):
     order_info: OrderInfo | None = None
 
 
-class ShippingQuery(BaseTelegram, frozen=True):
+class ShippingQuery(API, frozen=True):
     id: str
     from_: User = field(name="from")
     invoice_payload: str
     shipping_address: ShippingAddress
 
 
-class PreCheckoutQuery(BaseTelegram, frozen=True):
+class PreCheckoutQuery(API, frozen=True):
     id: str
     from_: User = field(name="from")
     currency: str
@@ -1277,19 +1277,19 @@ class PreCheckoutQuery(BaseTelegram, frozen=True):
     order_info: OrderInfo | None = None
 
 
-class PassportData(BaseTelegram, frozen=True):
+class PassportData(API, frozen=True):
     data: tuple["EncryptedPassportElement", ...]
     credentials: "EncryptedCredentials"
 
 
-class PassportFile(BaseTelegram, frozen=True):
+class PassportFile(API, frozen=True):
     file_id: str
     file_unique_id: str
     file_date: int
     file_size: int | None = None
 
 
-class EncryptedPassportElement(BaseTelegram, frozen=True):
+class EncryptedPassportElement(API, frozen=True):
     type: str
     data: str | None = None
     phone_number: str | None = None
@@ -1302,7 +1302,7 @@ class EncryptedPassportElement(BaseTelegram, frozen=True):
     hash: str | None = None
 
 
-class EncryptedCredentials(BaseTelegram, frozen=True):
+class EncryptedCredentials(API, frozen=True):
     data: str
     hash: str
     secret: str
@@ -1321,7 +1321,7 @@ PassportElementError = Union[
 ]
 
 
-class PassportElementErrorDataField(BaseTelegram, frozen=True):
+class PassportElementErrorDataField(API, frozen=True):
     source: str
     type: str
     field_name: str
@@ -1329,63 +1329,63 @@ class PassportElementErrorDataField(BaseTelegram, frozen=True):
     message: str
 
 
-class PassportElementErrorFrontSide(BaseTelegram, frozen=True):
+class PassportElementErrorFrontSide(API, frozen=True):
     source: str
     type: str
     file_hash: str
     message: str
 
 
-class PassportElementErrorReverseSide(BaseTelegram, frozen=True):
+class PassportElementErrorReverseSide(API, frozen=True):
     source: str
     type: str
     file_hash: str
     message: str
 
 
-class PassportElementErrorSelfie(BaseTelegram, frozen=True):
+class PassportElementErrorSelfie(API, frozen=True):
     source: str
     type: str
     file_hash: str
     message: str
 
 
-class PassportElementErrorFile(BaseTelegram, frozen=True):
+class PassportElementErrorFile(API, frozen=True):
     source: str
     type: str
     file_hash: str
     message: str
 
 
-class PassportElementErrorFiles(BaseTelegram, frozen=True):
+class PassportElementErrorFiles(API, frozen=True):
     source: str
     type: str
     file_hashes: Sequence[str]
     message: str
 
 
-class PassportElementErrorTranslationFile(BaseTelegram, frozen=True):
+class PassportElementErrorTranslationFile(API, frozen=True):
     source: str
     type: str
     file_hash: str
     message: str
 
 
-class PassportElementErrorTranslationFiles(BaseTelegram, frozen=True):
+class PassportElementErrorTranslationFiles(API, frozen=True):
     source: str
     type: str
     file_hashes: Sequence[str]
     message: str
 
 
-class PassportElementErrorUnspecified(BaseTelegram, frozen=True):
+class PassportElementErrorUnspecified(API, frozen=True):
     source: str
     type: str
     element_hash: str
     message: str
 
 
-class Game(BaseTelegram, frozen=True):
+class Game(API, frozen=True):
     title: str
     description: str
     photo: tuple[PhotoSize, ...]
@@ -1394,11 +1394,11 @@ class Game(BaseTelegram, frozen=True):
     animation: "Animation | None" = None
 
 
-class CallbackGame(BaseTelegram, frozen=True):
+class CallbackGame(API, frozen=True):
     pass
 
 
-class GameHighScore(BaseTelegram, frozen=True):
+class GameHighScore(API, frozen=True):
     position: int
     user: User
     score: int

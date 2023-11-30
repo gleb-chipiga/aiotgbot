@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives.constant_time import bytes_eq
 from cryptography.hazmat.primitives.hashes import SHA1, SHA256, SHA512, Hash
 from yarl import URL
 
-from aiotgbot import BaseTelegram
+from aiotgbot import API
 from aiotgbot.api_types import EncryptedCredentials
 
 __all__ = (
@@ -156,14 +156,14 @@ class PassportScopeType(StrEnum):
     EMAIL = "email"
 
 
-class PassportScopeElementOne(BaseTelegram, frozen=True):
+class PassportScopeElementOne(API, frozen=True):
     type: PassportScopeType
     selfie: bool | None = None
     translation: bool | None = None
     native_names: bool | None = None
 
 
-class PassportScopeElementOneOfSeveral(BaseTelegram, frozen=True):
+class PassportScopeElementOneOfSeveral(API, frozen=True):
     one_of: tuple[PassportScopeElementOne, ...]
     selfie: bool | None = None
     translation: bool | None = None
@@ -175,17 +175,17 @@ PassportScopeElement = Union[
 ]
 
 
-class PassportScope(BaseTelegram, frozen=True, omit_defaults=False):
+class PassportScope(API, frozen=True, omit_defaults=False):
     data: tuple[PassportScopeElement, ...]
     v: int = 1
 
 
-class FileCredentials(BaseTelegram, frozen=True):
+class FileCredentials(API, frozen=True):
     file_hash: str
     secret: str
 
 
-class DataCredentials(BaseTelegram, frozen=True):
+class DataCredentials(API, frozen=True):
     data_hash: str
     secret: str
 
@@ -196,7 +196,7 @@ class DataCredentials(BaseTelegram, frozen=True):
         return cipher.decrypt(b64decode(ciphertext))
 
 
-class SecureValue(BaseTelegram, frozen=True):
+class SecureValue(API, frozen=True):
     data: DataCredentials | None = None
     front_side: FileCredentials | None = None
     reverse_side: FileCredentials | None = None
@@ -205,7 +205,7 @@ class SecureValue(BaseTelegram, frozen=True):
     files: tuple[FileCredentials, ...] | None = None
 
 
-class SecureData(BaseTelegram, frozen=True):
+class SecureData(API, frozen=True):
     personal_details: SecureValue | None = None
     passport: SecureValue | None = None
     internal_passport: SecureValue | None = None
@@ -219,7 +219,7 @@ class SecureData(BaseTelegram, frozen=True):
     temporary_registration: SecureValue | None = None
 
 
-class Credentials(BaseTelegram, frozen=True):
+class Credentials(API, frozen=True):
     secure_data: SecureData
     nonce: str
 
@@ -235,7 +235,7 @@ class Credentials(BaseTelegram, frozen=True):
         return msgspec.json.decode(plaintext, type=Credentials)
 
 
-class PersonalDetails(BaseTelegram, frozen=True):
+class PersonalDetails(API, frozen=True):
     first_name: str
     last_name: str
     birth_date: str
@@ -248,7 +248,7 @@ class PersonalDetails(BaseTelegram, frozen=True):
     middle_name_native: str | None = None
 
 
-class ResidentialAddress(BaseTelegram, frozen=True):
+class ResidentialAddress(API, frozen=True):
     street_line1: str
     city: str
     country_code: str
@@ -257,6 +257,6 @@ class ResidentialAddress(BaseTelegram, frozen=True):
     state: str | None = None
 
 
-class IdDocumentData(BaseTelegram, frozen=True):
+class IdDocumentData(API, frozen=True):
     document_no: str
     expiry_date: str | None = None

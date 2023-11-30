@@ -4,11 +4,11 @@ import msgspec
 import pytest
 from msgspec import UNSET, Raw
 
-from aiotgbot import BaseTelegram
+from aiotgbot import API
 from aiotgbot.api_types import APIResponse
 
 
-class Result(BaseTelegram, frozen=True):
+class Result(API, frozen=True):
     a: int
     b: str
     c: bool
