@@ -19,10 +19,6 @@ from .api_types import (
     InlineQueryResult,
     InputFile,
     InputMedia,
-    InputMediaAudio,
-    InputMediaDocument,
-    InputMediaPhoto,
-    InputMediaVideo,
     InputSticker,
     LabeledPrice,
     MaskPosition,
@@ -511,12 +507,7 @@ class ApiMethods(ABC):
     async def send_media_group(
         self,
         chat_id: int | str,
-        media: Iterable[
-            InputMediaAudio
-            | InputMediaDocument
-            | InputMediaPhoto
-            | InputMediaVideo
-        ],
+        media: Iterable[InputMedia],
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         reply_to_message_id: int | None = None,
