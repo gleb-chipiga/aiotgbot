@@ -97,9 +97,12 @@ class ApiMethods(ABC):
         allowed_updates: Sequence[UpdateType] | None = None,
     ) -> tuple[Update, ...]:
         api_logger.debug(
-            f"Get updates offset: {offset}, limit: {limit}, "
-            f"timeout: {timeout}, "
-            f"allowed_updates: {allowed_updates}"
+            "Get updates offset: %r, limit: %r, timeout: %r, "
+            "allowed_updates: %r",
+            offset,
+            limit,
+            timeout,
+            allowed_updates,
         )
         return await self._request(
             RequestMethod.GET,
