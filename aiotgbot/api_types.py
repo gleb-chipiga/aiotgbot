@@ -2,17 +2,9 @@ import asyncio
 from dataclasses import dataclass
 from io import BufferedReader
 from pathlib import Path
-from typing import (
-    AsyncIterator,
-    Final,
-    Generic,
-    Sequence,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import AsyncIterator, Final, Sequence, Union, cast
 
-from msgspec import Struct, field
+from msgspec import UNSET, Raw, Struct, UnsetType, field
 
 from aiotgbot.constants import InputMediaType, ParseMode, PollType
 
@@ -200,6 +192,9 @@ class LocalFile:
             await loop.run_in_executor(None, reader.close)
 
 
+InputFile = LocalFile | StreamFile
+
+
 class BaseTelegram(Struct, frozen=True, omit_defaults=True):
     pass
 
@@ -209,12 +204,9 @@ class ResponseParameters(BaseTelegram, frozen=True):
     retry_after: int | None = None
 
 
-T = TypeVar("T")
-
-
-class APIResponse(BaseTelegram, Generic[T], frozen=True):
+class APIResponse(BaseTelegram, frozen=True):
     ok: bool
-    result: T
+    result: Raw | UnsetType = UNSET
     error_code: int | None = None
     description: str | None = None
     parameters: ResponseParameters | None = None
@@ -767,9 +759,6 @@ class MenuButton(BaseTelegram, frozen=True):
     type: str
     text: str | None
     web_app: WebAppInfo | None
-
-
-InputFile = LocalFile | StreamFile
 
 
 class InputMedia(BaseTelegram, frozen=True):

@@ -175,7 +175,7 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         )
 
     @staticmethod
-    def _telegram_exception(api_response: APIResponse[T]) -> TelegramError:
+    def _telegram_exception(api_response: APIResponse) -> TelegramError:
         assert api_response.error_code is not None
         assert api_response.description is not None
         error_code = api_response.error_code
@@ -246,13 +246,13 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
 
         url = TG_API_URL.format(token=self._token, method=api_method)
         async with request(url) as response:
-            response_dict = await response.read()
-        decode_type = APIResponse[type_]  # type: ignore
-        api_response = msgspec.json.decode(response_dict, type=decode_type)
-
+            response_data = await response.read()
+        api_response = msgspec.json.decode(response_data, type=APIResponse)
         if api_response.ok:
-            return api_response.result
+            assert isinstance(api_response.result, msgspec.Raw)
+            return msgspec.json.decode(api_response.result, type=type_)
         else:
+            assert api_response.result is msgspec.UNSET
             raise Bot._telegram_exception(api_response)
 
     async def _safe_request(

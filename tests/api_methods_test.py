@@ -8,7 +8,6 @@ import pytest_asyncio
 
 from aiotgbot.api_methods import ApiMethods, ParamType
 from aiotgbot.api_types import (
-    APIResponse,
     Chat,
     File,
     InputMediaPhoto,
@@ -20,7 +19,6 @@ from aiotgbot.api_types import (
     User,
 )
 from aiotgbot.constants import ChatAction, ParseMode, RequestMethod, UpdateType
-from aiotgbot.helpers import json_dumps
 
 _MakeMessage = Callable[..., Message]
 
@@ -126,42 +124,40 @@ async def test_api_methods_get_me(_bot: Bot) -> None:
     ]
 
 
-# TODO
-# @pytest.mark.asyncio
-# async def test_api_methods_send_message(
-#     _bot: Bot, make_message: _MakeMessage, reply_kb: ReplyKeyboardMarkup
-# ) -> None:
-#     message = make_message(text="Hello!")
-#     _bot.safe_request_mock.return_value = msgspec.convert(
-#         {"ok": True, "result": msgspec.to_builtins(message)}, APIResponse
-#     )
-#     assert (
-#         await _bot.send_message(
-#             chat_id=1,
-#             text="Hello!",
-#             parse_mode=ParseMode.HTML,
-#             disable_web_page_preview=True,
-#             reply_to_message_id=111,
-#             reply_markup=reply_kb,
-#         )
-#         == message
-#     )
-#     assert _bot.safe_request_mock.call_args_list == [
-#         call(
-#             RequestMethod.POST,
-#             "sendMessage",
-#             1,
-#             text="Hello!",
-#             parse_mode="HTML",
-#             entities=None,
-#             disable_web_page_preview=True,
-#             disable_notification=None,
-#             protect_content=None,
-#             reply_to_message_id=111,
-#             allow_sending_without_reply=None,
-#             reply_markup=json_dumps(msgspec.to_builtins(reply_kb)),
-#         )
-#     ]
+@pytest.mark.asyncio
+async def test_api_methods_send_message(
+    _bot: Bot, make_message: _MakeMessage, reply_kb: ReplyKeyboardMarkup
+) -> None:
+    message = make_message(text="Hello!")
+    _bot.safe_request_mock.return_value = message
+
+    assert (
+        await _bot.send_message(
+            chat_id=1,
+            text="Hello!",
+            parse_mode=ParseMode.HTML,
+            disable_web_page_preview=True,
+            reply_to_message_id=111,
+            reply_markup=reply_kb,
+        )
+        == message
+    )
+    assert _bot.safe_request_mock.call_args_list == [
+        call(
+            RequestMethod.POST,
+            "sendMessage",
+            1,
+            text="Hello!",
+            parse_mode="HTML",
+            entities=None,
+            disable_web_page_preview=True,
+            disable_notification=None,
+            protect_content=None,
+            reply_to_message_id=111,
+            allow_sending_without_reply=None,
+            reply_markup=msgspec.json.encode(reply_kb).decode(),
+        )
+    ]
 
 
 @pytest.mark.asyncio
@@ -193,7 +189,7 @@ async def test_api_methods_send_photo(
             protect_content=None,
             reply_to_message_id=111,
             allow_sending_without_reply=None,
-            reply_markup=json_dumps(msgspec.to_builtins(reply_kb)),
+            reply_markup=msgspec.json.encode(reply_kb).decode(),
         )
     ]
 
@@ -223,9 +219,7 @@ async def test_api_methods_forward_message(
 
 @pytest.mark.asyncio
 async def test_api_methods_send_chat_action(_bot: Bot) -> None:
-    _bot.safe_request_mock.return_value = msgspec.convert(
-        {"ok": True, "result": True}, APIResponse
-    )
+    _bot.safe_request_mock.return_value = True
     assert await _bot.send_chat_action(chat_id=1, action=ChatAction.TYPING)
     assert _bot.safe_request_mock.call_args_list == [
         call(
@@ -248,9 +242,7 @@ async def test_api_methods_get_file(_bot: Bot) -> None:
         },
         File,
     )
-    _bot.request_mock.return_value = msgspec.convert(
-        {"ok": True, "result": msgspec.to_builtins(_file)}, APIResponse
-    )
+    _bot.request_mock.return_value = _file
     assert await _bot.get_file(file_id="1")
     assert _bot.request_mock.call_args_list == [
         call(RequestMethod.GET, "getFile", file_id="1")
@@ -259,9 +251,7 @@ async def test_api_methods_get_file(_bot: Bot) -> None:
 
 @pytest.mark.asyncio
 async def test_api_methods_leave_chat(_bot: Bot) -> None:
-    _bot.request_mock.return_value = msgspec.convert(
-        {"ok": True, "result": True}, APIResponse
-    )
+    _bot.request_mock.return_value = True
     assert await _bot.leave_chat(chat_id=1)
     assert _bot.request_mock.call_args_list == [
         call(RequestMethod.POST, "leaveChat", chat_id=1)
@@ -271,9 +261,7 @@ async def test_api_methods_leave_chat(_bot: Bot) -> None:
 @pytest.mark.asyncio
 async def test_api_methods_get_chat(_bot: Bot) -> None:
     chat = msgspec.convert({"id": 1, "type": "private"}, Chat)
-    _bot.request_mock.return_value = msgspec.convert(
-        {"ok": True, "result": msgspec.to_builtins(chat)}, APIResponse
-    )
+    _bot.request_mock.return_value = chat
     assert await _bot.get_chat(chat_id=1)
     assert _bot.request_mock.call_args_list == [
         call(RequestMethod.GET, "getChat", chat_id=1)
@@ -282,9 +270,7 @@ async def test_api_methods_get_chat(_bot: Bot) -> None:
 
 @pytest.mark.asyncio
 async def test_api_methods_answer_callback_query(_bot: Bot) -> None:
-    _bot.request_mock.return_value = msgspec.convert(
-        {"ok": True, "result": True}, APIResponse
-    )
+    _bot.request_mock.return_value = True
     assert await _bot.answer_callback_query(
         callback_query_id="1", text="message", show_alert=True
     )
@@ -306,9 +292,7 @@ async def test_api_methods_edit_message_text(
     _bot: Bot, make_message: _MakeMessage
 ) -> None:
     message = make_message(text="text2")
-    _bot.request_mock.return_value = msgspec.convert(
-        {"ok": True, "result": msgspec.to_builtins(message)}, APIResponse
-    )
+    _bot.request_mock.return_value = message
     assert await _bot.edit_message_text(text="text2", chat_id=1, message_id=1)
     assert _bot.request_mock.call_args_list == [
         call(
@@ -332,16 +316,10 @@ async def test_send_media_group(_bot: Bot, make_message: _MakeMessage) -> None:
     file1 = stream_file("bytes2")
     file2 = stream_file("bytes3")
 
-    _bot.safe_request_mock.return_value = msgspec.convert(
-        {
-            "ok": True,
-            "result": [
-                msgspec.to_builtins(make_message()),
-                msgspec.to_builtins(make_message()),
-                msgspec.to_builtins(make_message()),
-            ],
-        },
-        APIResponse,
+    _bot.safe_request_mock.return_value = (
+        make_message(),
+        make_message(),
+        make_message(),
     )
 
     await _bot.send_media_group(
@@ -358,25 +336,19 @@ async def test_send_media_group(_bot: Bot, make_message: _MakeMessage) -> None:
             RequestMethod.POST,
             "sendMediaGroup",
             1,
-            media=json_dumps(
+            media=msgspec.json.encode(
                 [
-                    msgspec.to_builtins(
-                        InputMediaPhoto(
-                            media="attach://attachment0", caption="f1"
-                        )
+                    InputMediaPhoto(
+                        media="attach://attachment0", caption="f1"
                     ),
-                    msgspec.to_builtins(
-                        InputMediaPhoto(
-                            media="attach://attachment1", caption="f2"
-                        )
+                    InputMediaPhoto(
+                        media="attach://attachment1", caption="f2"
                     ),
-                    msgspec.to_builtins(
-                        InputMediaPhoto(
-                            media="attach://attachment2", caption="f3"
-                        )
+                    InputMediaPhoto(
+                        media="attach://attachment2", caption="f3"
                     ),
                 ]
-            ),
+            ).decode(),
             disable_notification=None,
             protect_content=None,
             reply_to_message_id=None,
@@ -393,10 +365,7 @@ async def test_edit_message_media(
     _bot: Bot, make_message: _MakeMessage
 ) -> None:
     file = stream_file("bytes1")
-    _bot.request_mock.return_value = msgspec.convert(
-        {"ok": True, "result": msgspec.to_builtins(make_message())},
-        APIResponse,
-    )
+    _bot.request_mock.return_value = make_message()
     await _bot.edit_message_media(
         media=InputMediaPhoto(media=file, caption="f1"),
         chat_id=1,
@@ -409,11 +378,9 @@ async def test_edit_message_media(
             chat_id=1,
             message_id=1,
             inline_message_id=None,
-            media=json_dumps(
-                msgspec.to_builtins(
-                    InputMediaPhoto(media="attach://attachment0", caption="f1")
-                )
-            ),
+            media=msgspec.json.encode(
+                InputMediaPhoto(media="attach://attachment0", caption="f1")
+            ).decode(),
             reply_markup=None,
             attachment0=file,
         )
