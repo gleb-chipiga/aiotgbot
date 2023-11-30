@@ -703,43 +703,67 @@ class BotCommand(API, frozen=True):
     description: str
 
 
-class BotCommandScope(API, frozen=True, tag_field="type"):
+class BotCommandScope(
+    API,
+    frozen=True,
+    tag_field="type",
+):
     pass
 
 
-class BotCommandScopeDefault(BotCommandScope, frozen=True, tag="default"):
+class BotCommandScopeDefault(
+    BotCommandScope,
+    frozen=True,
+    tag="default",
+):
     pass
 
 
 class BotCommandScopeAllPrivateChats(
-    BotCommandScope, frozen=True, tag="all_private_chats"
+    BotCommandScope,
+    frozen=True,
+    tag="all_private_chats",
 ):
     pass
 
 
 class BotCommandScopeAllGroupChats(
-    BotCommandScope, frozen=True, tag="all_group_chats"
+    BotCommandScope,
+    frozen=True,
+    tag="all_group_chats",
 ):
     pass
 
 
 class BotCommandScopeAllChatAdministrators(
-    BotCommandScope, frozen=True, tag="all_chat_administrators"
+    BotCommandScope,
+    frozen=True,
+    tag="all_chat_administrators",
 ):
     pass
 
 
-class BotCommandScopeChat(BotCommandScope, frozen=True, tag="chat"):
-    chat_id: int | str
-
-
-class BotCommandScopeChatAdministrators(
-    BotCommandScope, frozen=True, tag="chat_administrators"
+class BotCommandScopeChat(
+    BotCommandScope,
+    frozen=True,
+    tag="chat",
 ):
     chat_id: int | str
 
 
-class BotCommandScopeChatMember(API, frozen=True, tag="chat_member"):
+class BotCommandScopeChatAdministrators(
+    BotCommandScope,
+    frozen=True,
+    tag="chat_administrators",
+):
+    chat_id: int | str
+
+
+class BotCommandScopeChatMember(
+    API,
+    frozen=True,
+    tag="chat_member",
+):
     chat_id: int | str
     user_id: int
 
