@@ -11,7 +11,6 @@ __all__ = (
     "ParseMode",
     "PollType",
     "DiceEmoji",
-    "InputMediaType",
     "InlineQueryResultType",
     "PassportElementType",
     "StickerFormat",
@@ -147,15 +146,6 @@ class DiceEmoji(StrEnum):
     FOOTBALL = "⚽"
     SLOT_MACHINE = "🎰"
     BOWLING = "🎳"
-
-
-@unique
-class InputMediaType(StrEnum):
-    PHOTO = "photo"
-    VIDEO = "video"
-    ANIMATION = "animation"
-    AUDIO = "audio"
-    DOCUMENT = "document"
 
 
 @unique

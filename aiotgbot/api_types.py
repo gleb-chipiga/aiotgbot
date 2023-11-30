@@ -774,19 +774,30 @@ class MenuButton(API, frozen=True):
     web_app: WebAppInfo | None
 
 
-class InputMedia(API, frozen=True):
+class InputMedia(
+    API,
+    frozen=True,
+    tag_field="type",
+):
     media: str | InputFile
     caption: str | None = None
     parse_mode: str | None = None
     caption_entities: Sequence[MessageEntity] | None = None
 
 
-class InputMediaPhoto(InputMedia, frozen=True):
-    type: str = InputMediaType.PHOTO
+class InputMediaPhoto(
+    InputMedia,
+    frozen=True,
+    tag="photo",
+):
+    pass
 
 
-class InputMediaVideo(InputMedia, frozen=True):
-    type: str = InputMediaType.VIDEO
+class InputMediaVideo(
+    InputMedia,
+    frozen=True,
+    tag="video",
+):
     thumb: str | None = None
     width: int | None = None
     height: int | None = None
@@ -794,16 +805,22 @@ class InputMediaVideo(InputMedia, frozen=True):
     supports_streaming: bool | None = None
 
 
-class InputMediaAnimation(InputMedia, frozen=True):
-    type: str = InputMediaType.ANIMATION
+class InputMediaAnimation(
+    InputMedia,
+    frozen=True,
+    tag="animation",
+):
     thumb: str | None = None
     width: int | None = None
     height: int | None = None
     duration: int | None = None
 
 
-class InputMediaAudio(InputMedia, frozen=True):
-    type: str = InputMediaType.AUDIO
+class InputMediaAudio(
+    InputMedia,
+    frozen=True,
+    tag="audio",
+):
     thumb: str | None = None
     duration: int | None = None
     performer: str | None = None
@@ -812,6 +829,7 @@ class InputMediaAudio(InputMedia, frozen=True):
 
 class InputMediaDocument(InputMedia, frozen=True):
     type: str = InputMediaType.DOCUMENT
+    InputMedia,
     thumb: str | None = None
     disable_content_type_detection: bool | None = None
 
