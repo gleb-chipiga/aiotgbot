@@ -6,7 +6,7 @@ from typing import AsyncIterator, Final, Sequence, Union, cast
 
 from msgspec import UNSET, Raw, Struct, UnsetType, field
 
-from aiotgbot.constants import InputMediaType, ParseMode, PollType
+from aiotgbot.constants import ParseMode, PollType
 
 __all__ = (
     "DataMappingError",
@@ -827,9 +827,11 @@ class InputMediaAudio(
     title: str | None = None
 
 
-class InputMediaDocument(InputMedia, frozen=True):
-    type: str = InputMediaType.DOCUMENT
+class InputMediaDocument(
     InputMedia,
+    frozen=True,
+    tag="document",
+):
     thumb: str | None = None
     disable_content_type_detection: bool | None = None
 
@@ -884,33 +886,19 @@ class InlineQuery(API, frozen=True):
     location: Location | None = None
 
 
-InlineQueryResult = Union[
-    "InlineQueryResultCachedAudio",
-    "InlineQueryResultCachedDocument",
-    "InlineQueryResultCachedGif",
-    "InlineQueryResultCachedMpeg4Gif",
-    "InlineQueryResultCachedPhoto",
-    "InlineQueryResultCachedSticker",
-    "InlineQueryResultCachedVideo",
-    "InlineQueryResultCachedVoice",
-    "InlineQueryResultArticle",
-    "InlineQueryResultAudio",
-    "InlineQueryResultContact",
-    "InlineQueryResultGame",
-    "InlineQueryResultDocument",
-    "InlineQueryResultGif",
-    "InlineQueryResultLocation",
-    "InlineQueryResultMpeg4Gif",
-    "InlineQueryResultPhoto",
-    "InlineQueryResultVenue",
-    "InlineQueryResultVideo",
-    "InlineQueryResultVoice",
-]
-
-
-class InlineQueryResultArticle(API, frozen=True):
-    type: str
+class InlineQueryResult(
+    API,
+    frozen=True,
+    tag_field="type",
+):
     id: str
+
+
+class InlineQueryResultArticle(
+    InlineQueryResult,
+    frozen=True,
+    tag="article",
+):
     title: str
     input_message_content: "InputMessageContent"
     reply_markup: InlineKeyboardMarkup | None = None
@@ -922,9 +910,11 @@ class InlineQueryResultArticle(API, frozen=True):
     thumb_height: int | None = None
 
 
-class InlineQueryResultPhoto(API, frozen=True):
-    type: str
-    td: str
+class InlineQueryResultPhoto(
+    InlineQueryResult,
+    frozen=True,
+    tag="photo",
+):
     photo_url: str
     thumb_url: str
     photo_width: int | None = None
@@ -938,9 +928,11 @@ class InlineQueryResultPhoto(API, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultGif(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultGif(
+    InlineQueryResult,
+    frozen=True,
+    tag="gif",
+):
     gif_url: str
     thumb_url: str
     gif_width: int | None = None
@@ -953,9 +945,11 @@ class InlineQueryResultGif(API, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultMpeg4Gif(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultMpeg4Gif(
+    InlineQueryResult,
+    frozen=True,
+    tag="mpeg4_gif",
+):
     mpeg4_url: str
     thumb_url: str
     mpeg4_width: int | None = None
@@ -968,9 +962,11 @@ class InlineQueryResultMpeg4Gif(API, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultVideo(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultVideo(
+    InlineQueryResult,
+    frozen=True,
+    tag="video",
+):
     video_url: str
     mime_type: str
     thumb_url: str
@@ -986,9 +982,11 @@ class InlineQueryResultVideo(API, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultAudio(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultAudio(
+    InlineQueryResult,
+    frozen=True,
+    tag="audio",
+):
     audio_url: str
     title: str
     caption: str | None = None
@@ -1000,9 +998,11 @@ class InlineQueryResultAudio(API, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultVoice(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultVoice(
+    InlineQueryResult,
+    frozen=True,
+    tag="voice",
+):
     voice_url: str
     title: str
     caption: str | None = None
@@ -1013,9 +1013,11 @@ class InlineQueryResultVoice(API, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultDocument(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultDocument(
+    InlineQueryResult,
+    frozen=True,
+    tag="document",
+):
     title: str
     document_url: str
     mime_type: str
@@ -1030,9 +1032,11 @@ class InlineQueryResultDocument(API, frozen=True):
     thumb_height: int | None = None
 
 
-class InlineQueryResultLocation(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultLocation(
+    InlineQueryResult,
+    frozen=True,
+    tag="location",
+):
     latitude: float
     longitude: float
     title: str
@@ -1047,9 +1051,11 @@ class InlineQueryResultLocation(API, frozen=True):
     thumb_height: int | None = None
 
 
-class InlineQueryResultVenue(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultVenue(
+    InlineQueryResult,
+    frozen=True,
+    tag="venue",
+):
     latitude: float
     longitude: float
     title: str
@@ -1065,9 +1071,11 @@ class InlineQueryResultVenue(API, frozen=True):
     thumb_height: int | None = None
 
 
-class InlineQueryResultContact(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultContact(
+    InlineQueryResult,
+    frozen=True,
+    tag="contact",
+):
     phone_number: str
     first_name: str
     last_name: str | None = None
@@ -1079,16 +1087,20 @@ class InlineQueryResultContact(API, frozen=True):
     thumb_height: int | None = None
 
 
-class InlineQueryResultGame(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultGame(
+    InlineQueryResult,
+    frozen=True,
+    tag="game",
+):
     game_short_name: str
     reply_markup: InlineKeyboardMarkup | None = None
 
 
-class InlineQueryResultCachedPhoto(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultCachedPhoto(
+    InlineQueryResult,
+    frozen=True,
+    tag="photo",
+):
     photofileid: str
     title: str | None = None
     description: str | None = None
@@ -1099,9 +1111,11 @@ class InlineQueryResultCachedPhoto(API, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedGif(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultCachedGif(
+    InlineQueryResult,
+    frozen=True,
+    tag="gif",
+):
     gif_file_id: str
     title: str | None = None
     caption: str | None = None
@@ -1111,9 +1125,11 @@ class InlineQueryResultCachedGif(API, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedMpeg4Gif(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultCachedMpeg4Gif(
+    InlineQueryResult,
+    frozen=True,
+    tag="mpeg4_gif",
+):
     mpeg4_file_id: str
     title: str | None = None
     caption: str | None = None
@@ -1123,17 +1139,21 @@ class InlineQueryResultCachedMpeg4Gif(API, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedSticker(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultCachedSticker(
+    InlineQueryResult,
+    frozen=True,
+    tag="sticker",
+):
     sticker_file_id: str
     reply_markup: InlineKeyboardMarkup | None = None
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedDocument(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultCachedDocument(
+    InlineQueryResult,
+    frozen=True,
+    tag="document",
+):
     title: str
     document_file_id: str
     description: str | None = None
@@ -1144,9 +1164,11 @@ class InlineQueryResultCachedDocument(API, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedVideo(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultCachedVideo(
+    InlineQueryResult,
+    frozen=True,
+    tag="video",
+):
     video_file_id: str
     title: str
     description: str | None = None
@@ -1157,9 +1179,11 @@ class InlineQueryResultCachedVideo(API, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedVoice(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultCachedVoice(
+    InlineQueryResult,
+    frozen=True,
+    tag="voice",
+):
     voice_file_id: str
     title: str
     caption: str | None = None
@@ -1169,9 +1193,11 @@ class InlineQueryResultCachedVoice(API, frozen=True):
     input_message_content: "InputMessageContent | None" = None
 
 
-class InlineQueryResultCachedAudio(API, frozen=True):
-    type: str
-    id: str
+class InlineQueryResultCachedAudio(
+    InlineQueryResult,
+    frozen=True,
+    tag="audio",
+):
     audio_file_id: str
     caption: str | None = None
     parse_mode: ParseMode | None = None
