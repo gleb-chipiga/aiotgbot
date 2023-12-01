@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass
+from enum import StrEnum, unique
 from io import BufferedReader
 from pathlib import Path
 from typing import AsyncIterator, Final, Sequence, Union, cast
@@ -95,6 +96,7 @@ __all__ = (
     "MessageId",
     "OrderInfo",
     "PassportData",
+    "PassportElementDataType",
     "PassportElementError",
     "PassportElementErrorDataField",
     "PassportElementErrorFile",
@@ -105,6 +107,12 @@ __all__ = (
     "PassportElementErrorTranslationFile",
     "PassportElementErrorTranslationFiles",
     "PassportElementErrorUnspecified",
+    "PassportElementFileType",
+    "PassportElementFrontSideType",
+    "PassportElementReverseSideType",
+    "PassportElementSelfieType",
+    "PassportElementTranslationFileType",
+    "PassportElementType",
     "PassportFile",
     "PhotoSize",
     "Poll",
@@ -1357,6 +1365,23 @@ class PassportFile(API, frozen=True):
     file_size: int | None = None
 
 
+@unique
+class PassportElementType(StrEnum):
+    PERSONAL_DETAILS = "personal_details"
+    PASSPORT = "passport"
+    DRIVER_LICENSE = "driver_license"
+    IDENTITY_CARD = "identity_card"
+    INTERNAL_PASSPORT = "internal_passport"
+    ADDRESS = "address"
+    UTILITY_BILL = "utility_bill"
+    BANK_STATEMENT = "bank_statement"
+    RENTAL_AGREEMENT = "rental_agreement"
+    PASSPORT_REGISTRATION = "passport_registration"
+    TEMPORARY_REGISTRATION = "temporary_registration"
+    PHONE_NUMBER = "phone_number"
+    EMAIL = "email"
+
+
 class EncryptedPassportElement(API, frozen=True):
     type: str
     data: str | None = None
@@ -1376,79 +1401,155 @@ class EncryptedCredentials(API, frozen=True):
     secret: str
 
 
-PassportElementError = Union[
-    "PassportElementErrorDataField",
-    "PassportElementErrorFrontSide",
-    "PassportElementErrorReverseSide",
-    "PassportElementErrorSelfie",
-    "PassportElementErrorFile",
-    "PassportElementErrorFiles",
-    "PassportElementErrorTranslationFile",
-    "PassportElementErrorTranslationFiles",
-    "PassportElementErrorUnspecified",
-]
+class PassportElementError(
+    API,
+    frozen=True,
+    tag_field="source",
+):
+    pass
 
 
-class PassportElementErrorDataField(API, frozen=True):
-    source: str
-    type: str
+@unique
+class PassportElementDataType(StrEnum):
+    PERSONAL_DETAILS = PassportElementType.PERSONAL_DETAILS
+    PASSPORT = PassportElementType.PASSPORT
+    DRIVER_LICENSE = PassportElementType.DRIVER_LICENSE
+    IDENTITY_CARD = PassportElementType.IDENTITY_CARD
+    INTERNAL_PASSPORT = PassportElementType.INTERNAL_PASSPORT
+    ADDRESS = PassportElementType.ADDRESS
+
+
+class PassportElementErrorDataField(
+    PassportElementError,
+    frozen=True,
+    tag="data",
+):
+    type: PassportElementDataType
     field_name: str
     data_hash: str
     message: str
 
 
-class PassportElementErrorFrontSide(API, frozen=True):
-    source: str
-    type: str
+@unique
+class PassportElementFrontSideType(StrEnum):
+    PASSPORT = PassportElementType.PASSPORT
+    DRIVER_LICENSE = PassportElementType.DRIVER_LICENSE
+    IDENTITY_CARD = PassportElementType.IDENTITY_CARD
+    INTERNAL_PASSPORT = PassportElementType.INTERNAL_PASSPORT
+
+
+class PassportElementErrorFrontSide(
+    PassportElementError,
+    frozen=True,
+    tag="front_side",
+):
+    type: PassportElementFrontSideType
     file_hash: str
     message: str
 
 
-class PassportElementErrorReverseSide(API, frozen=True):
-    source: str
-    type: str
+@unique
+class PassportElementReverseSideType(StrEnum):
+    DRIVER_LICENSE = PassportElementType.DRIVER_LICENSE
+    IDENTITY_CARD = PassportElementType.IDENTITY_CARD
+
+
+class PassportElementErrorReverseSide(
+    PassportElementError,
+    frozen=True,
+    tag="reverse_side",
+):
+    type: PassportElementReverseSideType
     file_hash: str
     message: str
 
 
-class PassportElementErrorSelfie(API, frozen=True):
-    source: str
-    type: str
+@unique
+class PassportElementSelfieType(StrEnum):
+    PASSPORT = PassportElementType.PASSPORT
+    DRIVER_LICENSE = PassportElementType.DRIVER_LICENSE
+    IDENTITY_CARD = PassportElementType.IDENTITY_CARD
+    INTERNAL_PASSPORT = PassportElementType.INTERNAL_PASSPORT
+
+
+class PassportElementErrorSelfie(
+    PassportElementError,
+    frozen=True,
+    tag="selfie",
+):
+    type: PassportElementSelfieType
     file_hash: str
     message: str
 
 
-class PassportElementErrorFile(API, frozen=True):
-    source: str
-    type: str
+@unique
+class PassportElementFileType(StrEnum):
+    UTILITY_BILL = PassportElementType.UTILITY_BILL
+    BANK_STATEMENT = PassportElementType.BANK_STATEMENT
+    RENTAL_AGREEMENT = PassportElementType.RENTAL_AGREEMENT
+    PASSPORT_REGISTRATION = PassportElementType.PASSPORT_REGISTRATION
+    TEMPORARY_REGISTRATION = PassportElementType.TEMPORARY_REGISTRATION
+
+
+class PassportElementErrorFile(
+    PassportElementError,
+    frozen=True,
+    tag="file",
+):
+    type: PassportElementFileType
     file_hash: str
     message: str
 
 
-class PassportElementErrorFiles(API, frozen=True):
-    source: str
-    type: str
+class PassportElementErrorFiles(
+    PassportElementError,
+    frozen=True,
+    tag="files",
+):
+    type: PassportElementFileType
     file_hashes: Sequence[str]
     message: str
 
 
-class PassportElementErrorTranslationFile(API, frozen=True):
-    source: str
-    type: str
+@unique
+class PassportElementTranslationFileType(StrEnum):
+    PASSPORT = PassportElementType.PASSPORT
+    DRIVER_LICENSE = PassportElementType.DRIVER_LICENSE
+    IDENTITY_CARD = PassportElementType.IDENTITY_CARD
+    INTERNAL_PASSPORT = PassportElementType.INTERNAL_PASSPORT
+    UTILITY_BILL = PassportElementType.UTILITY_BILL
+    BANK_STATEMENT = PassportElementType.BANK_STATEMENT
+    RENTAL_AGREEMENT = PassportElementType.RENTAL_AGREEMENT
+    PASSPORT_REGISTRATION = PassportElementType.PASSPORT_REGISTRATION
+    TEMPORARY_REGISTRATION = PassportElementType.TEMPORARY_REGISTRATION
+
+
+class PassportElementErrorTranslationFile(
+    PassportElementError,
+    frozen=True,
+    tag="translation_file",
+):
+    type: PassportElementTranslationFileType
     file_hash: str
     message: str
 
 
-class PassportElementErrorTranslationFiles(API, frozen=True):
-    source: str
-    type: str
+class PassportElementErrorTranslationFiles(
+    PassportElementError,
+    frozen=True,
+    tag="translation_files",
+):
+    type: PassportElementTranslationFileType
     file_hashes: Sequence[str]
     message: str
 
 
-class PassportElementErrorUnspecified(API, frozen=True):
-    source: str
-    type: str
+class PassportElementErrorUnspecified(
+    PassportElementError,
+    frozen=True,
+    tag="unspecified",
+):
+    type: PassportElementType
     element_hash: str
     message: str
 
