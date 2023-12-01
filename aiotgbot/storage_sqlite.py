@@ -1,5 +1,4 @@
 import json
-from enum import StrEnum
 from pathlib import Path
 from typing import Any, AsyncIterator, Final, cast
 
@@ -8,26 +7,16 @@ import aiosqlite
 from .helpers import json_dumps
 from .storage import Json, StorageProtocol
 
-__all__ = ("IsolationLevel", "SQLiteStorage")
-
-
-class IsolationLevel(StrEnum):
-    DEFERRED = "DEFERRED"
-    IMMEDIATE = "IMMEDIATE"
-    EXCLUSIVE = "EXCLUSIVE"
+__all__ = ("SQLiteStorage",)
 
 
 class SQLiteStorage(StorageProtocol):
     def __init__(
         self,
         database: str | Path,
-        isolation_level: IsolationLevel | None = None,
         **kwargs: Any,
     ) -> None:
         self._database: Final[str | Path] = database
-        self._isolation_level: Final[str | None] = (
-            isolation_level.value if isolation_level is not None else None
-        )
         self._kwargs: Final[dict[str, Any]] = kwargs
         self._connection: aiosqlite.Connection | None = None
 
@@ -36,7 +25,7 @@ class SQLiteStorage(StorageProtocol):
             raise RuntimeError("Already connected")
         self._connection = await aiosqlite.connect(
             self._database,
-            isolation_level=self._isolation_level,
+            isolation_level=None,
             **self._kwargs,
         )
         async with self._connection.cursor() as cursor:
@@ -90,7 +79,7 @@ class SQLiteStorage(StorageProtocol):
     async def clear(self) -> None:
         async with self.connection.cursor() as cursor:
             await cursor.execute("DELETE FROM kv")
-            await cursor.execute("VACUUM")
+            await self.connection.execute("VACUUM")
 
     def raw_connection(self) -> Any:
         return self.connection
