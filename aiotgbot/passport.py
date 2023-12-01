@@ -1,6 +1,5 @@
 from base64 import b64decode
-from enum import StrEnum, unique
-from typing import AsyncIterator, Final, Union, cast
+from typing import AsyncIterator, Final, Self, Sequence, Union, cast
 
 import msgspec.json
 from cryptography.hazmat.primitives import serialization
@@ -13,7 +12,7 @@ from cryptography.hazmat.primitives.constant_time import bytes_eq
 from cryptography.hazmat.primitives.hashes import SHA1, SHA256, SHA512, Hash
 from yarl import URL
 
-from .api_types import API, EncryptedCredentials
+from .api_types import API, EncryptedCredentials, PassportElementType
 
 __all__ = (
     "Credentials",
@@ -26,7 +25,6 @@ __all__ = (
     "PassportScopeElement",
     "PassportScopeElementOne",
     "PassportScopeElementOneOfSeveral",
-    "PassportScopeType",
     "PersonalDetails",
     "ResidentialAddress",
     "SecureData",
@@ -36,7 +34,10 @@ __all__ = (
 
 
 def passport_request(
-    bot_id: int, scope: "PassportScope", public_key: str, nonce: str
+    bot_id: int,
+    scope: "PassportScope",
+    public_key: str,
+    nonce: str,
 ) -> str:
     url = URL("tg://resolve").with_query(
         domain="telegrampassport",
@@ -50,10 +51,15 @@ def passport_request(
 
 class PassportKey:
     _padding: Final[OAEP] = OAEP(
-        mgf=MGF1(algorithm=SHA1()), algorithm=SHA1(), label=None
+        mgf=MGF1(algorithm=SHA1()),
+        algorithm=SHA1(),
+        label=None,
     )
 
-    def __init__(self, private_key: RSAPrivateKey) -> None:
+    def __init__(
+        self,
+        private_key: RSAPrivateKey,
+    ) -> None:
         if not isinstance(private_key, RSAPrivateKey):
             raise RuntimeError("Key is not RSA private key")
         self._private_key: Final[RSAPrivateKey] = private_key
@@ -64,25 +70,38 @@ class PassportKey:
         )
         self._public_key_pem: Final[str] = public_bytes.decode()
 
-    @staticmethod
-    def load_der(private_bytes: bytes) -> "PassportKey":
+    @classmethod
+    def load_der(
+        cls,
+        private_bytes: bytes,
+    ) -> Self:
         private_key = serialization.load_der_private_key(
-            private_bytes, password=None
+            private_bytes,
+            password=None,
         )
-        return PassportKey(cast(RSAPrivateKey, private_key))
+        return cls(cast(RSAPrivateKey, private_key))
 
-    @staticmethod
-    def load_pem(private_text: str) -> "PassportKey":
+    @classmethod
+    def load_pem(
+        cls,
+        private_text: str,
+    ) -> Self:
         private_key = serialization.load_pem_private_key(
-            private_text.encode(), password=None
+            private_text.encode(),
+            password=None,
         )
-        return PassportKey(cast(RSAPrivateKey, private_key))
+        return cls(cast(RSAPrivateKey, private_key))
 
-    def decrypt(self, ciphertext: bytes) -> bytes:
+    def decrypt(
+        self,
+        ciphertext: bytes,
+    ) -> bytes:
         return self._private_key.decrypt(ciphertext, self._padding)
 
     @property
-    def public_key_pem(self) -> str:
+    def public_key_pem(
+        self,
+    ) -> str:
         return self._public_key_pem
 
 
@@ -90,7 +109,11 @@ class PassportCipher:
     _key_size: Final[int] = 32
     _iv_size: Final[int] = 16
 
-    def __init__(self, data_secret: bytes, data_hash: bytes) -> None:
+    def __init__(
+        self,
+        data_secret: bytes,
+        data_hash: bytes,
+    ) -> None:
         digest = Hash(SHA512())
         digest.update(data_secret)
         digest.update(data_hash)
@@ -102,7 +125,10 @@ class PassportCipher:
         self._data_hash: Final[bytes] = data_hash
         self._cipher: Final[Cipher[CBC]] = Cipher(AES(key), CBC(iv))
 
-    def decrypt(self, ciphertext: bytes) -> bytes:
+    def decrypt(
+        self,
+        ciphertext: bytes,
+    ) -> bytes:
         decryptor = self._cipher.decryptor()
         assert isinstance(decryptor, CipherContext)
         plaintext = decryptor.update(ciphertext) + decryptor.finalize()
@@ -114,7 +140,8 @@ class PassportCipher:
         return plaintext[plaintext[0] :]  # noqa: E203
 
     async def decrypt_stream(
-        self, stream: AsyncIterator[bytes]
+        self,
+        stream: AsyncIterator[bytes],
     ) -> AsyncIterator[bytes]:
         decryptor = self._cipher.decryptor()
         assert isinstance(decryptor, CipherContext)
@@ -138,32 +165,15 @@ class PassportCipher:
         yield decrypted[skip:]
 
 
-@unique
-class PassportScopeType(StrEnum):
-    PERSONAL_DETAILS = "personal_details"
-    PASSPORT = "passport"
-    DRIVER_LICENSE = "driver_license"
-    IDENTITY_CARD = "identity_card"
-    INTERNAL_PASSPORT = "internal_passport"
-    ADDRESS = "address"
-    UTILITY_BILL = "utility_bill"
-    BANK_STATEMENT = "bank_statement"
-    RENTAL_AGREEMENT = "rental_agreement"
-    PASSPORT_REGISTRATION = "passport_registration"
-    TEMPORARY_REGISTRATION = "temporary_registration"
-    PHONE_NUMBER = "phone_number"
-    EMAIL = "email"
-
-
 class PassportScopeElementOne(API, frozen=True):
-    type: PassportScopeType
+    type: PassportElementType
     selfie: bool | None = None
     translation: bool | None = None
     native_names: bool | None = None
 
 
 class PassportScopeElementOneOfSeveral(API, frozen=True):
-    one_of: tuple[PassportScopeElementOne, ...]
+    one_of: Sequence[PassportScopeElementOne]
     selfie: bool | None = None
     translation: bool | None = None
 
@@ -174,9 +184,13 @@ PassportScopeElement = Union[
 ]
 
 
-class PassportScope(API, frozen=True, omit_defaults=False):
-    data: tuple[PassportScopeElement, ...]
-    v: int = 1
+class PassportScope(
+    API,
+    frozen=True,
+    tag_field="v",
+    tag=1,
+):
+    data: Sequence[PassportScopeElement]
 
 
 class FileCredentials(API, frozen=True):
@@ -188,9 +202,13 @@ class DataCredentials(API, frozen=True):
     data_hash: str
     secret: str
 
-    def decrypt(self, ciphertext: str) -> bytes:
+    def decrypt(
+        self,
+        ciphertext: str,
+    ) -> bytes:
         cipher = PassportCipher(
-            b64decode(self.secret), b64decode(self.data_hash)
+            b64decode(self.secret),
+            b64decode(self.data_hash),
         )
         return cipher.decrypt(b64decode(ciphertext))
 
@@ -200,8 +218,8 @@ class SecureValue(API, frozen=True):
     front_side: FileCredentials | None = None
     reverse_side: FileCredentials | None = None
     selfie: FileCredentials | None = None
-    translation: tuple[FileCredentials, ...] | None = None
-    files: tuple[FileCredentials, ...] | None = None
+    translation: Sequence[FileCredentials] | None = None
+    files: Sequence[FileCredentials] | None = None
 
 
 class SecureData(API, frozen=True):
@@ -222,16 +240,18 @@ class Credentials(API, frozen=True):
     secure_data: SecureData
     nonce: str
 
-    @staticmethod
+    @classmethod
     def from_encrypted(
-        encrypted: EncryptedCredentials, passport_key: PassportKey
-    ) -> "Credentials":
+        cls,
+        encrypted: EncryptedCredentials,
+        passport_key: PassportKey,
+    ) -> Self:
         data_secret = passport_key.decrypt(b64decode(encrypted.secret))
         data_hash = b64decode(encrypted.hash)
         ciphertext = b64decode(encrypted.data)
         cipher = PassportCipher(data_secret, data_hash)
         plaintext = cipher.decrypt(ciphertext)
-        return msgspec.json.decode(plaintext, type=Credentials)
+        return msgspec.json.decode(plaintext, type=cls)
 
 
 class PersonalDetails(API, frozen=True):
