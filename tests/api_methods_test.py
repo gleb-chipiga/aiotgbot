@@ -234,7 +234,7 @@ async def test_api_methods_send_chat_action(_bot: Bot) -> None:
             RequestMethod.POST,
             "sendChatAction",
             1,
-            action=ChatAction.TYPING.value,
+            action=ChatAction.TYPING,
             message_thread_id=None,
         )
     ]
