@@ -64,8 +64,8 @@ response_logger: Final[logging.Logger] = logging.getLogger("aiotgbot.response")
 
 EventHandler = Callable[["Bot"], Awaitable[None]]
 
-_T = TypeVar("_T")
 T = TypeVar("T")
+V = TypeVar("V")
 
 
 class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
@@ -109,28 +109,28 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         self._data: Final[dict[BotKey[Any] | str, object]] = {}
 
     @overload  # type: ignore[override]
-    def __getitem__(self, key: BotKey[_T]) -> _T:
+    def __getitem__(self, key: BotKey[T]) -> T:
         ...
 
     @overload
     def __getitem__(self, key: str) -> Any:
         ...
 
-    def __getitem__(self, key: str | BotKey[_T]) -> Any:
+    def __getitem__(self, key: str | BotKey[T]) -> Any:
         return self._data[key]
 
     @overload  # type: ignore[override]
-    def __setitem__(self, key: BotKey[_T], value: _T) -> None:
+    def __setitem__(self, key: BotKey[T], value: T) -> None:
         ...
 
     @overload
     def __setitem__(self, key: str, value: Any) -> None:
         ...
 
-    def __setitem__(self, key: str | BotKey[_T], value: Any) -> None:
+    def __setitem__(self, key: str | BotKey[T], value: Any) -> None:
         self._data[key] = value
 
-    def __delitem__(self, key: str | BotKey[_T]) -> None:
+    def __delitem__(self, key: str | BotKey[T]) -> None:
         del self._data[key]
 
     def __len__(self) -> int:
@@ -206,9 +206,9 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         self,
         http_method: RequestMethod,
         api_method: str,
-        type_: Type[T],
+        type_: Type[V],
         **params: ParamType,
-    ) -> T:
+    ) -> V:
         data = {
             name: str(value) if isinstance(value, (int, float)) else value
             for name, value in params.items()
@@ -251,13 +251,13 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         http_method: RequestMethod,
         api_method: str,
         chat_id: int | str,
-        type_: Type[T],
+        type_: Type[V],
         **params: ParamType,
-    ) -> T:
+    ) -> V:
         retry_allowed = all(
             not isinstance(param, StreamFile) for param in params.values()
         )
-        request: Callable[[], Awaitable[T]] = partial(
+        request: Callable[[], Awaitable[V]] = partial(
             self._request,
             http_method,
             api_method,
