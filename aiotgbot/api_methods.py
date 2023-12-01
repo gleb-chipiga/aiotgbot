@@ -14,6 +14,7 @@ from .api_types import (
     ChatMember,
     ChatPermissions,
     File,
+    ForumTopic,
     GameHighScore,
     InlineKeyboardMarkup,
     InlineQueryResult,
@@ -41,6 +42,7 @@ from .api_types import (
 from .constants import (
     ChatAction,
     DiceEmoji,
+    IconColor,
     ParseMode,
     PollType,
     RequestMethod,
@@ -197,6 +199,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         text: str,
+        message_thread_id: int | None = None,
         parse_mode: ParseMode | None = None,
         entities: Sequence[MessageEntity] | None = None,
         disable_web_page_preview: bool | None = None,
@@ -217,6 +220,7 @@ class ApiMethods(ABC):
             chat_id,
             Message,
             text=text,
+            message_thread_id=message_thread_id,
             parse_mode=parse_mode,
             entities=_encode_json(entities),
             disable_web_page_preview=disable_web_page_preview,
@@ -232,6 +236,7 @@ class ApiMethods(ABC):
         chat_id: int | str,
         from_chat_id: int | str,
         message_id: int,
+        message_thread_id: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
     ) -> Message:
@@ -248,6 +253,7 @@ class ApiMethods(ABC):
             Message,
             from_chat_id=from_chat_id,
             message_id=message_id,
+            message_thread_id=message_thread_id,
             disable_notification=disable_notification,
             protect_content=protect_content,
         )
@@ -257,6 +263,7 @@ class ApiMethods(ABC):
         chat_id: int | str,
         from_chat_id: int | str,
         message_id: int,
+        message_thread_id: int | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -279,6 +286,7 @@ class ApiMethods(ABC):
             MessageId,
             from_chat_id=from_chat_id,
             message_id=message_id,
+            message_thread_id=message_thread_id,
             parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
             caption=caption,
@@ -293,6 +301,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         photo: InputFile | str,
+        message_thread_id: int | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -312,6 +321,7 @@ class ApiMethods(ABC):
             chat_id,
             Message,
             photo=photo,
+            message_thread_id=message_thread_id,
             caption=caption,
             parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
@@ -326,6 +336,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         audio: InputFile | str,
+        message_thread_id: int | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -349,6 +360,7 @@ class ApiMethods(ABC):
             chat_id,
             Message,
             audio=audio,
+            message_thread_id=message_thread_id,
             caption=caption,
             parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
@@ -367,6 +379,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         document: InputFile | str,
+        message_thread_id: int | None = None,
         thumb: InputFile | str | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
@@ -391,6 +404,7 @@ class ApiMethods(ABC):
             chat_id,
             Message,
             document=document,
+            message_thread_id=message_thread_id,
             thumb=thumb,
             caption=caption,
             parse_mode=parse_mode,
@@ -410,6 +424,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         video: InputFile | str,
+        message_thread_id: int | None = None,
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
@@ -434,6 +449,7 @@ class ApiMethods(ABC):
             chat_id,
             Message,
             video=video,
+            message_thread_id=message_thread_id,
             duration=duration,
             width=width,
             height=height,
@@ -453,6 +469,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         animation: InputFile | str,
+        message_thread_id: int | None = None,
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
@@ -476,6 +493,7 @@ class ApiMethods(ABC):
             chat_id,
             Message,
             animation=animation,
+            message_thread_id=message_thread_id,
             duration=duration,
             width=width,
             height=height,
@@ -494,6 +512,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         voice: InputFile | str,
+        message_thread_id: int | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -514,6 +533,7 @@ class ApiMethods(ABC):
             chat_id,
             Message,
             voice=voice,
+            message_thread_id=message_thread_id,
             caption=caption,
             parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
@@ -529,6 +549,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         video_note: InputFile | str,
+        message_thread_id: int | None = None,
         duration: int | None = None,
         length: int | None = None,
         thumb: InputFile | str | None = None,
@@ -548,6 +569,7 @@ class ApiMethods(ABC):
             chat_id,
             Message,
             video_note=video_note,
+            message_thread_id=message_thread_id,
             duration=duration,
             length=length,
             thumb=thumb,
@@ -562,6 +584,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         media: Iterable[InputMedia],
+        message_thread_id: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         reply_to_message_id: int | None = None,
@@ -591,6 +614,7 @@ class ApiMethods(ABC):
             chat_id,
             tuple[Message, ...],
             media=_encode_json(attached_media),
+            message_thread_id=message_thread_id,
             disable_notification=disable_notification,
             protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
@@ -603,6 +627,7 @@ class ApiMethods(ABC):
         chat_id: int | str,
         latitude: float,
         longitude: float,
+        message_thread_id: int | None = None,
         horizontal_accuracy: float | None = None,
         live_period: int | None = None,
         heading: int | None = None,
@@ -625,6 +650,7 @@ class ApiMethods(ABC):
             Message,
             latitude=latitude,
             longitude=longitude,
+            message_thread_id=message_thread_id,
             horizontal_accuracy=horizontal_accuracy,
             live_period=live_period,
             heading=heading,
@@ -698,6 +724,7 @@ class ApiMethods(ABC):
         longitude: float,
         title: str,
         address: str,
+        message_thread_id: int | None = None,
         foursquare_id: str | None = None,
         foursquare_type: str | None = None,
         disable_notification: bool | None = None,
@@ -719,6 +746,7 @@ class ApiMethods(ABC):
             longitude=longitude,
             title=title,
             address=address,
+            message_thread_id=message_thread_id,
             foursquare_id=foursquare_id,
             foursquare_type=foursquare_type,
             disable_notification=disable_notification,
@@ -733,6 +761,7 @@ class ApiMethods(ABC):
         chat_id: int | str,
         phone_number: str,
         first_name: str,
+        message_thread_id: int | None = None,
         last_name: str | None = None,
         vcard: str | None = None,
         disable_notification: bool | None = None,
@@ -752,6 +781,7 @@ class ApiMethods(ABC):
             Message,
             phone_number=phone_number,
             first_name=first_name,
+            message_thread_id=message_thread_id,
             last_name=last_name,
             vcard=vcard,
             disable_notification=disable_notification,
@@ -766,6 +796,7 @@ class ApiMethods(ABC):
         chat_id: int | str,
         question: str,
         options: Sequence[str],
+        message_thread_id: int | None = None,
         is_anonymous: bool | None = None,
         type_: PollType | None = None,
         allows_multiple_answers: bool | None = None,
@@ -793,6 +824,7 @@ class ApiMethods(ABC):
             Message,
             question=question,
             options=_encode_json(options),
+            message_thread_id=message_thread_id,
             is_anonymous=is_anonymous,
             type=type_,
             allows_multiple_answers=allows_multiple_answers,
@@ -813,6 +845,7 @@ class ApiMethods(ABC):
     async def send_dice(
         self,
         chat_id: int | str,
+        message_thread_id: int | None = None,
         emoji: DiceEmoji | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
@@ -830,6 +863,7 @@ class ApiMethods(ABC):
             "sendDice",
             chat_id,
             Message,
+            message_thread_id=message_thread_id,
             emoji=emoji,
             disable_notification=disable_notification,
             protect_content=protect_content,
@@ -966,7 +1000,9 @@ class ApiMethods(ABC):
         can_restrict_members: bool | None = None,
         can_pin_messages: bool | None = None,
         can_promote_members: bool | None = None,
+        can_manage_topics: bool | None = None,
     ) -> bool:
+        # TODO: check all params
         api_logger.debug(
             'Promote member %s in "%s"',
             user_id,
@@ -989,6 +1025,7 @@ class ApiMethods(ABC):
             can_restrict_members=can_restrict_members,
             can_pin_messages=can_pin_messages,
             can_promote_members=can_promote_members,
+            can_manage_topics=can_manage_topics,
         )
 
     async def set_chat_administrator_custom_title(
@@ -1374,7 +1411,7 @@ class ApiMethods(ABC):
         return await self._request(
             RequestMethod.GET,
             "getChatMember",
-            ChatMember,
+            ChatMember,  # type: ignore # TODO
             chat_id=chat_id,
             user_id=user_id,
         )
@@ -1410,6 +1447,115 @@ class ApiMethods(ABC):
             "deleteChatStickerSet",
             bool,
             chat_id=chat_id,
+        )
+
+    async def get_forum_topic_icon_stickers(
+        self,
+    ) -> tuple[Sticker, ...]:
+        api_logger.debug(
+            "Get forum topic icon stickers",
+        )
+        return await self._request(
+            RequestMethod.GET,
+            "getForumTopicIconStickers",
+            tuple[Sticker, ...],
+        )
+
+    async def create_forum_topic(
+        self,
+        chat_id: int | str,
+        name: str,
+        icon_color: IconColor | None = None,
+        icon_custom_emoji_id: str | None = None,
+    ) -> ForumTopic:
+        api_logger.debug(
+            "Create forum topic %r %r",
+            chat_id,
+            name,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "createForumTopic",
+            ForumTopic,
+            chat_id=chat_id,
+            icon_color=icon_color,
+            icon_custom_emoji_id=icon_custom_emoji_id,
+        )
+
+    async def edit_forum_topic(
+        self,
+        chat_id: int | str,
+        message_thread_id: int,
+        name: str | None = None,
+        icon_custom_emoji_id: str | None = None,
+    ) -> bool:
+        api_logger.debug(
+            "Edit forum topic %r %r",
+            chat_id,
+            message_thread_id,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "editForumTopic",
+            bool,
+            chat_id=chat_id,
+            message_thread_id=message_thread_id,
+            name=name,
+            icon_custom_emoji_id=icon_custom_emoji_id,
+        )
+
+    async def close_forum_topic(
+        self,
+        chat_id: int | str,
+        message_thread_id: int,
+    ) -> bool:
+        api_logger.debug(
+            "Close forum topic %r %r",
+            chat_id,
+            message_thread_id,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "closeForumTopic",
+            bool,
+            chat_id=chat_id,
+            message_thread_id=message_thread_id,
+        )
+
+    async def reopen_forum_topic(
+        self,
+        chat_id: int | str,
+        message_thread_id: int,
+    ) -> bool:
+        api_logger.debug(
+            "Reopen forum topic %r %r",
+            chat_id,
+            message_thread_id,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "reopenForumTopic",
+            bool,
+            chat_id=chat_id,
+            message_thread_id=message_thread_id,
+        )
+
+    async def unpin_all_forum_topic_messages(
+        self,
+        chat_id: int | str,
+        message_thread_id: int,
+    ) -> bool:
+        api_logger.debug(
+            "Unpin all forum topic messages %r %r",
+            chat_id,
+            message_thread_id,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "unpinAllForumTopicMessages",
+            bool,
+            chat_id=chat_id,
+            message_thread_id=message_thread_id,
         )
 
     async def answer_callback_query(
@@ -1751,6 +1897,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         sticker: InputFile | str,
+        message_thread_id: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         reply_to_message_id: int | None = None,
@@ -1767,6 +1914,7 @@ class ApiMethods(ABC):
             Message,
             chat_id=chat_id,
             sticker=sticker,
+            message_thread_id=message_thread_id,
             disable_notification=disable_notification,
             protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
@@ -1998,6 +2146,7 @@ class ApiMethods(ABC):
         provider_token: str,
         currency: str,
         prices: Sequence[LabeledPrice],
+        message_thread_id: int | None = None,
         max_tip_amount: int | None = None,
         suggested_tip_amounts: tuple[int, ...] | None = None,
         start_parameter: str | None = None,
@@ -2034,6 +2183,7 @@ class ApiMethods(ABC):
             provider_token=provider_token,
             currency=currency,
             prices=_encode_json(prices),
+            message_thread_id=message_thread_id,
             max_tip_amount=max_tip_amount,
             suggested_tip_amounts=_encode_json(suggested_tip_amounts),
             start_parameter=start_parameter,
@@ -2171,6 +2321,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int,
         game_short_name: str,
+        message_thread_id: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         reply_to_message_id: int | None = None,
@@ -2188,6 +2339,7 @@ class ApiMethods(ABC):
             chat_id,
             Message,
             game_short_name=game_short_name,
+            message_thread_id=message_thread_id,
             disable_notification=disable_notification,
             protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,

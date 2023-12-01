@@ -294,11 +294,11 @@ def test_bot_update_my_chat_member(
             "date": 123,
             "old_chat_member": {
                 "user": {"id": 1, "is_bot": False, "first_name": "name1"},
-                "status": "status1",
+                "status": "member",
             },
             "new_chat_member": {
                 "user": {"id": 1, "is_bot": False, "first_name": "name2"},
-                "status": "status2",
+                "status": "member",
             },
         },
         ChatMemberUpdated,
@@ -318,11 +318,11 @@ def test_bot_update_chat_member(
             "date": 123,
             "old_chat_member": {
                 "user": {"id": 1, "is_bot": False, "first_name": "name1"},
-                "status": "status1",
+                "status": "member",
             },
             "new_chat_member": {
                 "user": {"id": 1, "is_bot": False, "first_name": "name2"},
-                "status": "status2",
+                "status": "member",
             },
         },
         ChatMemberUpdated,

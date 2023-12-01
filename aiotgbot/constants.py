@@ -1,4 +1,4 @@
-from enum import StrEnum, unique
+from enum import IntEnum, StrEnum, unique
 
 __all__ = (
     "ChatAction",
@@ -6,6 +6,7 @@ __all__ = (
     "ChatType",
     "ContentType",
     "DiceEmoji",
+    "IconColor",
     "MessageEntityType",
     "ParseMode",
     "PollType",
@@ -158,3 +159,12 @@ class StickerType(StrEnum):
     REGULAR = "regular"
     MASK = "mask"
     CUSTOM_EMOJI = "custom_emoji"
+
+
+class IconColor(IntEnum):
+    IC_0x6FB9F0 = 0x6FB9F0
+    IC_0xFFD67E = 0xFFD67E
+    IC_0xCB86DB = 0xCB86DB
+    IC_0x8EEE98 = 0x8EEE98
+    IC_0xFF93B2 = 0xFF93B2
+    IC_0xFB6F5F = 0xFB6F5F

@@ -31,6 +31,14 @@ __all__ = (
     "ChatInviteLink",
     "ChatLocation",
     "ChatMember",
+    "ChatMemberAdministrator",
+    "ChatMemberBanned",
+    "ChatMemberBase",
+    "ChatMemberBase",
+    "ChatMemberLeft",
+    "ChatMemberMember",
+    "ChatMemberOwner",
+    "ChatMemberRestricted",
     "ChatMemberUpdated",
     "ChatPermissions",
     "ChatPhoto",
@@ -43,6 +51,10 @@ __all__ = (
     "EncryptedPassportElement",
     "File",
     "ForceReply",
+    "ForumTopic",
+    "ForumTopicClosed",
+    "ForumTopicCreated",
+    "ForumTopicReopened",
     "Game",
     "GameHighScore",
     "InlineKeyboardButton",
@@ -272,7 +284,10 @@ class Chat(API, frozen=True):
     username: str | None = None
     first_name: str | None = None
     last_name: str | None = None
+    is_forum: bool | None = None
     photo: "ChatPhoto | None" = None
+    active_usernames: Sequence[str] | None = None
+    emoji_status_custom_emoji_id: str | None = None
     bio: str | None = None
     has_private_forwards: bool | None = None
     join_to_send_messages: bool | None = None
@@ -294,6 +309,7 @@ class Message(API, frozen=True):
     message_id: int
     date: int
     chat: Chat
+    message_thread_id: int | None = None
     from_: User | None = field(default=None, name="from")
     sender_chat: Chat | None = None
     forward_from: User | None = None
@@ -302,6 +318,7 @@ class Message(API, frozen=True):
     forward_signature: str | None = None
     forward_sender_name: str | None = None
     forward_date: int | None = None
+    is_topic_message: bool | None = None
     is_automatic_forward: bool | None = None
     reply_to_message: "Message | None" = None
     via_bot: User | None = None
@@ -346,6 +363,9 @@ class Message(API, frozen=True):
     connected_website: str | None = None
     passport_data: "PassportData | None" = None
     proximity_alert_triggered: "ProximityAlertTriggered | None" = None
+    forum_topic_created: "ForumTopicCreated | None" = None
+    forum_topic_closed: "ForumTopicClosed | None" = None
+    forum_topic_reopened: "ForumTopicReopened | None" = None
     video_chat_scheduled: "VideoChatScheduled | None" = None
     video_chat_started: "VideoChatStarted | None" = None
     video_chat_ended: "VideoChatEnded | None" = None
@@ -494,6 +514,21 @@ class ProximityAlertTriggered(API, frozen=True):
 
 class MessageAutoDeleteTimerChanged(API, frozen=True):
     message_auto_delete_time: int
+
+
+class ForumTopicCreated(API, frozen=True):
+    name: str
+    icon_color: int
+    icon_custom_emoji_id: str | None = None
+
+
+class ForumTopicClosed(API, frozen=True):
+    name: str | None = None
+    icon_custom_emoji_id: str | None = None
+
+
+class ForumTopicReopened(API, frozen=True):
+    pass
 
 
 class VideoChatScheduled(API, frozen=True):
@@ -650,31 +685,105 @@ class ChatAdministratorRights(API, frozen=True):
     can_post_messages: bool | None
     can_edit_messages: bool | None
     can_pin_messages: bool | None
+    can_manage_topics: bool | None
 
 
-class ChatMember(API, frozen=True):
+class ChatMemberBase(
+    API,
+    frozen=True,
+    tag_field="status",
+):
     user: User
-    status: str
+
+
+class ChatMemberOwner(
+    ChatMemberBase,
+    frozen=True,
+    tag="creator",
+):
+    is_anonymous: bool
     custom_title: str | None = None
-    is_anonymous: bool | None = None
-    until_date: int | None = None
-    can_be_edited: bool | None = None
-    can_manage_chat: bool | None = None
-    can_change_info: bool | None = None
+
+
+class ChatMemberAdministrator(
+    ChatMemberBase,
+    frozen=True,
+    tag="administrator",
+):
+    can_be_edited: bool
+    is_anonymous: bool
+    can_manage_chat: bool
+    can_delete_messages: bool
+    can_manage_video_chats: bool
+    can_restrict_members: bool
+    can_promote_members: bool
+    can_change_info: bool
+    can_invite_users: bool
     can_post_messages: bool | None = None
     can_edit_messages: bool | None = None
-    can_delete_messages: bool | None = None
-    can_manage_video_chats: bool | None = None
-    can_invite_users: bool | None = None
-    can_restrict_members: bool | None = None
     can_pin_messages: bool | None = None
-    can_promote_members: bool | None = None
-    is_member: bool | None = None
-    can_send_messages: bool | None = None
-    can_send_media_messages: bool | None = None
-    can_send_other_messages: bool | None = None
-    can_add_web_page_previews: bool | None = None
-    can_send_polls: bool | None = None
+    can_post_stories: bool | None = None
+    can_edit_stories: bool | None = None
+    can_delete_stories: bool | None = None
+    can_manage_topics: bool | None = None
+    custom_title: str | None = None
+
+
+class ChatMemberMember(
+    ChatMemberBase,
+    frozen=True,
+    tag="member",
+):
+    pass
+
+
+class ChatMemberRestricted(
+    ChatMemberBase,
+    frozen=True,
+    tag="restricted",
+):
+    is_member: bool
+    can_send_messages: bool
+    can_send_audios: bool
+    can_send_documents: bool
+    can_send_photos: bool
+    can_send_videos: bool
+    can_send_video_notes: bool
+    can_send_voice_notes: bool
+    can_send_polls: bool
+    can_send_other_messages: bool
+    can_add_web_page_previews: bool
+    can_change_info: bool
+    can_invite_users: bool
+    can_pin_messages: bool
+    can_manage_topics: bool
+    until_date: int
+
+
+class ChatMemberLeft(
+    ChatMemberBase,
+    frozen=True,
+    tag="left",
+):
+    pass
+
+
+class ChatMemberBanned(
+    ChatMemberBase,
+    frozen=True,
+    tag="kicked",
+):
+    until_date: int
+
+
+ChatMember = Union[
+    ChatMemberOwner,
+    ChatMemberAdministrator,
+    ChatMemberMember,
+    ChatMemberRestricted,
+    ChatMemberLeft,
+    ChatMemberBanned,
+]
 
 
 class ChatMemberUpdated(API, frozen=True):
@@ -703,11 +812,19 @@ class ChatPermissions(API, frozen=True):
     can_change_info: bool | None = None
     can_invite_users: bool | None = None
     can_pin_messages: bool | None = None
+    can_manage_topics: bool | None = None
 
 
 class ChatLocation(API, frozen=True):
     location: Location
     address: str
+
+
+class ForumTopic(API, frozen=True):
+    message_thread_id: int
+    name: str
+    icon_color: int
+    icon_custom_emoji_id: str | None = None
 
 
 class BotCommand(API, frozen=True):
@@ -1056,6 +1173,7 @@ class InlineQueryResultLocation(
     live_period: int | None = None
     heading: int | None = None
     proximity_alert_radius: int | None = None
+
     reply_markup: InlineKeyboardMarkup | None = None
     input_message_content: "InputMessageContent | None" = None
     thumb_url: str | None = None

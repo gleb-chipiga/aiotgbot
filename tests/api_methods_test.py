@@ -137,6 +137,7 @@ async def test_api_methods_send_message(
         await _bot.send_message(
             chat_id=1,
             text="Hello!",
+            message_thread_id=None,
             parse_mode=ParseMode.HTML,
             disable_web_page_preview=True,
             reply_to_message_id=111,
@@ -150,6 +151,7 @@ async def test_api_methods_send_message(
             "sendMessage",
             1,
             text="Hello!",
+            message_thread_id=None,
             parse_mode="HTML",
             entities=None,
             disable_web_page_preview=True,
@@ -172,6 +174,7 @@ async def test_api_methods_send_photo(
         await _bot.send_photo(
             chat_id=1,
             photo="some photo",
+            message_thread_id=None,
             parse_mode=ParseMode.HTML,
             reply_to_message_id=111,
             reply_markup=reply_kb,
@@ -184,6 +187,7 @@ async def test_api_methods_send_photo(
             "sendPhoto",
             1,
             photo="some photo",
+            message_thread_id=None,
             caption=None,
             parse_mode="HTML",
             caption_entities=None,
@@ -213,6 +217,7 @@ async def test_api_methods_forward_message(
             1,
             from_chat_id=2,
             message_id=9,
+            message_thread_id=None,
             disable_notification=None,
             protect_content=None,
         )
@@ -351,6 +356,7 @@ async def test_send_media_group(_bot: Bot, make_message: _MakeMessage) -> None:
                     ),
                 ]
             ).decode(),
+            message_thread_id=None,
             disable_notification=None,
             protect_content=None,
             reply_to_message_id=None,
