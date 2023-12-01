@@ -315,7 +315,6 @@ class Message(API, frozen=True):
     audio: "Audio | None" = None
     document: "Document | None" = None
     animation: "Animation | None" = None
-    game: "Game | None" = None
     photo: tuple["PhotoSize", ...] | None = None
     sticker: "Sticker | None" = None
     video: "Video | None" = None
@@ -324,9 +323,10 @@ class Message(API, frozen=True):
     caption: str | None = None
     contact: "Contact | None" = None
     dice: "Dice | None" = None
-    location: "Location | None" = None
-    venue: "Venue | None" = None
+    game: "Game | None" = None
     poll: "Poll | None" = None
+    venue: "Venue | None" = None
+    location: "Location | None" = None
     new_chat_members: tuple[User, ...] | None = None
     left_chat_member: User | None = None
     new_chat_title: str | None = None
@@ -1266,9 +1266,9 @@ class InputInvoiceMessageContent:
     payload: str
     provider_token: str
     currency: str
-    prices: tuple["LabeledPrice", ...]
+    prices: Sequence["LabeledPrice"]
     max_tip_amount: int | None = None
-    suggested_tip_amounts: tuple[int, ...] | None = None
+    suggested_tip_amounts: Sequence[int] | None = None
     provider_data: str | None = None
     photo_url: str | None = None
     photo_size: int | None = None
