@@ -191,6 +191,7 @@ async def test_api_methods_send_photo(
             caption=None,
             parse_mode="HTML",
             caption_entities=None,
+            has_spoiler=None,
             disable_notification=None,
             protect_content=None,
             reply_to_message_id=111,
@@ -234,6 +235,7 @@ async def test_api_methods_send_chat_action(_bot: Bot) -> None:
             "sendChatAction",
             1,
             action=ChatAction.TYPING.value,
+            message_thread_id=None,
         )
     ]
 

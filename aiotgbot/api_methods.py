@@ -305,6 +305,7 @@ class ApiMethods(ABC):
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
+        has_spoiler: bool | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         reply_to_message_id: int | None = None,
@@ -325,6 +326,7 @@ class ApiMethods(ABC):
             caption=caption,
             parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
+            has_spoiler=has_spoiler,
             disable_notification=disable_notification,
             protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
@@ -432,6 +434,7 @@ class ApiMethods(ABC):
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
+        has_spoiler: bool | None = None,
         supports_streaming: bool | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
@@ -457,6 +460,7 @@ class ApiMethods(ABC):
             caption=caption,
             parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
+            has_spoiler=has_spoiler,
             supports_streaming=supports_streaming,
             disable_notification=disable_notification,
             protect_content=protect_content,
@@ -477,6 +481,7 @@ class ApiMethods(ABC):
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
+        has_spoiler: bool | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         reply_to_message_id: int | None = None,
@@ -501,6 +506,7 @@ class ApiMethods(ABC):
             caption=caption,
             parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
+            has_spoiler=has_spoiler,
             disable_notification=disable_notification,
             protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
@@ -876,6 +882,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         action: ChatAction,
+        message_thread_id: int | None = None,
     ) -> bool:
         api_logger.debug(
             'Send action "%s" to chat "%s"',
@@ -888,6 +895,7 @@ class ApiMethods(ABC):
             chat_id,
             bool,
             action=action,
+            message_thread_id=message_thread_id,
         )
 
     async def get_user_profile_photos(
@@ -1556,6 +1564,84 @@ class ApiMethods(ABC):
             bool,
             chat_id=chat_id,
             message_thread_id=message_thread_id,
+        )
+
+    async def edit_general_forum_topic(
+        self,
+        chat_id: int | str,
+        name: str,
+    ) -> bool:
+        api_logger.debug(
+            "Edit general forum topic %r %r",
+            chat_id,
+            name,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "editGeneralForumTopic",
+            bool,
+            chat_id=chat_id,
+            name=name,
+        )
+
+    async def close_general_forum_topic(
+        self,
+        chat_id: int | str,
+    ) -> bool:
+        api_logger.debug(
+            "Close general forum topic %r %r",
+            chat_id,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "closeGeneralForumTopic",
+            bool,
+            chat_id=chat_id,
+        )
+
+    async def reopen_general_forum_topic(
+        self,
+        chat_id: int | str,
+    ) -> bool:
+        api_logger.debug(
+            "Reopen general forum topic %r %r",
+            chat_id,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "reopenGeneralForumTopic",
+            bool,
+            chat_id=chat_id,
+        )
+
+    async def hide_general_forum_topic(
+        self,
+        chat_id: int | str,
+    ) -> bool:
+        api_logger.debug(
+            "Hide general forum topic %r",
+            chat_id,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "hideGeneralForumTopic",
+            bool,
+            chat_id=chat_id,
+        )
+
+    async def unhide_general_forum_topic(
+        self,
+        chat_id: int | str,
+    ) -> bool:
+        api_logger.debug(
+            "Unhide general forum topic %r",
+            chat_id,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "unhideGeneralForumTopic",
+            bool,
+            chat_id=chat_id,
         )
 
     async def answer_callback_query(

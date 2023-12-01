@@ -297,6 +297,8 @@ class Chat(API, frozen=True):
     pinned_message: "Message | None" = None
     permissions: "ChatPermissions | None" = None
     slow_mode_delay: int | None = None
+    has_aggressive_anti_spam_enabled: bool | None = None
+    has_hidden_members: bool | None = None
     has_protected_content: bool | None = None
     has_restricted_voice_and_video_messages: bool | None = None
     sticker_set_name: str | None = None
@@ -329,6 +331,7 @@ class Message(API, frozen=True):
     text: str | None = None
     entities: tuple["MessageEntity", ...] | None = None
     caption_entities: tuple["MessageEntity", ...] | None = None
+    has_media_spoiler: bool | None = None
     audio: "Audio | None" = None
     document: "Document | None" = None
     animation: "Animation | None" = None
@@ -361,11 +364,16 @@ class Message(API, frozen=True):
     invoice: "Invoice | None" = None
     successful_payment: "SuccessfulPayment | None" = None
     connected_website: str | None = None
+    write_access_allowed: "WriteAccessAllowed | None" = None
     passport_data: "PassportData | None" = None
     proximity_alert_triggered: "ProximityAlertTriggered | None" = None
     forum_topic_created: "ForumTopicCreated | None" = None
+    forum_topic_edited: "ForumTopicEdited | None" = None
     forum_topic_closed: "ForumTopicClosed | None" = None
     forum_topic_reopened: "ForumTopicReopened | None" = None
+    general_forum_topic_hidden: "GeneralForumTopicHidden | None" = None
+    general_forum_topic_unhidden: "GeneralForumTopicUnhidden | None" = None
+
     video_chat_scheduled: "VideoChatScheduled | None" = None
     video_chat_started: "VideoChatStarted | None" = None
     video_chat_ended: "VideoChatEnded | None" = None
@@ -527,8 +535,27 @@ class ForumTopicClosed(API, frozen=True):
     icon_custom_emoji_id: str | None = None
 
 
+class ForumTopicEdited(API, frozen=True):
+    name: str | None = None
+    icon_custom_emoji_id: str | None = None
+
+
 class ForumTopicReopened(API, frozen=True):
     pass
+
+
+class GeneralForumTopicHidden(API, frozen=True):
+    pass
+
+
+class GeneralForumTopicUnhidden(API, frozen=True):
+    pass
+
+
+class WriteAccessAllowed(API, frozen=True):
+    from_request: bool | None = None
+    web_app_name: str | None = None
+    from_attachment_menu: bool | None = None
 
 
 class VideoChatScheduled(API, frozen=True):
@@ -588,6 +615,7 @@ ReplyMarkup = Union[
 
 class ReplyKeyboardMarkup(API, frozen=True):
     keyboard: Sequence[Sequence["KeyboardButton"]]
+    is_persistent: bool | None = None
     resize_keyboard: bool | None = None
     one_time_keyboard: bool | None = None
     input_field_placeholder: str | None = None
@@ -919,7 +947,7 @@ class InputMediaPhoto(
     frozen=True,
     tag="photo",
 ):
-    pass
+    has_spoiler: bool | None = None
 
 
 class InputMediaVideo(
@@ -932,6 +960,7 @@ class InputMediaVideo(
     height: int | None = None
     duration: int | None = None
     supports_streaming: bool | None = None
+    has_spoiler: bool | None = None
 
 
 class InputMediaAnimation(
@@ -943,6 +972,7 @@ class InputMediaAnimation(
     width: int | None = None
     height: int | None = None
     duration: int | None = None
+    has_spoiler: bool | None = None
 
 
 class InputMediaAudio(
