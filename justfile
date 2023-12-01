@@ -7,7 +7,7 @@ mypy:
 isort:
     isort --skip .mypy_cache --skip .hypothesis --skip .tox .
 
-black: isort
+black:
     black --extend-exclude="\.env/|\.tox/" .
 
 coverage:
@@ -16,6 +16,8 @@ coverage:
 
 test:
     python -m pytest tests
+
+all: isort black flake8 mypy test
 
 build:
     if [ -d dist ]; then rm -rf dist; fi
