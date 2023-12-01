@@ -609,8 +609,12 @@ class CallbackQuery(API, frozen=True):
     game_short_name: str | None = None
 
 
-class ForceReply(API, frozen=True):
-    force_reply: bool
+class ForceReply(
+    API,
+    frozen=True,
+    tag_field="force_reply",
+    tag=True,
+):
     input_field_placeholder: str | None = None
     selective: bool | None = None
 
