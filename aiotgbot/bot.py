@@ -22,13 +22,7 @@ import aiojobs
 import backoff
 import msgspec
 from aiofreqlimit import FreqLimit
-from aiohttp import (
-    BaseConnector,
-    ClientError,
-    ClientSession,
-    FormData,
-    TCPConnector,
-)
+from aiohttp import ClientError, ClientSession, FormData, TCPConnector
 
 from .api_methods import ApiMethods, ParamType
 from .api_types import APIResponse, LocalFile, StreamFile, Update, User
@@ -43,7 +37,7 @@ from .exceptions import (
     RetryAfter,
     TelegramError,
 )
-from .helpers import BotKey, KeyLock, get_software, json_dumps
+from .helpers import BotKey, KeyLock, get_software
 from .storage import StorageProtocol
 
 __all__ = (
@@ -80,32 +74,29 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         token: str,
         handler_table: "HandlerTableProtocol",
         storage: StorageProtocol,
-        connector: BaseConnector | None = None,
-        client_trust_env: bool = False,
+        client_session: ClientSession | None = None,
     ) -> None:
         if not handler_table.frozen:
             raise RuntimeError("Can't use unfrozen handler table")
         if not isinstance(handler_table, HandlerTableProtocol):
             raise RuntimeError(
-                "Handler table is not HandlerTableProtocol " "instance"
+                "Handler table is not HandlerTableProtocol instance"
             )
         if not isinstance(storage, StorageProtocol):
             raise RuntimeError(
-                "Storage parameter is not StorageProtocol " "instance"
+                "Storage parameter is not StorageProtocol instance"
             )
         self._token: Final[str] = token
         self._handler_table: Final["HandlerTableProtocol"] = handler_table
         self._storage: Final[StorageProtocol] = storage
-        if connector is not None:
-            _connector: BaseConnector = connector
+        if client_session is not None:
+            client_session.headers.setdefault("User-Agent", SOFTWARE)
         else:
-            _connector = TCPConnector(keepalive_timeout=60)
-        self._client: Final[ClientSession] = ClientSession(
-            connector=_connector,
-            json_serialize=json_dumps,
-            headers={"User-Agent": SOFTWARE},
-            trust_env=client_trust_env,
-        )
+            client_session = ClientSession(
+                connector=TCPConnector(keepalive_timeout=60),
+                headers={"User-Agent": SOFTWARE},
+            )
+        self._client_session: Final[ClientSession] = client_session
         self._context_lock: Final[KeyLock] = KeyLock()
         self._message_limit: Final[FreqLimit] = FreqLimit(MESSAGE_INTERVAL)
         self._chat_limit: Final[FreqLimit] = FreqLimit(CHAT_INTERVAL)
@@ -158,10 +149,10 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
 
     @property
     def client(self) -> ClientSession:
-        if self._client is None:
+        if self._client_session is None:
             raise RuntimeError("Access to client during bot is not running.")
         else:
-            return self._client
+            return self._client_session
 
     def file_url(self, path: str) -> str:
         return TG_FILE_URL.format(token=self._token, path=path)
@@ -398,10 +389,10 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         )
 
     async def _cleanup(self) -> None:
-        assert self._client is not None
+        assert self._client_session is not None
         assert self._scheduler is not None
         await self._scheduler.close()
-        await self._client.close()
+        await self._client_session.close()
         await self._message_limit.clear()
         await self._chat_limit.clear()
         await self._group_limit.clear()
@@ -421,15 +412,13 @@ class PollBot(Bot):
         token: str,
         handler_table: "HandlerTableProtocol",
         storage: StorageProtocol,
-        connector: BaseConnector | None = None,
-        client_trust_env: bool = False,
+        client_session: ClientSession | None = None,
     ) -> None:
         super().__init__(
             token,
             handler_table,
             storage,
-            connector,
-            client_trust_env,
+            client_session,
         )
         self._poll_task: asyncio.Task[None] | None = None
 

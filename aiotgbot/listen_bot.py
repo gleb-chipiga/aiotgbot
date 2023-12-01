@@ -5,7 +5,7 @@ from secrets import compare_digest, token_urlsafe
 from typing import Any, Final
 
 import msgspec.json
-from aiohttp import BaseConnector
+from aiohttp import ClientSession
 from aiohttp.web import (
     Application,
     HTTPInternalServerError,
@@ -37,18 +37,16 @@ class ListenBot(Bot):
         storage: StorageProtocol,
         certificate: InputFile | None = None,
         ip_address: str | None = None,
-        connector: BaseConnector | None = None,
-        client_trust_env: bool = False,
         check_address: bool = False,
         address_header: str | None = None,
+        client_session: ClientSession | None = None,
         **application_args: Any
     ) -> None:
         super().__init__(
             token,
             handler_table,
             storage,
-            connector,
-            client_trust_env,
+            client_session,
         )
         self._url: URL = URL(url) if isinstance(url, str) else url
         self._certificate = certificate
