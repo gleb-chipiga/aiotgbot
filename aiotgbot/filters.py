@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass
 from typing import Final
 
-from . import Bot, FilterProtocol
+from .bot import Bot, FilterProtocol
 from .bot_update import BotUpdate
 from .constants import ChatType, ContentType, UpdateType
 

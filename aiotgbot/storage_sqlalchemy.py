@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from aiotgbot.storage import Json, StorageProtocol
+from .storage import Json, StorageProtocol
 
 __all__ = ("SqlalchemyStorage",)
 

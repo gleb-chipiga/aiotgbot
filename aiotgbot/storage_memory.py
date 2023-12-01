@@ -1,6 +1,6 @@
 from typing import Any, AsyncIterator, Final
 
-from aiotgbot.storage import Json, StorageProtocol
+from .storage import Json, StorageProtocol
 
 __all__ = ("MemoryStorage",)
 

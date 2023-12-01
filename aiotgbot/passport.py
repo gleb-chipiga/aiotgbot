@@ -13,8 +13,7 @@ from cryptography.hazmat.primitives.constant_time import bytes_eq
 from cryptography.hazmat.primitives.hashes import SHA1, SHA256, SHA512, Hash
 from yarl import URL
 
-from aiotgbot import API
-from aiotgbot.api_types import EncryptedCredentials
+from .api_types import API, EncryptedCredentials
 
 __all__ = (
     "Credentials",
