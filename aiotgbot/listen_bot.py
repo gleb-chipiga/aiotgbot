@@ -95,7 +95,9 @@ class ListenBot(Bot):
         url = str(self._url / self._webhook_token)
         await self.set_webhook(url, self._certificate, self._ip_address)
         bot_logger.info(
-            "Bot %s (%s) start listen", self._me.first_name, self._me.username
+            "Bot %s (%s) start listen",
+            self._me.first_name,
+            self._me.username,
         )
 
     async def stop(self) -> None:
@@ -108,5 +110,7 @@ class ListenBot(Bot):
         await self.delete_webhook()
         await self._cleanup()
         bot_logger.info(
-            "Bot %s (%s) stop listen", self._me.first_name, self._me.username
+            "Bot %s (%s) stop listen",
+            self._me.first_name,
+            self._me.username,
         )
