@@ -214,7 +214,12 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
             for name, value in params.items()
             if value is not None
         }
-        bot_logger.debug("Request %s %s %r", http_method, api_method, data)
+        bot_logger.debug(
+            "Request %s %s %r",
+            http_method,
+            api_method,
+            data,
+        )
         if http_method == RequestMethod.GET:
             if len(data) > 0:
                 assert all(isinstance(value, str) for value in data.values())
@@ -283,7 +288,7 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
                     await asyncio.sleep(retry_after.retry_after)
                 else:
                     bot_logger.error(
-                        "RetryAfter error during " "retry not allowed"
+                        "RetryAfter error during retry not allowed",
                     )
                     raise
 
@@ -348,7 +353,10 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
     async def _handle_update(self, update: Update) -> None:
         assert self._handler_table.frozen
         assert self._context_lock is not None, "Context lock not initialized"
-        bot_logger.debug('Dispatch update "%s"', update.update_id)
+        bot_logger.debug(
+            'Dispatch update "%s"',
+            update.update_id,
+        )
         update_state = self._update_state(update)
         state_key = f"{STATE_PREFIX}|{update_state}"
         context_key = f"{CONTEXT_PREFIX}|{update_state}"
@@ -372,7 +380,8 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
                     context_key, bot_update.context.to_dict()
                 )
                 bot_logger.debug(
-                    'Set context for update "%s"', update.update_id
+                    'Set context for update "%s"',
+                    update.update_id,
                 )
             else:
                 bot_logger.debug(
@@ -429,7 +438,9 @@ class PollBot(Bot):
         assert self._me is not None
         self._poll_task = asyncio.create_task(self._poll_wrapper())
         bot_logger.info(
-            "Bot %s (%s) start polling", self._me.first_name, self._me.username
+            "Bot %s (%s) start polling",
+            self._me.first_name,
+            self._me.username,
         )
 
     async def stop(self) -> None:
@@ -451,11 +462,14 @@ class PollBot(Bot):
             pass
         except Exception as exception:
             bot_logger.exception(
-                "Error while polling updates", exc_info=exception
+                "Error while polling updates",
+                exc_info=exception,
             )
         await self._cleanup()
         bot_logger.info(
-            "Bot %s (%s) stop polling", self._me.first_name, self._me.username
+            "Bot %s (%s) stop polling",
+            self._me.first_name,
+            self._me.username,
         )
 
     @backoff.on_exception(backoff.expo, TelegramError)
@@ -464,7 +478,8 @@ class PollBot(Bot):
         bot_logger.debug("Get updates from: %s", self._updates_offset)
         while not self._stopped:
             updates = await self.get_updates(
-                offset=self._updates_offset, timeout=TG_GET_UPDATES_TIMEOUT
+                offset=self._updates_offset,
+                timeout=TG_GET_UPDATES_TIMEOUT,
             )
             for update in updates:
                 await self._scheduler.spawn(
