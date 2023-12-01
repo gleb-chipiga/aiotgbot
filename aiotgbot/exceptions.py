@@ -1,11 +1,11 @@
 __all__ = (
-    "TelegramError",
-    "MigrateToChat",
-    "RetryAfter",
     "BadGateway",
-    "RestartingTelegram",
     "BotBlocked",
     "BotKicked",
+    "MigrateToChat",
+    "RestartingTelegram",
+    "RetryAfter",
+    "TelegramError",
 )
 
 

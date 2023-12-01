@@ -49,7 +49,10 @@ from .constants import (
     UpdateType,
 )
 
-__all__ = ("ParamType", "ApiMethods")
+__all__ = (
+    "ApiMethods",
+    "ParamType",
+)
 
 api_logger: Final[logging.Logger] = logging.getLogger("aiotgbot.api")
 

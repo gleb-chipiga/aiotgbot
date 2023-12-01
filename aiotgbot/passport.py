@@ -17,22 +17,22 @@ from aiotgbot import API
 from aiotgbot.api_types import EncryptedCredentials
 
 __all__ = (
-    "passport_request",
-    "PassportKey",
+    "Credentials",
+    "DataCredentials",
+    "FileCredentials",
+    "IdDocumentData",
     "PassportCipher",
-    "PassportScopeType",
+    "PassportKey",
+    "PassportScope",
+    "PassportScopeElement",
     "PassportScopeElementOne",
     "PassportScopeElementOneOfSeveral",
-    "PassportScopeElement",
-    "PassportScope",
-    "FileCredentials",
-    "DataCredentials",
-    "SecureValue",
-    "SecureData",
-    "Credentials",
+    "PassportScopeType",
     "PersonalDetails",
     "ResidentialAddress",
-    "IdDocumentData",
+    "SecureData",
+    "SecureValue",
+    "passport_request",
 )
 
 

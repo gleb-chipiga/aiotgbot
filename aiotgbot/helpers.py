@@ -7,11 +7,11 @@ import msgspec.json
 from aiohttp import web
 
 __all__ = (
-    "json_dumps",
-    "get_python_version",
-    "get_software",
     "BotKey",
     "KeyLock",
+    "get_python_version",
+    "get_software",
+    "json_dumps",
 )
 
 

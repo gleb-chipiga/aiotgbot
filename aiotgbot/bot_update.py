@@ -13,7 +13,10 @@ from .api_types import (
     Update,
 )
 
-__all__ = ("Context", "BotUpdate")
+__all__ = (
+    "BotUpdate",
+    "Context",
+)
 
 
 class Context(MutableMapping[str, Any]):

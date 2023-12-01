@@ -1,19 +1,19 @@
 from enum import StrEnum, unique
 
 __all__ = (
-    "RequestMethod",
-    "ChatType",
     "ChatAction",
     "ChatMemberStatus",
-    "MessageEntityType",
-    "UpdateType",
+    "ChatType",
     "ContentType",
-    "ParseMode",
-    "PollType",
     "DiceEmoji",
+    "MessageEntityType",
+    "ParseMode",
     "PassportElementType",
+    "PollType",
+    "RequestMethod",
     "StickerFormat",
     "StickerType",
+    "UpdateType",
 )
 
 
