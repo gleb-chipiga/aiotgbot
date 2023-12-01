@@ -8,7 +8,7 @@ isort:
     isort --skip .mypy_cache --skip .hypothesis --skip .tox .
 
 sort-all:
-    sort-all aiotgbot/*.py
+    -sort-all aiotgbot/*.py
 
 black:
     black --extend-exclude="\.env/|\.tox/" .
