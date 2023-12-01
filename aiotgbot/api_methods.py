@@ -976,6 +976,7 @@ class ApiMethods(ABC):
         chat_id: int | str,
         user_id: int,
         permissions: ChatPermissions,
+        use_independent_chat_permissions: bool | None = None,
         until_date: int | None = None,
     ) -> bool:
         api_logger.debug(
@@ -990,6 +991,7 @@ class ApiMethods(ABC):
             chat_id=chat_id,
             user_id=user_id,
             permissions=_encode_json(permissions),
+            use_independent_chat_permissions=use_independent_chat_permissions,
             until_date=until_date,
         )
 
@@ -1215,6 +1217,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         permissions: ChatPermissions,
+        use_independent_chat_permissions: bool | None = None,
     ) -> bool:
         api_logger.debug(
             'Set chat "%s" permissions',
@@ -1226,6 +1229,7 @@ class ApiMethods(ABC):
             chat_id,
             bool,
             permissions=_encode_json(permissions),
+            use_independent_chat_permissions=use_independent_chat_permissions,
         )
 
     async def set_chat_photo(

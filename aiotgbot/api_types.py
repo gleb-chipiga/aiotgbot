@@ -97,6 +97,8 @@ __all__ = (
     "Invoice",
     "KeyboardButton",
     "KeyboardButtonPollType",
+    "KeyboardButtonRequestChat",
+    "KeyboardButtonRequestUser",
     "LabeledPrice",
     "LocalFile",
     "Location",
@@ -363,6 +365,8 @@ class Message(API, frozen=True):
     pinned_message: "Message | None" = None
     invoice: "Invoice | None" = None
     successful_payment: "SuccessfulPayment | None" = None
+    user_shared: "UserShared | None" = None
+    chat_shared: "ChatShared | None" = None
     connected_website: str | None = None
     write_access_allowed: "WriteAccessAllowed | None" = None
     passport_data: "PassportData | None" = None
@@ -552,6 +556,16 @@ class GeneralForumTopicUnhidden(API, frozen=True):
     pass
 
 
+class UserShared(API, frozen=True):
+    request_id: int
+    user_id: int
+
+
+class ChatShared(API, frozen=True):
+    request_id: int
+    chat_id: int
+
+
 class WriteAccessAllowed(API, frozen=True):
     from_request: bool | None = None
     web_app_name: str | None = None
@@ -624,10 +638,29 @@ class ReplyKeyboardMarkup(API, frozen=True):
 
 class KeyboardButton(API, frozen=True):
     text: str
+    request_user: "KeyboardButtonRequestUser | None" = None
+    request_chat: "KeyboardButtonRequestChat | None" = None
     request_contact: bool | None = None
     request_location: bool | None = None
     request_poll: "KeyboardButtonPollType | None" = None
     web_app: WebAppInfo | None = None
+
+
+class KeyboardButtonRequestUser(API, frozen=True):
+    request_id: int
+    user_is_bot: bool | None = None
+    user_is_premium: bool | None = None
+
+
+class KeyboardButtonRequestChat(API, frozen=True):
+    request_id: int
+    chat_is_channel: bool
+    chat_is_forum: bool | None = None
+    chat_has_username: bool | None = None
+    chat_is_created: bool | None = None
+    user_administrator_rights: "ChatAdministratorRights | None" = None
+    bot_administrator_rights: "ChatAdministratorRights | None" = None
+    bot_is_member: bool | None = None
 
 
 class KeyboardButtonPollType(API, frozen=True):
@@ -826,6 +859,7 @@ class ChatMemberUpdated(API, frozen=True):
 class ChatJoinRequest(API, frozen=True):
     chat: Chat
     from_: User = field(name="from")
+    user_chat_id: int
     date: int
     bio: str | None = None
     invite_link: ChatInviteLink | None = None
@@ -833,7 +867,12 @@ class ChatJoinRequest(API, frozen=True):
 
 class ChatPermissions(API, frozen=True):
     can_send_messages: bool | None = None
-    can_send_media_messages: bool | None = None
+    can_send_audios: bool | None = None
+    can_send_documents: bool | None = None
+    can_send_photos: bool | None = None
+    can_send_videos: bool | None = None
+    can_send_video_notes: bool | None = None
+    can_send_voice_notes: bool | None = None
     can_send_polls: bool | None = None
     can_send_other_messages: bool | None = None
     can_add_web_page_previews: bool | None = None
