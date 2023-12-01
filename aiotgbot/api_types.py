@@ -850,9 +850,9 @@ class InputMediaDocument(
 
 class InputSticker(API, frozen=True):
     sticker: str | InputFile
-    emoji_list: tuple[str, ...]
+    emoji_list: Sequence[str]
     mask_position: "MaskPosition | None"
-    keywords: tuple[str, ...] | None
+    keywords: Sequence[str] | None
 
 
 class Sticker(API, frozen=True):
