@@ -25,7 +25,7 @@ class UpdateTypeFilter:
     update_type: UpdateType
 
     async def check(self, _: Bot, update: BotUpdate) -> bool:
-        return getattr(update, self.update_type.value) is not None
+        return getattr(update, self.update_type) is not None
 
 
 @dataclass(frozen=True)
@@ -67,7 +67,7 @@ class ContentTypeFilter:
         else:
             return False
         for content_type in self.content_types:
-            if getattr(message, content_type.value) is not None:
+            if getattr(message, content_type) is not None:
                 return True
         return False
 

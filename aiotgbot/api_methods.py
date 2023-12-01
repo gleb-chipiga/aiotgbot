@@ -853,7 +853,7 @@ class ApiMethods(ABC):
             "sendChatAction",
             chat_id,
             bool,
-            action=action.value,
+            action=action,
         )
 
     async def get_user_profile_photos(
