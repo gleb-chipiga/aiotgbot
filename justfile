@@ -7,6 +7,9 @@ mypy:
 isort:
     isort --skip .mypy_cache --skip .hypothesis --skip .tox .
 
+sort-all:
+    sort-all aiotgbot/*.py
+
 black:
     black --extend-exclude="\.env/|\.tox/" .
 
@@ -17,7 +20,7 @@ coverage:
 test:
     python -m pytest tests
 
-all: isort black flake8 mypy test
+all: isort sort-all black flake8 mypy test
 
 build:
     if [ -d dist ]; then rm -rf dist; fi
