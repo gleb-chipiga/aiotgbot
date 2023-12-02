@@ -161,6 +161,13 @@ class StickerType(StrEnum):
     CUSTOM_EMOJI = "custom_emoji"
 
 
+class MaskPositionPoint(StrEnum):
+    FOREHEAD = "forehead"
+    EYES = "eyes"
+    MOUTH = "mouth"
+    CHIN = "chin"
+
+
 class IconColor(IntEnum):
     IC_0x6FB9F0 = 0x6FB9F0
     IC_0xFFD67E = 0xFFD67E

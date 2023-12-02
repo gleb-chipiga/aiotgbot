@@ -24,6 +24,8 @@ __all__ = (
     "BotCommandScopeChatAdministrators",
     "BotCommandScopeChatMember",
     "BotCommandScopeDefault",
+    "BotDescription",
+    "BotShortDescription",
     "CallbackGame",
     "CallbackQuery",
     "Chat",
@@ -419,13 +421,13 @@ class Audio(API, frozen=True):
     file_name: str | None = None
     mime_type: str | None = None
     file_size: int | None = None
-    thumb: PhotoSize | None = None
+    thumbnail: PhotoSize | None = None
 
 
 class Document(API, frozen=True):
     file_id: str
     file_unique_id: str
-    thumb: PhotoSize | None = None
+    thumbnail: PhotoSize | None = None
     file_name: str | None = None
     mime_type: str | None = None
     file_size: int | None = None
@@ -437,7 +439,7 @@ class Video(API, frozen=True):
     width: int
     height: int
     duration: int
-    thumb: PhotoSize | None = None
+    thumbnail: PhotoSize | None = None
     file_name: str | None = None
     mime_type: str | None = None
     file_size: int | None = None
@@ -446,7 +448,7 @@ class Video(API, frozen=True):
 class Animation(API, frozen=True):
     file_id: str
     file_unique_id: str
-    thumb: PhotoSize | None = None
+    thumbnail: PhotoSize | None = None
     file_name: str | None = None
     mime_type: str | None = None
     file_size: int | None = None
@@ -465,7 +467,7 @@ class VideoNote(API, frozen=True):
     file_unique_id: str
     length: int
     duration: int
-    thumb: PhotoSize | None = None
+    thumbnail: PhotoSize | None = None
     file_size: int | None = None
 
 
@@ -964,6 +966,14 @@ class BotCommandScopeChatMember(
     user_id: int
 
 
+class BotDescription(API, frozen=True):
+    description: str
+
+
+class BotShortDescription(API, frozen=True):
+    short_description: str
+
+
 class MenuButton(API, frozen=True):
     type: str
     text: str | None
@@ -994,7 +1004,7 @@ class InputMediaVideo(
     frozen=True,
     tag="video",
 ):
-    thumb: str | None = None
+    thumbnail: str | None = None
     width: int | None = None
     height: int | None = None
     duration: int | None = None
@@ -1007,7 +1017,7 @@ class InputMediaAnimation(
     frozen=True,
     tag="animation",
 ):
-    thumb: str | None = None
+    thumbnail: str | None = None
     width: int | None = None
     height: int | None = None
     duration: int | None = None
@@ -1019,7 +1029,7 @@ class InputMediaAudio(
     frozen=True,
     tag="audio",
 ):
-    thumb: str | None = None
+    thumbnail: str | None = None
     duration: int | None = None
     performer: str | None = None
     title: str | None = None
@@ -1030,7 +1040,7 @@ class InputMediaDocument(
     frozen=True,
     tag="document",
 ):
-    thumb: str | None = None
+    thumbnail: str | None = None
     disable_content_type_detection: bool | None = None
 
 
@@ -1049,12 +1059,13 @@ class Sticker(API, frozen=True):
     height: int
     is_animated: bool
     is_video: bool
-    thumb: PhotoSize | None = None
+    thumbnail: PhotoSize | None = None
     emoji: str | None = None
     set_name: str | None = None
     premium_animation: File | None = None
     mask_position: "MaskPosition | None" = None
     custom_emoji_id: str | None = None
+    needs_repainting: bool | None = None
     file_size: int | None = None
 
 
@@ -1065,7 +1076,7 @@ class StickerSet(API, frozen=True):
     is_animated: bool
     is_video: bool
     stickers: tuple[Sticker, ...]
-    thumb: PhotoSize | None = None
+    thumbnail: PhotoSize | None = None
 
 
 class MaskPosition(API, frozen=True):
@@ -1103,9 +1114,9 @@ class InlineQueryResultArticle(
     url: str | None = None
     hide_url: bool | None = None
     description: str | None = None
-    thumb_url: str | None = None
-    thumb_width: int | None = None
-    thumb_height: int | None = None
+    thumbnail_url: str | None = None
+    thumbnail_width: int | None = None
+    thumbnail_height: int | None = None
 
 
 class InlineQueryResultPhoto(
@@ -1114,7 +1125,7 @@ class InlineQueryResultPhoto(
     tag="photo",
 ):
     photo_url: str
-    thumb_url: str
+    thumbnail_url: str
     photo_width: int | None = None
     photo_height: int | None = None
     title: str | None = None
@@ -1132,7 +1143,7 @@ class InlineQueryResultGif(
     tag="gif",
 ):
     gif_url: str
-    thumb_url: str
+    thumbnail_url: str
     gif_width: int | None = None
     gif_height: int | None = None
     title: str | None = None
@@ -1149,7 +1160,7 @@ class InlineQueryResultMpeg4Gif(
     tag="mpeg4_gif",
 ):
     mpeg4_url: str
-    thumb_url: str
+    thumbnail_url: str
     mpeg4_width: int | None = None
     mpeg4_height: int | None = None
     title: str | None = None
@@ -1167,7 +1178,7 @@ class InlineQueryResultVideo(
 ):
     video_url: str
     mime_type: str
-    thumb_url: str
+    thumbnail_url: str
     title: str
     caption: str | None = None
     parse_mode: ParseMode | None = None
@@ -1225,9 +1236,9 @@ class InlineQueryResultDocument(
     description: str | None = None
     reply_markup: InlineKeyboardMarkup | None = None
     input_message_content: "InputMessageContent | None" = None
-    thumb_url: str | None = None
-    thumb_width: int | None = None
-    thumb_height: int | None = None
+    thumbnail_url: str | None = None
+    thumbnail_width: int | None = None
+    thumbnail_height: int | None = None
 
 
 class InlineQueryResultLocation(
@@ -1245,9 +1256,9 @@ class InlineQueryResultLocation(
 
     reply_markup: InlineKeyboardMarkup | None = None
     input_message_content: "InputMessageContent | None" = None
-    thumb_url: str | None = None
-    thumb_width: int | None = None
-    thumb_height: int | None = None
+    thumbnail_url: str | None = None
+    thumbnail_width: int | None = None
+    thumbnail_height: int | None = None
 
 
 class InlineQueryResultVenue(
@@ -1265,9 +1276,9 @@ class InlineQueryResultVenue(
     google_place_type: str | None = None
     reply_markup: InlineKeyboardMarkup | None = None
     input_message_content: "InputMessageContent | None" = None
-    thumb_url: str | None = None
-    thumb_width: int | None = None
-    thumb_height: int | None = None
+    thumbnail_url: str | None = None
+    thumbnail_width: int | None = None
+    thumbnail_height: int | None = None
 
 
 class InlineQueryResultContact(
@@ -1281,9 +1292,9 @@ class InlineQueryResultContact(
     vcard: str | None = None
     reply_markup: InlineKeyboardMarkup | None = None
     input_message_content: "InputMessageContent | None" = None
-    thumb_url: str | None = None
-    thumb_width: int | None = None
-    thumb_height: int | None = None
+    thumbnail_url: str | None = None
+    thumbnail_width: int | None = None
+    thumbnail_height: int | None = None
 
 
 class InlineQueryResultGame(

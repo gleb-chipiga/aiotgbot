@@ -8,6 +8,8 @@ import msgspec
 from .api_types import (
     BotCommand,
     BotCommandScope,
+    BotDescription,
+    BotShortDescription,
     Chat,
     ChatAdministratorRights,
     ChatInviteLink,
@@ -347,7 +349,7 @@ class ApiMethods(ABC):
         duration: int | None = None,
         performer: str | None = None,
         title: str | None = None,
-        thumb: InputFile | str | None = None,
+        thumbnail: InputFile | str | None = None,
         reply_to_message_id: int | None = None,
         allow_sending_without_reply: bool | None = None,
         reply_markup: ReplyMarkup | None = None,
@@ -371,7 +373,7 @@ class ApiMethods(ABC):
             duration=duration,
             performer=performer,
             title=title,
-            thumb=thumb,
+            thumbnail=thumbnail,
             reply_to_message_id=reply_to_message_id,
             allow_sending_without_reply=allow_sending_without_reply,
             reply_markup=_encode_json(reply_markup),
@@ -382,7 +384,7 @@ class ApiMethods(ABC):
         chat_id: int | str,
         document: InputFile | str,
         message_thread_id: int | None = None,
-        thumb: InputFile | str | None = None,
+        thumbnail: InputFile | str | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -407,7 +409,7 @@ class ApiMethods(ABC):
             Message,
             document=document,
             message_thread_id=message_thread_id,
-            thumb=thumb,
+            thumbnail=thumbnail,
             caption=caption,
             parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
@@ -430,7 +432,7 @@ class ApiMethods(ABC):
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
-        thumb: InputFile | str | None = None,
+        thumbnail: InputFile | str | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -456,7 +458,7 @@ class ApiMethods(ABC):
             duration=duration,
             width=width,
             height=height,
-            thumb=thumb,
+            thumbnail=thumbnail,
             caption=caption,
             parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
@@ -477,7 +479,7 @@ class ApiMethods(ABC):
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
-        thumb: InputFile | str | None = None,
+        thumbnail: InputFile | str | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -502,7 +504,7 @@ class ApiMethods(ABC):
             duration=duration,
             width=width,
             height=height,
-            thumb=thumb,
+            thumbnail=thumbnail,
             caption=caption,
             parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
@@ -558,7 +560,7 @@ class ApiMethods(ABC):
         message_thread_id: int | None = None,
         duration: int | None = None,
         length: int | None = None,
-        thumb: InputFile | str | None = None,
+        thumbnail: InputFile | str | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         reply_to_message_id: int | None = None,
@@ -578,7 +580,7 @@ class ApiMethods(ABC):
             message_thread_id=message_thread_id,
             duration=duration,
             length=length,
-            thumb=thumb,
+            thumbnail=thumbnail,
             disable_notification=disable_notification,
             protect_content=protect_content,
             reply_to_message_id=reply_to_message_id,
@@ -1785,6 +1787,66 @@ class ApiMethods(ABC):
             language_code=language_code,
         )
 
+    async def set_my_description(
+        self,
+        description: str | None = None,
+        language_code: str | None = None,
+    ) -> bool:
+        api_logger.debug(
+            "Set my description",
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "setMyDescription",
+            bool,
+            description=description,
+            language_code=language_code,
+        )
+
+    async def get_my_description(
+        self,
+        language_code: str | None = None,
+    ) -> BotDescription:
+        api_logger.debug(
+            "Get my description",
+        )
+        return await self._request(
+            RequestMethod.GET,
+            "getMyDescription",
+            BotDescription,
+            language_code=language_code,
+        )
+
+    async def set_my_short_description(
+        self,
+        short_description: str | None = None,
+        language_code: str | None = None,
+    ) -> bool:
+        api_logger.debug(
+            "Set my short description",
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "setMyShortDescription",
+            bool,
+            short_description=short_description,
+            language_code=language_code,
+        )
+
+    async def get_my_short_description(
+        self,
+        language_code: str | None = None,
+    ) -> BotShortDescription:
+        api_logger.debug(
+            "Get my short description",
+        )
+        return await self._request(
+            RequestMethod.GET,
+            "getMyShortDescription",
+            BotShortDescription,
+            language_code=language_code,
+        )
+
     async def edit_message_text(
         self,
         text: str,
@@ -1987,6 +2049,7 @@ class ApiMethods(ABC):
         self,
         chat_id: int | str,
         sticker: InputFile | str,
+        emoji: str | None = None,
         message_thread_id: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
@@ -2004,6 +2067,7 @@ class ApiMethods(ABC):
             Message,
             chat_id=chat_id,
             sticker=sticker,
+            emoji=emoji,
             message_thread_id=message_thread_id,
             disable_notification=disable_notification,
             protect_content=protect_content,
@@ -2042,7 +2106,8 @@ class ApiMethods(ABC):
     async def upload_sticker_file(
         self,
         user_id: int,
-        png_sticker: InputFile,
+        sticker: InputFile,
+        sticker_format: StickerFormat,
     ) -> File:
         api_logger.debug(
             "Upload sticker file for %s",
@@ -2053,7 +2118,8 @@ class ApiMethods(ABC):
             "uploadStickerFile",
             File,
             user_id=user_id,
-            png_sticker=png_sticker,
+            sticker=sticker,
+            sticker_format=sticker_format,
         )
 
     async def create_new_sticker_set(
@@ -2061,7 +2127,6 @@ class ApiMethods(ABC):
         user_id: int,
         name: str,
         title: str,
-        emojis: str,
         stickers: Iterable[InputSticker],
         sticker_format: StickerFormat,
         sticker_type: StickerType | None = None,
@@ -2093,7 +2158,6 @@ class ApiMethods(ABC):
             user_id=user_id,
             name=name,
             title=title,
-            emojis=emojis,
             stickers=_encode_json(attached_media),
             sticker_format=sticker_format,
             sticker_type=sticker_type,
@@ -2104,30 +2168,28 @@ class ApiMethods(ABC):
         self,
         user_id: int,
         name: str,
-        title: str,
-        emojis: str,
-        png_sticker: InputFile | str,
-        tgs_sticker: InputFile | None = None,
-        webm_sticker: InputFile | None = None,
-        mask_position: MaskPosition | None = None,
-    ) -> File:
+        sticker: InputSticker,
+    ) -> bool:
         api_logger.debug(
             'Add sticker to set "%s" for %s',
             name,
             user_id,
         )
+        attachments = {}
+        if not isinstance(sticker.sticker, str):
+            attachment_name = "attachment0"
+            attachments[attachment_name] = sticker.sticker
+            sticker = msgspec.structs.replace(
+                sticker, media=f"attach://{attachment_name}"
+            )
         return await self._request(
             RequestMethod.POST,
             "addStickerToSet",
-            File,
+            bool,
             user_id=user_id,
             name=name,
-            title=title,
-            emojis=emojis,
-            png_sticker=png_sticker,
-            tgs_sticker=tgs_sticker,
-            webm_sticker=webm_sticker,
-            mask_position=_encode_json(mask_position),
+            sticker=_encode_json(sticker),
+            **attachments,
         )
 
     async def set_sticker_position_in_set(
@@ -2163,24 +2225,126 @@ class ApiMethods(ABC):
             sticker=sticker,
         )
 
-    async def set_sticker_set_thumb(
+    async def set_sticker_emoji_list(
+        self,
+        sticker: str,
+        emoji_list: Sequence[str],
+    ) -> bool:
+        api_logger.debug(
+            "Set sticker emoji list %r",
+            sticker,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "setStickerEmojiList",
+            bool,
+            sticker=sticker,
+            emoji_list=_encode_json(emoji_list),
+        )
+
+    async def set_sticker_keywords(
+        self,
+        sticker: str,
+        keywords: Sequence[str],
+    ) -> bool:
+        api_logger.debug(
+            "Set sticker keywords %r",
+            sticker,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "setStickerKeywords",
+            bool,
+            sticker=sticker,
+            emoji_list=_encode_json(keywords),
+        )
+
+    async def set_sticker_mask_position(
+        self,
+        sticker: str,
+        mask_position: MaskPosition,
+    ) -> bool:
+        api_logger.debug(
+            "Set sticker mask position %r",
+            sticker,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "setStickerMaskPosition",
+            bool,
+            sticker=sticker,
+            mask_position=_encode_json(mask_position),
+        )
+
+    async def set_sticker_set_title(
+        self,
+        name: str,
+        title: str,
+    ) -> bool:
+        api_logger.debug(
+            "Set sticker set title %r %r",
+            name,
+            title,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "setStickerSetTitle",
+            bool,
+            name=name,
+            title=title,
+        )
+
+    async def set_sticker_set_thumbnail(
         self,
         name: str,
         user_id: int,
-        thumb: InputFile | str | None = None,
+        thumbnail: InputFile | str | None = None,
     ) -> bool:
         api_logger.debug(
-            'Set sticker set "%s" owned by "%s" thumb',
+            "Set sticker set thumbnail %r %r",
             name,
             user_id,
         )
         return await self._request(
             RequestMethod.POST,
-            "setStickerSetThumb",
+            "setStickerSetThumbnail",
             bool,
             name=name,
             user_id=user_id,
-            thumb=thumb,
+            thumbnail=thumbnail,
+        )
+
+    async def set_custom_emoji_sticker_set_thumbnail(
+        self,
+        name: str,
+        custom_emoji_id: str | None = None,
+    ) -> bool:
+        api_logger.debug(
+            "Set custom emoji sticker set thumbnail %r %r",
+            name,
+            custom_emoji_id,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "setCustomEmojiStickerSetThumbnail",
+            bool,
+            name=name,
+            custom_emoji_id=custom_emoji_id,
+        )
+
+    async def delete_sticker_set(
+        self,
+        name: str,
+    ) -> bool:
+        api_logger.debug(
+            "Delete sticker set %r",
+            name,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "deleteStickerSet",
+            bool,
+            name=name,
         )
 
     async def answer_inline_query(
