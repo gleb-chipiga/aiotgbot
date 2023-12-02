@@ -1004,7 +1004,7 @@ class InputMediaVideo(
     frozen=True,
     tag="video",
 ):
-    thumbnail: str | None = None
+    thumbnail: InputFile | str | None = None
     width: int | None = None
     height: int | None = None
     duration: int | None = None
@@ -1017,7 +1017,7 @@ class InputMediaAnimation(
     frozen=True,
     tag="animation",
 ):
-    thumbnail: str | None = None
+    thumbnail: InputFile | str | None = None
     width: int | None = None
     height: int | None = None
     duration: int | None = None
@@ -1029,7 +1029,7 @@ class InputMediaAudio(
     frozen=True,
     tag="audio",
 ):
-    thumbnail: str | None = None
+    thumbnail: InputFile | str | None = None
     duration: int | None = None
     performer: str | None = None
     title: str | None = None
@@ -1040,7 +1040,7 @@ class InputMediaDocument(
     frozen=True,
     tag="document",
 ):
-    thumbnail: str | None = None
+    thumbnail: InputFile | str | None = None
     disable_content_type_detection: bool | None = None
 
 

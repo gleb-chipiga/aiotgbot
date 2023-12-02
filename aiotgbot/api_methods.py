@@ -606,16 +606,20 @@ class ApiMethods(ABC):
         attachments = {}
         counter = count()
         for item in media:
-            if isinstance(item.media, str):
-                attached_media.append(item)
-            else:
+            if not isinstance(item.media, str):
                 attachment_name = f"attachment{next(counter)}"
                 attachments[attachment_name] = item.media
-                attached_media.append(
-                    msgspec.structs.replace(
-                        item, media=f"attach://{attachment_name}"
-                    )
+                item = msgspec.structs.replace(
+                    item, media=f"attach://{attachment_name}"
                 )
+            thumbnail = getattr(item, "thumbnail", None)
+            if thumbnail is not None and not isinstance(thumbnail, str):
+                attachment_name = f"attachment{next(counter)}"
+                attachments[attachment_name] = thumbnail
+                item = msgspec.structs.replace(
+                    item, thumbnail=f"attach://{attachment_name}"
+                )
+            attached_media.append(item)
         return await self._safe_request(
             RequestMethod.POST,
             "sendMediaGroup",
@@ -1960,6 +1964,13 @@ class ApiMethods(ABC):
             attachments[attachment_name] = media.media
             media = msgspec.structs.replace(
                 media, media=f"attach://{attachment_name}"
+            )
+        thumbnail = getattr(media, "thumbnail", None)
+        if thumbnail is not None and not isinstance(thumbnail, str):
+            attachment_name = "attachment1"
+            attachments[attachment_name] = thumbnail
+            media = msgspec.structs.replace(
+                media, thumbnail=f"attach://{attachment_name}"
             )
         return await self._request(
             RequestMethod.POST,
