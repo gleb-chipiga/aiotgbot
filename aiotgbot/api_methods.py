@@ -1593,7 +1593,7 @@ class ApiMethods(ABC):
         chat_id: int | str,
     ) -> bool:
         api_logger.debug(
-            "Close general forum topic %r %r",
+            "Close general forum topic %r",
             chat_id,
         )
         return await self._request(
@@ -1608,7 +1608,7 @@ class ApiMethods(ABC):
         chat_id: int | str,
     ) -> bool:
         api_logger.debug(
-            "Reopen general forum topic %r %r",
+            "Reopen general forum topic %r",
             chat_id,
         )
         return await self._request(
