@@ -92,6 +92,7 @@ __all__ = (
     "InlineQueryResultVenue",
     "InlineQueryResultVideo",
     "InlineQueryResultVoice",
+    "InlineQueryResultsButton",
     "InputContactMessageContent",
     "InputFile",
     "InputLocationMessageContent",
@@ -158,6 +159,7 @@ __all__ = (
     "StickerSet",
     "StreamFile",
     "SuccessfulPayment",
+    "SwitchInlineQueryChosenChat",
     "Update",
     "User",
     "UserProfilePhotos",
@@ -703,6 +705,14 @@ class InlineKeyboardMarkup(API, frozen=True):
     inline_keyboard: Sequence[Sequence["InlineKeyboardButton"]]
 
 
+class SwitchInlineQueryChosenChat(API, frozen=True):
+    query: str | None = None
+    allow_user_chats: bool | None = None
+    allow_bot_chats: bool | None = None
+    allow_group_chats: bool | None = None
+    allow_channel_chats: bool | None = None
+
+
 class InlineKeyboardButton(API, frozen=True):
     text: str
     url: str | None = None
@@ -711,6 +721,7 @@ class InlineKeyboardButton(API, frozen=True):
     web_app: WebAppInfo | None = None
     switch_inline_query: str | None = None
     switch_inline_query_current_chat: str | None = None
+    switch_inline_query_chosen_chat: SwitchInlineQueryChosenChat | None = None
     callback_game: "CallbackGame | None" = None
     pay: bool | None = None
 
@@ -881,6 +892,7 @@ class ChatMemberUpdated(API, frozen=True):
     old_chat_member: ChatMember
     new_chat_member: ChatMember
     invite_link: ChatInviteLink | None = None
+    via_chat_folder_invite_link: bool | None = None
 
 
 class ChatJoinRequest(API, frozen=True):
@@ -989,6 +1001,10 @@ class BotCommandScopeChatMember(
 ):
     chat_id: int | str
     user_id: int
+
+
+class BotName(API, frozen=True):
+    name: str
 
 
 class BotDescription(API, frozen=True):
@@ -1112,6 +1128,12 @@ class MaskPosition(API, frozen=True):
     x_shift: float
     y_shift: float
     scale: float
+
+
+class InlineQueryResultsButton(API, frozen=True):
+    text: str
+    web_app: WebAppInfo | None = None
+    start_parameter: str | None = None
 
 
 class InlineQuery(API, frozen=True):

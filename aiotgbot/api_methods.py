@@ -9,6 +9,7 @@ from .api_types import (
     BotCommand,
     BotCommandScope,
     BotDescription,
+    BotName,
     BotShortDescription,
     Chat,
     ChatAdministratorRights,
@@ -20,6 +21,7 @@ from .api_types import (
     GameHighScore,
     InlineKeyboardMarkup,
     InlineQueryResult,
+    InlineQueryResultsButton,
     InputFile,
     InputMedia,
     InputMediaWithThumbnail,
@@ -1762,6 +1764,22 @@ class ApiMethods(ABC):
             for_channels=for_channels,
         )
 
+    async def delete_my_commands(
+        self,
+        scope: BotCommandScope | None = None,
+        language_code: str | None = None,
+    ) -> bool:
+        api_logger.debug(
+            "Delete my commands",
+        )
+        return await self._request(
+            RequestMethod.GET,
+            "deleteMyCommands",
+            bool,
+            scope=_encode_json(scope),
+            language_code=language_code,
+        )
+
     async def get_my_commands(
         self,
         scope: BotCommandScope | None = None,
@@ -1778,19 +1796,33 @@ class ApiMethods(ABC):
             language_code=language_code,
         )
 
-    async def delete_my_commands(
+    async def set_my_name(
         self,
-        scope: BotCommandScope | None = None,
+        name: str | None = None,
         language_code: str | None = None,
     ) -> bool:
         api_logger.debug(
-            "Delete my commands",
+            "Set my name",
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "setMyName",
+            bool,
+            name=name,
+            language_code=language_code,
+        )
+
+    async def get_my_name(
+        self,
+        language_code: str | None = None,
+    ) -> BotName:
+        api_logger.debug(
+            "Get my name",
         )
         return await self._request(
             RequestMethod.GET,
-            "deleteMyCommands",
-            bool,
-            scope=_encode_json(scope),
+            "getMyName",
+            BotName,
             language_code=language_code,
         )
 
@@ -2369,8 +2401,7 @@ class ApiMethods(ABC):
         cache_time: int | None = None,
         is_personal: bool | None = None,
         next_offset: str | None = None,
-        switch_pm_text: str | None = None,
-        switch_pm_parameter: str | None = None,
+        button: InlineQueryResultsButton | None = None,
     ) -> bool:
         api_logger.debug(
             'Answer inline query "%s"',
@@ -2385,8 +2416,7 @@ class ApiMethods(ABC):
             cache_time=cache_time,
             is_personal=is_personal,
             next_offset=next_offset,
-            switch_pm_text=switch_pm_text,
-            switch_pm_parameter=switch_pm_parameter,
+            button=_encode_json(button),
         )
 
     async def answer_web_app_query(
