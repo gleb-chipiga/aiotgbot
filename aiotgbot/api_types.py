@@ -16,7 +16,7 @@ from typing import (
 
 from msgspec import UNSET, Raw, Struct, UnsetType, field
 
-from aiotgbot.constants import ParseMode, PollType
+from .constants import ParseMode, PollType
 
 __all__ = (
     "API",
