@@ -1026,7 +1026,6 @@ class ApiMethods(ABC):
         can_promote_members: bool | None = None,
         can_manage_topics: bool | None = None,
     ) -> bool:
-        # TODO: check all params
         api_logger.debug(
             'Promote member %s in "%s"',
             user_id,
