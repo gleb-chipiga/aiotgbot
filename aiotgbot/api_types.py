@@ -319,6 +319,7 @@ class Chat(API, frozen=True):
     photo: "ChatPhoto | None" = None
     active_usernames: Sequence[str] | None = None
     emoji_status_custom_emoji_id: str | None = None
+    emoji_status_expiration_date: int | None = None
     bio: str | None = None
     has_private_forwards: bool | None = None
     join_to_send_messages: bool | None = None
@@ -368,6 +369,7 @@ class Message(API, frozen=True):
     animation: "Animation | None" = None
     photo: tuple["PhotoSize", ...] | None = None
     sticker: "Sticker | None" = None
+    story: "Story | None" = None
     video: "Video | None" = None
     voice: "Voice | None" = None
     video_note: "VideoNote | None" = None
@@ -406,7 +408,6 @@ class Message(API, frozen=True):
     forum_topic_reopened: "ForumTopicReopened | None" = None
     general_forum_topic_hidden: "GeneralForumTopicHidden | None" = None
     general_forum_topic_unhidden: "GeneralForumTopicUnhidden | None" = None
-
     video_chat_scheduled: "VideoChatScheduled | None" = None
     video_chat_started: "VideoChatStarted | None" = None
     video_chat_ended: "VideoChatEnded | None" = None
@@ -458,6 +459,10 @@ class Document(API, frozen=True):
     file_name: str | None = None
     mime_type: str | None = None
     file_size: int | None = None
+
+
+class Story(API, frozen=True):
+    pass
 
 
 class Video(API, frozen=True):
@@ -614,6 +619,7 @@ class PollAnswer(API, frozen=True):
     poll_id: str
     user: User
     option_ids: tuple[int, ...]
+    voter_chat: "Chat | None" = None
 
 
 class Poll(API, frozen=True):

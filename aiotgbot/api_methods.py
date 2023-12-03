@@ -1659,6 +1659,21 @@ class ApiMethods(ABC):
             chat_id=chat_id,
         )
 
+    async def unpin_all_general_forum_topic_messages(
+        self,
+        chat_id: int | str,
+    ) -> bool:
+        api_logger.debug(
+            "Unpin all general forum topic messages %r",
+            chat_id,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "unpinAllGeneralForumTopicMessages",
+            bool,
+            chat_id=chat_id,
+        )
+
     async def answer_callback_query(
         self,
         callback_query_id: str,
