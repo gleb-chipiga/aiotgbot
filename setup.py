@@ -37,7 +37,7 @@ setup(
     ],
     packages=["aiotgbot"],
     package_data={"aiotgbot": ["py.typed"]},
-    python_requires=">=3.11,<3.12",
+    python_requires=">=3.11,<3.13",
     install_requires=[
         "aiofreqlimit>=0.0.12",
         "aiohttp>=3.9",
@@ -48,11 +48,11 @@ setup(
         "yarl",
     ],
     tests_require=[
+        "hypothesis",
         "more-itertools",
         "pytest",
         "pytest-asyncio>=0.19",
         "pytest-cov",
-        "hypothesis",
         "sqlalchemy[aiosqlite]",
     ],
     extras_require={
