@@ -511,6 +511,7 @@ class HandlerTableProtocol(Protocol):
         ...
 
     @property
+    @abstractmethod
     def frozen(self) -> bool:
         ...
 
