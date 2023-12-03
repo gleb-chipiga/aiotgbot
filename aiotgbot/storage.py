@@ -1,9 +1,9 @@
 from abc import abstractmethod
 from typing import Any, AsyncIterator, Protocol, runtime_checkable
 
-__all__ = ("Json", "StorageProtocol")
+__all__ = ("StorageProtocol",)
 
-Json = str | int | float | bool | dict[str, Any] | list[Any] | None
+from aiotgbot.helpers import Json
 
 
 @runtime_checkable

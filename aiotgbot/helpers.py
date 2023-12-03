@@ -1,6 +1,6 @@
 import asyncio
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator, Final, Hashable
+from typing import AsyncIterator, Final, Hashable
 from weakref import WeakValueDictionary
 
 import msgspec.json
@@ -8,14 +8,17 @@ from aiohttp import web
 
 __all__ = (
     "BotKey",
+    "Json",
     "KeyLock",
     "get_python_version",
     "get_software",
     "json_dumps",
 )
 
+Json = str | int | float | bool | dict[str, "Json"] | list["Json"] | None
 
-def json_dumps(obj: Any) -> str:
+
+def json_dumps(obj: Json) -> str:
     return msgspec.json.encode(obj).decode()
 
 

@@ -1,6 +1,7 @@
 from typing import Any, AsyncIterator, Final
 
-from .storage import Json, StorageProtocol
+from .helpers import Json
+from .storage import StorageProtocol
 
 __all__ = ("MemoryStorage",)
 

@@ -4,8 +4,8 @@ from typing import Any, AsyncIterator, Final, cast
 
 import aiosqlite
 
-from .helpers import json_dumps
-from .storage import Json, StorageProtocol
+from .helpers import Json, json_dumps
+from .storage import StorageProtocol
 
 __all__ = ("SQLiteStorage",)
 
