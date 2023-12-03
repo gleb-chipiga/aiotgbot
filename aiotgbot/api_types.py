@@ -1,9 +1,18 @@
 import asyncio
+from abc import abstractmethod
 from dataclasses import dataclass
 from enum import StrEnum, unique
 from io import BufferedReader
 from pathlib import Path
-from typing import AsyncIterator, Final, Sequence, Union, cast
+from typing import (
+    AsyncIterator,
+    Final,
+    Protocol,
+    Sequence,
+    Union,
+    cast,
+    runtime_checkable,
+)
 
 from msgspec import UNSET, Raw, Struct, UnsetType, field
 
@@ -92,6 +101,7 @@ __all__ = (
     "InputMediaDocument",
     "InputMediaPhoto",
     "InputMediaVideo",
+    "InputMediaWithThumbnail",
     "InputMessageContent",
     "InputSticker",
     "InputTextMessageContent",
@@ -163,10 +173,28 @@ class DataMappingError(BaseException):
     pass
 
 
+@runtime_checkable
+class InputFile(Protocol):
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        ...
+
+    @property
+    @abstractmethod
+    def content_type(self) -> str | None:
+        pass
+
+    @property
+    @abstractmethod
+    def content(self) -> AsyncIterator[bytes]:
+        ...
+
+
 @dataclass(frozen=True)
 class StreamFile:
-    content: AsyncIterator[bytes]
     name: str
+    content: AsyncIterator[bytes]
     content_type: str | None = None
 
 
@@ -215,9 +243,6 @@ class LocalFile:
                 )
         finally:
             await loop.run_in_executor(None, reader.close)
-
-
-InputFile = LocalFile | StreamFile
 
 
 class API(Struct, frozen=True, omit_defaults=True):
@@ -999,12 +1024,18 @@ class InputMediaPhoto(
     has_spoiler: bool | None = None
 
 
-class InputMediaVideo(
+class InputMediaWithThumbnail(
     InputMedia,
+    frozen=True,
+):
+    thumbnail: InputFile | str | None = None
+
+
+class InputMediaVideo(
+    InputMediaWithThumbnail,
     frozen=True,
     tag="video",
 ):
-    thumbnail: InputFile | str | None = None
     width: int | None = None
     height: int | None = None
     duration: int | None = None
@@ -1013,11 +1044,10 @@ class InputMediaVideo(
 
 
 class InputMediaAnimation(
-    InputMedia,
+    InputMediaWithThumbnail,
     frozen=True,
     tag="animation",
 ):
-    thumbnail: InputFile | str | None = None
     width: int | None = None
     height: int | None = None
     duration: int | None = None
@@ -1025,22 +1055,20 @@ class InputMediaAnimation(
 
 
 class InputMediaAudio(
-    InputMedia,
+    InputMediaWithThumbnail,
     frozen=True,
     tag="audio",
 ):
-    thumbnail: InputFile | str | None = None
     duration: int | None = None
     performer: str | None = None
     title: str | None = None
 
 
 class InputMediaDocument(
-    InputMedia,
+    InputMediaWithThumbnail,
     frozen=True,
     tag="document",
 ):
-    thumbnail: InputFile | str | None = None
     disable_content_type_detection: bool | None = None
 
 

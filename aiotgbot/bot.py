@@ -25,7 +25,7 @@ from aiofreqlimit import FreqLimit
 from aiohttp import ClientError, ClientSession, FormData, TCPConnector
 
 from .api_methods import ApiMethods, ParamType
-from .api_types import APIResponse, LocalFile, StreamFile, Update, User
+from .api_types import APIResponse, InputFile, Update, User
 from .bot_update import BotUpdate, Context
 from .constants import ChatType, RequestMethod
 from .exceptions import (
@@ -229,7 +229,7 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         else:
             form_data = FormData()
             for name, value in data.items():
-                if isinstance(value, (StreamFile, LocalFile)):
+                if isinstance(value, InputFile):
                     form_data.add_field(
                         name,
                         value.content,
@@ -260,7 +260,7 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         **params: ParamType,
     ) -> V:
         retry_allowed = all(
-            not isinstance(param, StreamFile) for param in params.values()
+            not isinstance(param, InputFile) for param in params.values()
         )
         request: Callable[[], Awaitable[V]] = partial(
             self._request,

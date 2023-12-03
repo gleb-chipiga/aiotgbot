@@ -22,6 +22,7 @@ from .api_types import (
     InlineQueryResult,
     InputFile,
     InputMedia,
+    InputMediaWithThumbnail,
     InputSticker,
     LabeledPrice,
     MaskPosition,
@@ -606,16 +607,18 @@ class ApiMethods(ABC):
         attachments = {}
         counter = count()
         for item in media:
-            if not isinstance(item.media, str):
+            if isinstance(item.media, InputFile):
                 attachment_name = f"attachment{next(counter)}"
                 attachments[attachment_name] = item.media
                 item = msgspec.structs.replace(
                     item, media=f"attach://{attachment_name}"
                 )
-            thumbnail = getattr(item, "thumbnail", None)
-            if thumbnail is not None and not isinstance(thumbnail, str):
+
+            if isinstance(item, InputMediaWithThumbnail) and isinstance(
+                item.thumbnail, InputFile
+            ):
                 attachment_name = f"attachment{next(counter)}"
-                attachments[attachment_name] = thumbnail
+                attachments[attachment_name] = item.thumbnail
                 item = msgspec.structs.replace(
                     item, thumbnail=f"attach://{attachment_name}"
                 )
@@ -1959,16 +1962,17 @@ class ApiMethods(ABC):
                 inline_message_id,
             )
         attachments = {}
-        if not isinstance(media.media, str):
+        if isinstance(media.media, InputFile):
             attachment_name = "attachment0"
             attachments[attachment_name] = media.media
             media = msgspec.structs.replace(
                 media, media=f"attach://{attachment_name}"
             )
-        thumbnail = getattr(media, "thumbnail", None)
-        if thumbnail is not None and not isinstance(thumbnail, str):
+        if isinstance(media, InputMediaWithThumbnail) and isinstance(
+            media.thumbnail, InputFile
+        ):
             attachment_name = "attachment1"
-            attachments[attachment_name] = thumbnail
+            attachments[attachment_name] = media.thumbnail
             media = msgspec.structs.replace(
                 media, thumbnail=f"attach://{attachment_name}"
             )

@@ -20,6 +20,7 @@ legacy_tox_ini = """
         flake8
         hypothesis
         mypy
+        more-itertools
         pytest
         pytest-asyncio
         sqlalchemy

@@ -48,6 +48,7 @@ setup(
         "yarl",
     ],
     tests_require=[
+        "more-itertools",
         "pytest",
         "pytest-asyncio>=0.19",
         "pytest-cov",
