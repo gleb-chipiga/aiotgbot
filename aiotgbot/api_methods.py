@@ -1020,6 +1020,9 @@ class ApiMethods(ABC):
         can_invite_users: bool | None = None,
         can_restrict_members: bool | None = None,
         can_pin_messages: bool | None = None,
+        can_post_stories: bool | None = None,
+        can_edit_stories: bool | None = None,
+        can_delete_stories: bool | None = None,
         can_promote_members: bool | None = None,
         can_manage_topics: bool | None = None,
     ) -> bool:
@@ -1045,6 +1048,9 @@ class ApiMethods(ABC):
             can_invite_users=can_invite_users,
             can_restrict_members=can_restrict_members,
             can_pin_messages=can_pin_messages,
+            can_post_stories=can_post_stories,
+            can_edit_stories=can_edit_stories,
+            can_delete_stories=can_delete_stories,
             can_promote_members=can_promote_members,
             can_manage_topics=can_manage_topics,
         )

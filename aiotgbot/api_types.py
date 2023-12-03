@@ -787,10 +787,13 @@ class ChatAdministratorRights(API, frozen=True):
     can_promote_members: bool
     can_change_info: bool
     can_invite_users: bool
-    can_post_messages: bool | None
-    can_edit_messages: bool | None
-    can_pin_messages: bool | None
-    can_manage_topics: bool | None
+    can_post_messages: bool | None = None
+    can_edit_messages: bool | None = None
+    can_pin_messages: bool | None = None
+    can_post_stories: bool | None = None
+    can_edit_stories: bool | None = None
+    can_delete_stories: bool | None = None
+    can_manage_topics: bool | None = None
 
 
 class ChatMemberBase(
