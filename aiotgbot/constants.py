@@ -128,7 +128,7 @@ class ContentType(StrEnum):
 class ParseMode(StrEnum):
     MARKDOWN = "Markdown"
     HTML = "HTML"
-    MARKDOWN2 = "Markdown2"
+    MARKDOWNV2 = "MarkdownV2"
 
 
 @unique
