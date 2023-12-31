@@ -65,6 +65,7 @@ __all__ = (
     "DataMappingError",
     "Dice",
     "Document",
+    "DocumentMimeType",
     "EncryptedCredentials",
     "EncryptedPassportElement",
     "ExternalReplyInfo",
@@ -186,6 +187,7 @@ __all__ = (
     "SuccessfulPayment",
     "SwitchInlineQueryChosenChat",
     "TextQuote",
+    "ThumbnailMimeType",
     "Update",
     "User",
     "UserChatBoosts",
@@ -193,6 +195,7 @@ __all__ = (
     "UsersShared",
     "Venue",
     "Video",
+    "VideoMimeType",
     "VideoNote",
     "Voice",
     "WebhookInfo",
@@ -221,7 +224,7 @@ class InputFile(Protocol):
         ...
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class StreamFile:
     name: str
     content: AsyncIterator[bytes]
@@ -279,12 +282,12 @@ class API(Struct, frozen=True, omit_defaults=True):
     pass
 
 
-class ResponseParameters(API, frozen=True):
+class ResponseParameters(API, frozen=True, kw_only=True):
     migrate_to_chat_id: int | None = None
     retry_after: int | None = None
 
 
-class APIResponse(API, frozen=True):
+class APIResponse(API, frozen=True, kw_only=True):
     ok: bool
     result: Raw | UnsetType = UNSET
     error_code: int | None = None
@@ -292,7 +295,7 @@ class APIResponse(API, frozen=True):
     parameters: ResponseParameters | None = None
 
 
-class Update(API, frozen=True):
+class Update(API, frozen=True, kw_only=True):
     update_id: int
     message: "Message | None" = None
     edited_message: "Message | None" = None
@@ -312,19 +315,19 @@ class Update(API, frozen=True):
     chat_join_request: "ChatJoinRequest | None" = None
 
 
-class WebhookInfo(API, frozen=True):
-    allowed_updates: tuple[str, ...]
-    url: str | None = None
-    has_custom_certificate: bool | None = None
-    pending_update_count: int | None = None
+class WebhookInfo(API, frozen=True, kw_only=True):
+    url: str
+    has_custom_certificate: bool
+    pending_update_count: int
     ip_address: str | None = None
     last_error_date: int | None = None
     last_error_message: str | None = None
     last_synchronization_error_date: int | None = None
     max_connections: int | None = None
+    allowed_updates: tuple[str, ...] | None = None
 
 
-class User(API, frozen=True):
+class User(API, frozen=True, kw_only=True):
     id: int
     is_bot: bool
     first_name: str
@@ -338,7 +341,7 @@ class User(API, frozen=True):
     supports_inline_queries: bool | None = None
 
 
-class Chat(API, frozen=True):
+class Chat(API, frozen=True, kw_only=True):
     id: int
     type: str
     title: str | None = None
@@ -357,6 +360,7 @@ class Chat(API, frozen=True):
     emoji_status_expiration_date: int | None = None
     bio: str | None = None
     has_private_forwards: bool | None = None
+    has_restricted_voice_and_video_messages: bool | None = None
     join_to_send_messages: bool | None = None
     join_by_request: bool | None = None
     description: str | None = None
@@ -368,20 +372,19 @@ class Chat(API, frozen=True):
     has_hidden_members: bool | None = None
     has_protected_content: bool | None = None
     has_visible_history: bool | None = None
-    has_restricted_voice_and_video_messages: bool | None = None
     sticker_set_name: str | None = None
     can_set_sticker_set: bool | None = None
     linked_chat_id: int | None = None
     location: "ChatLocation | None" = None
 
 
-class Message(API, frozen=True):
+class Message(API, frozen=True, kw_only=True):
     message_id: int
-    date: int
-    chat: Chat
     message_thread_id: int | None = None
     from_: User | None = field(default=None, name="from")
     sender_chat: Chat | None = None
+    date: int
+    chat: Chat
     forward_origin: "MessageOrigin | None" = None
     is_topic_message: bool | None = None
     is_automatic_forward: bool | None = None
@@ -396,18 +399,18 @@ class Message(API, frozen=True):
     text: str | None = None
     entities: tuple["MessageEntity", ...] | None = None
     link_preview_options: "LinkPreviewOptions | None" = None
-    caption_entities: tuple["MessageEntity", ...] | None = None
-    has_media_spoiler: bool | None = None
+    animation: "Animation | None" = None
     audio: "Audio | None" = None
     document: "Document | None" = None
-    animation: "Animation | None" = None
     photo: tuple["PhotoSize", ...] | None = None
     sticker: "Sticker | None" = None
     story: "Story | None" = None
     video: "Video | None" = None
-    voice: "Voice | None" = None
     video_note: "VideoNote | None" = None
+    voice: "Voice | None" = None
     caption: str | None = None
+    caption_entities: tuple["MessageEntity", ...] | None = None
+    has_media_spoiler: bool | None = None
     contact: "Contact | None" = None
     dice: "Dice | None" = None
     game: "Game | None" = None
@@ -460,7 +463,7 @@ class MessageId(API, frozen=True):
     message_id: int
 
 
-class MessageEntity(API, frozen=True):
+class MessageEntity(API, frozen=True, kw_only=True):
     type: str
     offset: int
     length: int
@@ -470,14 +473,14 @@ class MessageEntity(API, frozen=True):
     custom_emoji_id: str | None = None
 
 
-class TextQuote(API, frozen=True):
+class TextQuote(API, frozen=True, kw_only=True):
     text: str
-    entities: tuple["MessageEntity", ...]
+    entities: tuple["MessageEntity", ...] | None = None
     position: int
     is_manual: bool | None = None
 
 
-class ExternalReplyInfo(API, frozen=True):
+class ExternalReplyInfo(API, frozen=True, kw_only=True):
     origin: "MessageOrigin"
     chat: Chat | None = None
     message_id: int | None = None
@@ -504,7 +507,7 @@ class ExternalReplyInfo(API, frozen=True):
     venue: "Venue | None" = None
 
 
-class ReplyParameters(API, frozen=True):
+class ReplyParameters(API, frozen=True, kw_only=True):
     message_id: int
     chat_id: int | str | None = None
     allow_sending_without_reply: bool | None = None
@@ -518,6 +521,7 @@ class MessageOriginBase(
     API,
     frozen=True,
     tag_field="type",
+    kw_only=True,
 ):
     date: int
 
@@ -526,6 +530,7 @@ class MessageOriginUser(
     MessageOriginBase,
     frozen=True,
     tag="user",
+    kw_only=True,
 ):
     sender_user: User
 
@@ -534,6 +539,7 @@ class MessageOriginHiddenUser(
     MessageOriginBase,
     frozen=True,
     tag="hidden_user",
+    kw_only=True,
 ):
     sender_user_name: str
 
@@ -542,6 +548,7 @@ class MessageOriginChat(
     MessageOriginBase,
     frozen=True,
     tag="chat",
+    kw_only=True,
 ):
     sender_user_name: str
     sender_chat: Chat
@@ -552,6 +559,7 @@ class MessageOriginChannel(
     MessageOriginBase,
     frozen=True,
     tag="channel",
+    kw_only=True,
 ):
     chat: Chat
     message_id: int
@@ -566,7 +574,7 @@ MessageOrigin = Union[
 ]
 
 
-class PhotoSize(API, frozen=True):
+class PhotoSize(API, frozen=True, kw_only=True):
     file_id: str
     file_unique_id: str
     width: int
@@ -574,7 +582,7 @@ class PhotoSize(API, frozen=True):
     file_size: int
 
 
-class Audio(API, frozen=True):
+class Audio(API, frozen=True, kw_only=True):
     file_id: str
     file_unique_id: str
     duration: int
@@ -586,7 +594,7 @@ class Audio(API, frozen=True):
     thumbnail: PhotoSize | None = None
 
 
-class Document(API, frozen=True):
+class Document(API, frozen=True, kw_only=True):
     file_id: str
     file_unique_id: str
     thumbnail: PhotoSize | None = None
@@ -599,7 +607,7 @@ class Story(API, frozen=True):
     pass
 
 
-class Video(API, frozen=True):
+class Video(API, frozen=True, kw_only=True):
     file_id: str
     file_unique_id: str
     width: int
@@ -611,7 +619,7 @@ class Video(API, frozen=True):
     file_size: int | None = None
 
 
-class Animation(API, frozen=True):
+class Animation(API, frozen=True, kw_only=True):
     file_id: str
     file_unique_id: str
     thumbnail: PhotoSize | None = None
@@ -620,7 +628,7 @@ class Animation(API, frozen=True):
     file_size: int | None = None
 
 
-class Voice(API, frozen=True):
+class Voice(API, frozen=True, kw_only=True):
     file_id: str
     file_unique_id: str
     duration: int
@@ -628,7 +636,7 @@ class Voice(API, frozen=True):
     file_size: int | None = None
 
 
-class VideoNote(API, frozen=True):
+class VideoNote(API, frozen=True, kw_only=True):
     file_id: str
     file_unique_id: str
     length: int
@@ -637,7 +645,7 @@ class VideoNote(API, frozen=True):
     file_size: int | None = None
 
 
-class Contact(API, frozen=True):
+class Contact(API, frozen=True, kw_only=True):
     phone_number: str
     first_name: str
     last_name: str | None = None
@@ -645,12 +653,12 @@ class Contact(API, frozen=True):
     vcard: int | None = None
 
 
-class Dice(API, frozen=True):
+class Dice(API, frozen=True, kw_only=True):
     emoji: str
     value: int
 
 
-class Location(API, frozen=True):
+class Location(API, frozen=True, kw_only=True):
     longitude: float
     latitude: float
     horizontal_accuracy: float | None = None
@@ -659,7 +667,7 @@ class Location(API, frozen=True):
     proximity_alert_radius: int | None = None
 
 
-class Venue(API, frozen=True):
+class Venue(API, frozen=True, kw_only=True):
     location: Location
     title: str
     address: str
@@ -669,7 +677,7 @@ class Venue(API, frozen=True):
     google_place_type: str | None = None
 
 
-class WebAppData(API, frozen=True):
+class WebAppData(API, frozen=True, kw_only=True):
     data: str
     button_text: str
 
@@ -678,11 +686,11 @@ class VideoChatStarted(API, frozen=True):
     pass
 
 
-class VideoChatEnded(API, frozen=True):
+class VideoChatEnded(API, frozen=True, kw_only=True):
     duration: int
 
 
-class VideoChatParticipantsInvited(API, frozen=True):
+class VideoChatParticipantsInvited(API, frozen=True, kw_only=True):
     users: tuple[User, ...] | None = None
 
 
@@ -690,7 +698,7 @@ class GiveawayCreated(API, frozen=True):
     pass
 
 
-class Giveaway(API, frozen=True):
+class Giveaway(API, frozen=True, kw_only=True):
     chats: tuple[Chat, ...]
     winners_selection_date: int
     winner_count: int
@@ -701,7 +709,7 @@ class Giveaway(API, frozen=True):
     premium_subscription_month_count: int | None = None
 
 
-class GiveawayWinners(API, frozen=True):
+class GiveawayWinners(API, frozen=True, kw_only=True):
     chat: Chat
     giveaway_message_id: int
     winners_selection_date: int
@@ -715,88 +723,88 @@ class GiveawayWinners(API, frozen=True):
     prize_description: str | None = None
 
 
-class GiveawayCompleted(API, frozen=True):
+class GiveawayCompleted(API, frozen=True, kw_only=True):
     winner_count: int
     unclaimed_prize_count: int | None = None
     giveaway_message: Message | None = None
 
 
-class ProximityAlertTriggered(API, frozen=True):
+class ProximityAlertTriggered(API, frozen=True, kw_only=True):
     traveler: User
     watcher: User
     distance: int
 
 
-class MessageAutoDeleteTimerChanged(API, frozen=True):
+class MessageAutoDeleteTimerChanged(API, frozen=True, kw_only=True):
     message_auto_delete_time: int
 
 
-class ForumTopicCreated(API, frozen=True):
+class ForumTopicCreated(API, frozen=True, kw_only=True):
     name: str
     icon_color: int
     icon_custom_emoji_id: str | None = None
 
 
-class ForumTopicClosed(API, frozen=True):
+class ForumTopicClosed(API, frozen=True, kw_only=True):
     name: str | None = None
     icon_custom_emoji_id: str | None = None
 
 
-class ForumTopicEdited(API, frozen=True):
+class ForumTopicEdited(API, frozen=True, kw_only=True):
     name: str | None = None
     icon_custom_emoji_id: str | None = None
 
 
-class ForumTopicReopened(API, frozen=True):
+class ForumTopicReopened(API, frozen=True, kw_only=True):
     pass
 
 
-class GeneralForumTopicHidden(API, frozen=True):
+class GeneralForumTopicHidden(API, frozen=True, kw_only=True):
     pass
 
 
-class GeneralForumTopicUnhidden(API, frozen=True):
+class GeneralForumTopicUnhidden(API, frozen=True, kw_only=True):
     pass
 
 
-class UsersShared(API, frozen=True):
+class UsersShared(API, frozen=True, kw_only=True):
     request_id: int
     user_ids: tuple[int, ...]
 
 
-class UserShared(API, frozen=True):
+class UserShared(API, frozen=True, kw_only=True):
     request_id: int
     user_id: int
 
 
-class ChatShared(API, frozen=True):
+class ChatShared(API, frozen=True, kw_only=True):
     request_id: int
     chat_id: int
 
 
-class WriteAccessAllowed(API, frozen=True):
+class WriteAccessAllowed(API, frozen=True, kw_only=True):
     from_request: bool | None = None
     web_app_name: str | None = None
     from_attachment_menu: bool | None = None
 
 
-class VideoChatScheduled(API, frozen=True):
+class VideoChatScheduled(API, frozen=True, kw_only=True):
     start_date: int
 
 
-class PollOption(API, frozen=True):
+class PollOption(API, frozen=True, kw_only=True):
     text: str
     voter_count: int
 
 
-class PollAnswer(API, frozen=True):
+class PollAnswer(API, frozen=True, kw_only=True):
     poll_id: str
-    user: User
-    option_ids: tuple[int, ...]
     voter_chat: "Chat | None" = None
+    user: User | None = None
+    option_ids: tuple[int, ...]
 
 
-class Poll(API, frozen=True):
+class Poll(API, frozen=True, kw_only=True):
     id: str
     question: str
     options: tuple[PollOption, ...]
@@ -812,7 +820,7 @@ class Poll(API, frozen=True):
     close_date: int | None = None
 
 
-class LinkPreviewOptions(API, frozen=True):
+class LinkPreviewOptions(API, frozen=True, kw_only=True):
     is_disabled: bool | None = None
     url: str | None = None
     prefer_small_media: bool | None = None
@@ -820,23 +828,23 @@ class LinkPreviewOptions(API, frozen=True):
     show_above_text: bool | None = None
 
 
-class UserProfilePhotos(API, frozen=True):
+class UserProfilePhotos(API, frozen=True, kw_only=True):
     total_count: int
     photos: tuple[tuple[PhotoSize, ...], ...]
 
 
-class File(API, frozen=True):
+class File(API, frozen=True, kw_only=True):
     file_id: str
     file_unique_id: str
     file_size: int | None = None
     file_path: str | None = None
 
 
-class WebAppInfo(API, frozen=True):
+class WebAppInfo(API, frozen=True, kw_only=True):
     url: str
 
 
-class ReplyKeyboardMarkup(API, frozen=True):
+class ReplyKeyboardMarkup(API, frozen=True, kw_only=True):
     keyboard: Sequence[Sequence["KeyboardButton"]]
     is_persistent: bool | None = None
     resize_keyboard: bool | None = None
@@ -845,7 +853,7 @@ class ReplyKeyboardMarkup(API, frozen=True):
     selective: bool | None = None
 
 
-class KeyboardButton(API, frozen=True):
+class KeyboardButton(API, frozen=True, kw_only=True):
     text: str
     request_users: "KeyboardButtonRequestUsers | None" = None
     request_chat: "KeyboardButtonRequestChat | None" = None
@@ -855,14 +863,14 @@ class KeyboardButton(API, frozen=True):
     web_app: WebAppInfo | None = None
 
 
-class KeyboardButtonRequestUsers(API, frozen=True):
+class KeyboardButtonRequestUsers(API, frozen=True, kw_only=True):
     request_id: int
     user_is_bot: bool | None = None
     user_is_premium: bool | None = None
     max_quantity: int | None = None
 
 
-class KeyboardButtonRequestChat(API, frozen=True):
+class KeyboardButtonRequestChat(API, frozen=True, kw_only=True):
     request_id: int
     chat_is_channel: bool
     chat_is_forum: bool | None = None
@@ -873,12 +881,12 @@ class KeyboardButtonRequestChat(API, frozen=True):
     bot_is_member: bool | None = None
 
 
-class KeyboardButtonPollType(API, frozen=True):
+class KeyboardButtonPollType(API, frozen=True, kw_only=True):
     type: PollType
 
 
-class ReplyKeyboardRemove(API, frozen=True):
-    remove_keyboard: bool
+class ReplyKeyboardRemove(API, frozen=True, kw_only=True):
+    remove_keyboard: bool = field(default_factory=lambda: True)
     selective: bool | None = None
 
 
@@ -886,7 +894,7 @@ class InlineKeyboardMarkup(API, frozen=True):
     inline_keyboard: Sequence[Sequence["InlineKeyboardButton"]]
 
 
-class SwitchInlineQueryChosenChat(API, frozen=True):
+class SwitchInlineQueryChosenChat(API, frozen=True, kw_only=True):
     query: str | None = None
     allow_user_chats: bool | None = None
     allow_bot_chats: bool | None = None
@@ -894,7 +902,7 @@ class SwitchInlineQueryChosenChat(API, frozen=True):
     allow_channel_chats: bool | None = None
 
 
-class InlineKeyboardButton(API, frozen=True):
+class InlineKeyboardButton(API, frozen=True, kw_only=True):
     text: str
     url: str | None = None
     login_url: "LoginUrl | None" = None
@@ -907,7 +915,7 @@ class InlineKeyboardButton(API, frozen=True):
     pay: bool | None = None
 
 
-class LoginUrl(API, frozen=True):
+class LoginUrl(API, frozen=True, kw_only=True):
     url: str
     forward_text: str | None = None
     bot_username: str | None = None
@@ -927,9 +935,9 @@ class CallbackQuery(API, frozen=True, kw_only=True):
 class ForceReply(
     API,
     frozen=True,
-    tag_field="force_reply",
-    tag=True,
+    kw_only=True,
 ):
+    force_reply: bool = field(default_factory=lambda: True)
     input_field_placeholder: str | None = None
     selective: bool | None = None
 
@@ -942,14 +950,14 @@ ReplyMarkup = Union[
 ]
 
 
-class ChatPhoto(API, frozen=True):
+class ChatPhoto(API, frozen=True, kw_only=True):
     small_file_id: str
     small_file_unique_id: str
     big_file_id: str
     big_file_unique_id: str
 
 
-class ChatInviteLink(API, frozen=True):
+class ChatInviteLink(API, frozen=True, kw_only=True):
     invite_link: str
     creator: User
     creates_join_request: bool
@@ -961,7 +969,7 @@ class ChatInviteLink(API, frozen=True):
     pending_join_request_count: int | None = None
 
 
-class ChatAdministratorRights(API, frozen=True):
+class ChatAdministratorRights(API, frozen=True, kw_only=True):
     is_anonymous: bool
     can_manage_chat: bool
     can_delete_messages: bool
@@ -983,6 +991,7 @@ class ChatMemberBase(
     API,
     frozen=True,
     tag_field="status",
+    kw_only=True,
 ):
     user: User
 
@@ -991,6 +1000,7 @@ class ChatMemberOwner(
     ChatMemberBase,
     frozen=True,
     tag="creator",
+    kw_only=True,
 ):
     is_anonymous: bool
     custom_title: str | None = None
@@ -1000,6 +1010,7 @@ class ChatMemberAdministrator(
     ChatMemberBase,
     frozen=True,
     tag="administrator",
+    kw_only=True,
 ):
     can_be_edited: bool
     is_anonymous: bool
@@ -1024,6 +1035,7 @@ class ChatMemberMember(
     ChatMemberBase,
     frozen=True,
     tag="member",
+    kw_only=True,
 ):
     pass
 
@@ -1032,6 +1044,7 @@ class ChatMemberRestricted(
     ChatMemberBase,
     frozen=True,
     tag="restricted",
+    kw_only=True,
 ):
     is_member: bool
     can_send_messages: bool
@@ -1055,6 +1068,7 @@ class ChatMemberLeft(
     ChatMemberBase,
     frozen=True,
     tag="left",
+    kw_only=True,
 ):
     pass
 
@@ -1063,6 +1077,7 @@ class ChatMemberBanned(
     ChatMemberBase,
     frozen=True,
     tag="kicked",
+    kw_only=True,
 ):
     until_date: int
 
@@ -1077,7 +1092,7 @@ ChatMember = Union[
 ]
 
 
-class ChatMemberUpdated(API, frozen=True):
+class ChatMemberUpdated(API, frozen=True, kw_only=True):
     chat: Chat
     from_: User = field(name="from")
     date: int
@@ -1087,7 +1102,7 @@ class ChatMemberUpdated(API, frozen=True):
     via_chat_folder_invite_link: bool | None = None
 
 
-class ChatJoinRequest(API, frozen=True):
+class ChatJoinRequest(API, frozen=True, kw_only=True):
     chat: Chat
     from_: User = field(name="from")
     user_chat_id: int
@@ -1096,7 +1111,7 @@ class ChatJoinRequest(API, frozen=True):
     invite_link: ChatInviteLink | None = None
 
 
-class ChatPermissions(API, frozen=True):
+class ChatPermissions(API, frozen=True, kw_only=True):
     can_send_messages: bool | None = None
     can_send_audios: bool | None = None
     can_send_documents: bool | None = None
@@ -1113,7 +1128,7 @@ class ChatPermissions(API, frozen=True):
     can_manage_topics: bool | None = None
 
 
-class ChatLocation(API, frozen=True):
+class ChatLocation(API, frozen=True, kw_only=True):
     location: Location
     address: str
 
@@ -1122,6 +1137,7 @@ class ReactionTypeBase(
     API,
     frozen=True,
     tag_field="type",
+    kw_only=True,
 ):
     pass
 
@@ -1130,6 +1146,7 @@ class ReactionTypeEmoji(
     ReactionTypeBase,
     frozen=True,
     tag="emoji",
+    kw_only=True,
 ):
     emoji: str
 
@@ -1138,6 +1155,7 @@ class ReactionTypeCustomEmoji(
     ReactionTypeBase,
     frozen=True,
     tag="custom_emoji",
+    kw_only=True,
 ):
     custom_emoji: str
 
@@ -1148,36 +1166,36 @@ ReactionType = Union[
 ]
 
 
-class ReactionCount(API, frozen=True):
+class ReactionCount(API, frozen=True, kw_only=True):
     type: ReactionType
     total_count: int
 
 
-class MessageReactionUpdated(API, frozen=True):
+class MessageReactionUpdated(API, frozen=True, kw_only=True):
     chat: Chat
     message_id: int
-    user: User
-    actor_chat: Chat
+    user: User | None = None
+    actor_chat: Chat | None = None
     date: int
     old_reaction: tuple[ReactionType, ...]
     new_reaction: tuple[ReactionType, ...]
 
 
-class MessageReactionCountUpdated(API, frozen=True):
+class MessageReactionCountUpdated(API, frozen=True, kw_only=True):
     chat: Chat
     message_id: int
     date: int
     reactions: tuple[ReactionCount, ...]
 
 
-class ForumTopic(API, frozen=True):
+class ForumTopic(API, frozen=True, kw_only=True):
     message_thread_id: int
     name: str
     icon_color: int
     icon_custom_emoji_id: str | None = None
 
 
-class BotCommand(API, frozen=True):
+class BotCommand(API, frozen=True, kw_only=True):
     command: str
     description: str
 
@@ -1186,6 +1204,7 @@ class BotCommandScope(
     API,
     frozen=True,
     tag_field="type",
+    kw_only=True,
 ):
     pass
 
@@ -1194,6 +1213,7 @@ class BotCommandScopeDefault(
     BotCommandScope,
     frozen=True,
     tag="default",
+    kw_only=True,
 ):
     pass
 
@@ -1202,6 +1222,7 @@ class BotCommandScopeAllPrivateChats(
     BotCommandScope,
     frozen=True,
     tag="all_private_chats",
+    kw_only=True,
 ):
     pass
 
@@ -1210,6 +1231,7 @@ class BotCommandScopeAllGroupChats(
     BotCommandScope,
     frozen=True,
     tag="all_group_chats",
+    kw_only=True,
 ):
     pass
 
@@ -1218,6 +1240,7 @@ class BotCommandScopeAllChatAdministrators(
     BotCommandScope,
     frozen=True,
     tag="all_chat_administrators",
+    kw_only=True,
 ):
     pass
 
@@ -1226,6 +1249,7 @@ class BotCommandScopeChat(
     BotCommandScope,
     frozen=True,
     tag="chat",
+    kw_only=True,
 ):
     chat_id: int | str
 
@@ -1234,6 +1258,7 @@ class BotCommandScopeChatAdministrators(
     BotCommandScope,
     frozen=True,
     tag="chat_administrators",
+    kw_only=True,
 ):
     chat_id: int | str
 
@@ -1242,24 +1267,25 @@ class BotCommandScopeChatMember(
     API,
     frozen=True,
     tag="chat_member",
+    kw_only=True,
 ):
     chat_id: int | str
     user_id: int
 
 
-class BotName(API, frozen=True):
+class BotName(API, frozen=True, kw_only=True):
     name: str
 
 
-class BotDescription(API, frozen=True):
+class BotDescription(API, frozen=True, kw_only=True):
     description: str
 
 
-class BotShortDescription(API, frozen=True):
+class BotShortDescription(API, frozen=True, kw_only=True):
     short_description: str
 
 
-class MenuButton(API, frozen=True):
+class MenuButton(API, frozen=True, kw_only=True):
     type: str
     text: str | None
     web_app: WebAppInfo | None
@@ -1269,6 +1295,7 @@ class ChatBoostSourceBase(
     API,
     frozen=True,
     tag_field="source",
+    kw_only=True,
 ):
     pass
 
@@ -1277,6 +1304,7 @@ class ChatBoostSourcePremium(
     ChatBoostSourceBase,
     frozen=True,
     tag="premium",
+    kw_only=True,
 ):
     user: User
 
@@ -1285,6 +1313,7 @@ class ChatBoostSourceGiftCode(
     ChatBoostSourceBase,
     frozen=True,
     tag="gift_code",
+    kw_only=True,
 ):
     user: User
 
@@ -1293,6 +1322,7 @@ class ChatBoostSourceGiveaway(
     ChatBoostSourceBase,
     frozen=True,
     tag="giveaway",
+    kw_only=True,
 ):
     giveaway_message_id: int
     user: User | None = None
@@ -1306,26 +1336,26 @@ ChatBoostSource = Union[
 ]
 
 
-class ChatBoost(API, frozen=True):
+class ChatBoost(API, frozen=True, kw_only=True):
     boost_id: str
     add_date: int
     expiration_date: int
     source: ChatBoostSource
 
 
-class ChatBoostUpdated(API, frozen=True):
+class ChatBoostUpdated(API, frozen=True, kw_only=True):
     chat: Chat
     boost: ChatBoost
 
 
-class ChatBoostRemoved(API, frozen=True):
+class ChatBoostRemoved(API, frozen=True, kw_only=True):
     chat: Chat
     boost_id: str
     remove_date: int
     source: ChatBoostSource
 
 
-class UserChatBoosts(API, frozen=True):
+class UserChatBoosts(API, frozen=True, kw_only=True):
     boosts: tuple[ChatBoost, ...]
 
 
@@ -1333,6 +1363,7 @@ class InputMedia(
     API,
     frozen=True,
     tag_field="type",
+    kw_only=True,
 ):
     media: str | InputFile
     caption: str | None = None
@@ -1344,6 +1375,7 @@ class InputMediaPhoto(
     InputMedia,
     frozen=True,
     tag="photo",
+    kw_only=True,
 ):
     has_spoiler: bool | None = None
 
@@ -1351,6 +1383,7 @@ class InputMediaPhoto(
 class InputMediaWithThumbnail(
     InputMedia,
     frozen=True,
+    kw_only=True,
 ):
     thumbnail: InputFile | str | None = None
 
@@ -1359,6 +1392,7 @@ class InputMediaVideo(
     InputMediaWithThumbnail,
     frozen=True,
     tag="video",
+    kw_only=True,
 ):
     width: int | None = None
     height: int | None = None
@@ -1371,6 +1405,7 @@ class InputMediaAnimation(
     InputMediaWithThumbnail,
     frozen=True,
     tag="animation",
+    kw_only=True,
 ):
     width: int | None = None
     height: int | None = None
@@ -1382,6 +1417,7 @@ class InputMediaAudio(
     InputMediaWithThumbnail,
     frozen=True,
     tag="audio",
+    kw_only=True,
 ):
     duration: int | None = None
     performer: str | None = None
@@ -1392,6 +1428,7 @@ class InputMediaDocument(
     InputMediaWithThumbnail,
     frozen=True,
     tag="document",
+    kw_only=True,
 ):
     disable_content_type_detection: bool | None = None
 
@@ -1457,6 +1494,7 @@ class InlineQueryResult(
     API,
     frozen=True,
     tag_field="type",
+    kw_only=True,
 ):
     id: str
 
@@ -1465,6 +1503,7 @@ class InlineQueryResultArticle(
     InlineQueryResult,
     frozen=True,
     tag="article",
+    kw_only=True,
 ):
     title: str
     input_message_content: "InputMessageContent"
@@ -1481,6 +1520,7 @@ class InlineQueryResultPhoto(
     InlineQueryResult,
     frozen=True,
     tag="photo",
+    kw_only=True,
 ):
     photo_url: str
     thumbnail_url: str
@@ -1495,15 +1535,25 @@ class InlineQueryResultPhoto(
     input_message_content: "InputMessageContent | None" = None
 
 
+@unique
+class ThumbnailMimeType(StrEnum):
+    JPEG = "image/jpeg"
+    GIF = "image/gif"
+    MP4 = "video/mp4"
+
+
 class InlineQueryResultGif(
     InlineQueryResult,
     frozen=True,
     tag="gif",
+    kw_only=True,
 ):
     gif_url: str
-    thumbnail_url: str
     gif_width: int | None = None
     gif_height: int | None = None
+    gif_duration: int | None = None
+    thumbnail_url: str
+    thumbnail_mime_type: ThumbnailMimeType | None = None
     title: str | None = None
     caption: str | None = None
     parse_mode: ParseMode | None = None
@@ -1516,11 +1566,14 @@ class InlineQueryResultMpeg4Gif(
     InlineQueryResult,
     frozen=True,
     tag="mpeg4_gif",
+    kw_only=True,
 ):
     mpeg4_url: str
-    thumbnail_url: str
     mpeg4_width: int | None = None
     mpeg4_height: int | None = None
+    mpeg4_duration: int | None = None
+    thumbnail_url: str
+    thumbnail_mime_type: ThumbnailMimeType | None = None
     title: str | None = None
     caption: str | None = None
     parse_mode: ParseMode | None = None
@@ -1529,13 +1582,20 @@ class InlineQueryResultMpeg4Gif(
     input_message_content: "InputMessageContent | None" = None
 
 
+@unique
+class VideoMimeType(StrEnum):
+    HTML = "text/html"
+    MP4 = "video/mp4"
+
+
 class InlineQueryResultVideo(
     InlineQueryResult,
     frozen=True,
     tag="video",
+    kw_only=True,
 ):
     video_url: str
-    mime_type: str
+    mime_type: VideoMimeType
     thumbnail_url: str
     title: str
     caption: str | None = None
@@ -1553,6 +1613,7 @@ class InlineQueryResultAudio(
     InlineQueryResult,
     frozen=True,
     tag="audio",
+    kw_only=True,
 ):
     audio_url: str
     title: str
@@ -1569,6 +1630,7 @@ class InlineQueryResultVoice(
     InlineQueryResult,
     frozen=True,
     tag="voice",
+    kw_only=True,
 ):
     voice_url: str
     title: str
@@ -1580,17 +1642,24 @@ class InlineQueryResultVoice(
     input_message_content: "InputMessageContent | None" = None
 
 
+@unique
+class DocumentMimeType(StrEnum):
+    PDF = "application/pdf"
+    ZIP = "application/zip"
+
+
 class InlineQueryResultDocument(
     InlineQueryResult,
     frozen=True,
     tag="document",
+    kw_only=True,
 ):
     title: str
-    document_url: str
-    mime_type: str
     caption: str | None = None
     parse_mode: ParseMode | None = None
     caption_entities: Sequence[MessageEntity] | None = None
+    document_url: str
+    mime_type: DocumentMimeType
     description: str | None = None
     reply_markup: InlineKeyboardMarkup | None = None
     input_message_content: "InputMessageContent | None" = None
@@ -1603,6 +1672,7 @@ class InlineQueryResultLocation(
     InlineQueryResult,
     frozen=True,
     tag="location",
+    kw_only=True,
 ):
     latitude: float
     longitude: float
@@ -1623,6 +1693,7 @@ class InlineQueryResultVenue(
     InlineQueryResult,
     frozen=True,
     tag="venue",
+    kw_only=True,
 ):
     latitude: float
     longitude: float
@@ -1643,6 +1714,7 @@ class InlineQueryResultContact(
     InlineQueryResult,
     frozen=True,
     tag="contact",
+    kw_only=True,
 ):
     phone_number: str
     first_name: str
@@ -1659,6 +1731,7 @@ class InlineQueryResultGame(
     InlineQueryResult,
     frozen=True,
     tag="game",
+    kw_only=True,
 ):
     game_short_name: str
     reply_markup: InlineKeyboardMarkup | None = None
@@ -1668,6 +1741,7 @@ class InlineQueryResultCachedPhoto(
     InlineQueryResult,
     frozen=True,
     tag="photo",
+    kw_only=True,
 ):
     photofileid: str
     title: str | None = None
@@ -1683,6 +1757,7 @@ class InlineQueryResultCachedGif(
     InlineQueryResult,
     frozen=True,
     tag="gif",
+    kw_only=True,
 ):
     gif_file_id: str
     title: str | None = None
@@ -1697,6 +1772,7 @@ class InlineQueryResultCachedMpeg4Gif(
     InlineQueryResult,
     frozen=True,
     tag="mpeg4_gif",
+    kw_only=True,
 ):
     mpeg4_file_id: str
     title: str | None = None
@@ -1711,6 +1787,7 @@ class InlineQueryResultCachedSticker(
     InlineQueryResult,
     frozen=True,
     tag="sticker",
+    kw_only=True,
 ):
     sticker_file_id: str
     reply_markup: InlineKeyboardMarkup | None = None
@@ -1721,6 +1798,7 @@ class InlineQueryResultCachedDocument(
     InlineQueryResult,
     frozen=True,
     tag="document",
+    kw_only=True,
 ):
     title: str
     document_file_id: str
@@ -1736,6 +1814,7 @@ class InlineQueryResultCachedVideo(
     InlineQueryResult,
     frozen=True,
     tag="video",
+    kw_only=True,
 ):
     video_file_id: str
     title: str
@@ -1751,6 +1830,7 @@ class InlineQueryResultCachedVoice(
     InlineQueryResult,
     frozen=True,
     tag="voice",
+    kw_only=True,
 ):
     voice_file_id: str
     title: str
@@ -1765,6 +1845,7 @@ class InlineQueryResultCachedAudio(
     InlineQueryResult,
     frozen=True,
     tag="audio",
+    kw_only=True,
 ):
     audio_file_id: str
     caption: str | None = None
@@ -1774,14 +1855,14 @@ class InlineQueryResultCachedAudio(
     input_message_content: "InputMessageContent | None" = None
 
 
-class InputTextMessageContent(API, frozen=True):
+class InputTextMessageContent(API, frozen=True, kw_only=True):
     message_text: str
     parse_mode: ParseMode | None = None
     entities: Sequence[MessageEntity] | None = None
     link_preview_options: LinkPreviewOptions | None = None
 
 
-class InputLocationMessageContent(API, frozen=True):
+class InputLocationMessageContent(API, frozen=True, kw_only=True):
     latitude: float
     longitude: float
     horizontal_accuracy: float | None = None
@@ -1790,7 +1871,7 @@ class InputLocationMessageContent(API, frozen=True):
     proximity_alert_radius: int | None = None
 
 
-class InputVenueMessageContent(API, frozen=True):
+class InputVenueMessageContent(API, frozen=True, kw_only=True):
     latitude: float
     longitude: float
     title: str
@@ -1801,14 +1882,14 @@ class InputVenueMessageContent(API, frozen=True):
     google_place_type: str | None = None
 
 
-class InputContactMessageContent(API, frozen=True):
+class InputContactMessageContent(API, frozen=True, kw_only=True):
     phone_number: str
     first_name: str
     last_name: str | None = None
     vcard: str | None = None
 
 
-class InputInvoiceMessageContent:
+class InputInvoiceMessageContent(API, frozen=True, kw_only=True):
     title: str
     description: str
     payload: str
@@ -1839,7 +1920,7 @@ InputMessageContent = Union[
 ]
 
 
-class ChosenInlineResult(API, frozen=True):
+class ChosenInlineResult(API, frozen=True, kw_only=True):
     result_id: str
     from_: User = field(name="from")
     query: str
@@ -1847,16 +1928,16 @@ class ChosenInlineResult(API, frozen=True):
     inline_message_id: str | None = None
 
 
-class SentWebAppMessage(API, frozen=True):
+class SentWebAppMessage(API, frozen=True, kw_only=True):
     inline_message_id: str | None
 
 
-class LabeledPrice(API, frozen=True):
+class LabeledPrice(API, frozen=True, kw_only=True):
     label: str
     amount: int
 
 
-class Invoice(API, frozen=True):
+class Invoice(API, frozen=True, kw_only=True):
     title: str
     description: str
     start_parameter: str
@@ -1864,7 +1945,7 @@ class Invoice(API, frozen=True):
     total_amount: int
 
 
-class ShippingAddress(API, frozen=True):
+class ShippingAddress(API, frozen=True, kw_only=True):
     country_code: str
     state: str
     city: str
@@ -1873,20 +1954,20 @@ class ShippingAddress(API, frozen=True):
     post_code: str
 
 
-class OrderInfo(API, frozen=True):
+class OrderInfo(API, frozen=True, kw_only=True):
     name: str | None = None
     phone_number: str | None = None
     email: str | None = None
     shipping_address: ShippingAddress | None = None
 
 
-class ShippingOption(API, frozen=True):
+class ShippingOption(API, frozen=True, kw_only=True):
     id: str
     title: str
     prices: tuple[LabeledPrice, ...]
 
 
-class SuccessfulPayment(API, frozen=True):
+class SuccessfulPayment(API, frozen=True, kw_only=True):
     currency: str
     total_amount: int
     invoice_payload: str
@@ -1896,14 +1977,14 @@ class SuccessfulPayment(API, frozen=True):
     order_info: OrderInfo | None = None
 
 
-class ShippingQuery(API, frozen=True):
+class ShippingQuery(API, frozen=True, kw_only=True):
     id: str
     from_: User = field(name="from")
     invoice_payload: str
     shipping_address: ShippingAddress
 
 
-class PreCheckoutQuery(API, frozen=True):
+class PreCheckoutQuery(API, frozen=True, kw_only=True):
     id: str
     from_: User = field(name="from")
     currency: str
@@ -1913,12 +1994,12 @@ class PreCheckoutQuery(API, frozen=True):
     order_info: OrderInfo | None = None
 
 
-class PassportData(API, frozen=True):
+class PassportData(API, frozen=True, kw_only=True):
     data: tuple["EncryptedPassportElement", ...]
     credentials: "EncryptedCredentials"
 
 
-class PassportFile(API, frozen=True):
+class PassportFile(API, frozen=True, kw_only=True):
     file_id: str
     file_unique_id: str
     file_date: int
@@ -1942,7 +2023,7 @@ class PassportElementType(StrEnum):
     EMAIL = "email"
 
 
-class EncryptedPassportElement(API, frozen=True):
+class EncryptedPassportElement(API, frozen=True, kw_only=True):
     type: str
     data: str | None = None
     phone_number: str | None = None
@@ -1955,7 +2036,7 @@ class EncryptedPassportElement(API, frozen=True):
     hash: str | None = None
 
 
-class EncryptedCredentials(API, frozen=True):
+class EncryptedCredentials(API, frozen=True, kw_only=True):
     data: str
     hash: str
     secret: str
@@ -1965,6 +2046,7 @@ class PassportElementError(
     API,
     frozen=True,
     tag_field="source",
+    kw_only=True,
 ):
     pass
 
@@ -1983,6 +2065,7 @@ class PassportElementErrorDataField(
     PassportElementError,
     frozen=True,
     tag="data",
+    kw_only=True,
 ):
     type: PassportElementDataType
     field_name: str
@@ -2002,6 +2085,7 @@ class PassportElementErrorFrontSide(
     PassportElementError,
     frozen=True,
     tag="front_side",
+    kw_only=True,
 ):
     type: PassportElementFrontSideType
     file_hash: str
@@ -2018,6 +2102,7 @@ class PassportElementErrorReverseSide(
     PassportElementError,
     frozen=True,
     tag="reverse_side",
+    kw_only=True,
 ):
     type: PassportElementReverseSideType
     file_hash: str
@@ -2036,6 +2121,7 @@ class PassportElementErrorSelfie(
     PassportElementError,
     frozen=True,
     tag="selfie",
+    kw_only=True,
 ):
     type: PassportElementSelfieType
     file_hash: str
@@ -2055,6 +2141,7 @@ class PassportElementErrorFile(
     PassportElementError,
     frozen=True,
     tag="file",
+    kw_only=True,
 ):
     type: PassportElementFileType
     file_hash: str
@@ -2065,6 +2152,7 @@ class PassportElementErrorFiles(
     PassportElementError,
     frozen=True,
     tag="files",
+    kw_only=True,
 ):
     type: PassportElementFileType
     file_hashes: Sequence[str]
@@ -2088,6 +2176,7 @@ class PassportElementErrorTranslationFile(
     PassportElementError,
     frozen=True,
     tag="translation_file",
+    kw_only=True,
 ):
     type: PassportElementTranslationFileType
     file_hash: str
@@ -2098,6 +2187,7 @@ class PassportElementErrorTranslationFiles(
     PassportElementError,
     frozen=True,
     tag="translation_files",
+    kw_only=True,
 ):
     type: PassportElementTranslationFileType
     file_hashes: Sequence[str]
@@ -2108,13 +2198,14 @@ class PassportElementErrorUnspecified(
     PassportElementError,
     frozen=True,
     tag="unspecified",
+    kw_only=True,
 ):
     type: PassportElementType
     element_hash: str
     message: str
 
 
-class Game(API, frozen=True):
+class Game(API, frozen=True, kw_only=True):
     title: str
     description: str
     photo: tuple[PhotoSize, ...]
@@ -2123,11 +2214,11 @@ class Game(API, frozen=True):
     animation: "Animation | None" = None
 
 
-class CallbackGame(API, frozen=True):
+class CallbackGame(API, frozen=True, kw_only=True):
     pass
 
 
-class GameHighScore(API, frozen=True):
+class GameHighScore(API, frozen=True, kw_only=True):
     position: int
     user: User
     score: int

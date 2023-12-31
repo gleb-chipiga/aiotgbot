@@ -15,23 +15,23 @@ from aiotgbot.api_types import (
     "input_media,json",
     (
         (
-            InputMediaPhoto("media"),
+            InputMediaPhoto(media="media"),
             b'{"type":"photo","media":"media"}',
         ),
         (
-            InputMediaVideo("media"),
+            InputMediaVideo(media="media"),
             b'{"type":"video","media":"media"}',
         ),
         (
-            InputMediaAnimation("media"),
+            InputMediaAnimation(media="media"),
             b'{"type":"animation","media":"media"}',
         ),
         (
-            InputMediaAudio("media"),
+            InputMediaAudio(media="media"),
             b'{"type":"audio","media":"media"}',
         ),
         (
-            InputMediaDocument("media"),
+            InputMediaDocument(media="media"),
             b'{"type":"document","media":"media"}',
         ),
     ),

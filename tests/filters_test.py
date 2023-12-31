@@ -74,7 +74,7 @@ def make_bot_update() -> _MakeBotUpdate:
             "poll_answer": None,
             **params,
         }
-        return BotUpdate(state, context, Update(update_id, **params))
+        return BotUpdate(state, context, Update(update_id=update_id, **params))
 
     return _make_bot_update
 

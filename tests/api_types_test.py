@@ -79,7 +79,11 @@ async def test_stream_file(count: int) -> None:
         for chunk in ichunked(b"bytes" * count, 32):
             yield bytes(chunk)
 
-    file = StreamFile("file.txt", content(), "text/plain")
+    file = StreamFile(
+        name="file.txt",
+        content=content(),
+        content_type="text/plain",
+    )
     await check_input_file(
         file,
         "file.txt",

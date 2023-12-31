@@ -42,7 +42,7 @@ def make_message() -> _MakeMessage:
 
 @pytest.fixture
 def reply_kb() -> ReplyKeyboardMarkup:
-    return ReplyKeyboardMarkup([[KeyboardButton("Button")]])
+    return ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text="Button")]])
 
 
 async def _iter_bytes(
@@ -394,12 +394,13 @@ async def test_edit_message_media(
 @pytest.mark.asyncio
 async def test_get_my_commands(_bot: Bot, make_message: _MakeMessage) -> None:
     commands = (
-        BotCommand("cmd1", "Command 1"),
-        BotCommand("cmd2", "Command 2"),
+        BotCommand(command="cmd1", description="Command 1"),
+        BotCommand(command="cmd2", description="Command 2"),
     )
     _bot.request_mock.return_value = commands
     assert (
-        await _bot.get_my_commands(BotCommandScopeChat(123), "ru") == commands
+        await _bot.get_my_commands(BotCommandScopeChat(chat_id=123), "ru")
+        == commands
     )
     assert _bot.request_mock.call_args_list == [
         call(

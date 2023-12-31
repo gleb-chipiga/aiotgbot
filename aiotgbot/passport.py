@@ -165,14 +165,14 @@ class PassportCipher:
         yield decrypted[skip:]
 
 
-class PassportScopeElementOne(API, frozen=True):
+class PassportScopeElementOne(API, frozen=True, kw_only=True):
     type: PassportElementType
     selfie: bool | None = None
     translation: bool | None = None
     native_names: bool | None = None
 
 
-class PassportScopeElementOneOfSeveral(API, frozen=True):
+class PassportScopeElementOneOfSeveral(API, frozen=True, kw_only=True):
     one_of: Sequence[PassportScopeElementOne]
     selfie: bool | None = None
     translation: bool | None = None
@@ -189,16 +189,17 @@ class PassportScope(
     frozen=True,
     tag_field="v",
     tag=1,
+    kw_only=True,
 ):
     data: Sequence[PassportScopeElement]
 
 
-class FileCredentials(API, frozen=True):
+class FileCredentials(API, frozen=True, kw_only=True):
     file_hash: str
     secret: str
 
 
-class DataCredentials(API, frozen=True):
+class DataCredentials(API, frozen=True, kw_only=True):
     data_hash: str
     secret: str
 
@@ -213,7 +214,7 @@ class DataCredentials(API, frozen=True):
         return cipher.decrypt(b64decode(ciphertext))
 
 
-class SecureValue(API, frozen=True):
+class SecureValue(API, frozen=True, kw_only=True):
     data: DataCredentials | None = None
     front_side: FileCredentials | None = None
     reverse_side: FileCredentials | None = None
@@ -222,7 +223,7 @@ class SecureValue(API, frozen=True):
     files: Sequence[FileCredentials] | None = None
 
 
-class SecureData(API, frozen=True):
+class SecureData(API, frozen=True, kw_only=True):
     personal_details: SecureValue | None = None
     passport: SecureValue | None = None
     internal_passport: SecureValue | None = None
@@ -236,7 +237,7 @@ class SecureData(API, frozen=True):
     temporary_registration: SecureValue | None = None
 
 
-class Credentials(API, frozen=True):
+class Credentials(API, frozen=True, kw_only=True):
     secure_data: SecureData
     nonce: str
 
@@ -254,7 +255,7 @@ class Credentials(API, frozen=True):
         return msgspec.json.decode(plaintext, type=cls)
 
 
-class PersonalDetails(API, frozen=True):
+class PersonalDetails(API, frozen=True, kw_only=True):
     first_name: str
     last_name: str
     birth_date: str
@@ -267,7 +268,7 @@ class PersonalDetails(API, frozen=True):
     middle_name_native: str | None = None
 
 
-class ResidentialAddress(API, frozen=True):
+class ResidentialAddress(API, frozen=True, kw_only=True):
     street_line1: str
     city: str
     country_code: str
@@ -276,6 +277,6 @@ class ResidentialAddress(API, frozen=True):
     state: str | None = None
 
 
-class IdDocumentData(API, frozen=True):
+class IdDocumentData(API, frozen=True, kw_only=True):
     document_no: str
     expiry_date: str | None = None

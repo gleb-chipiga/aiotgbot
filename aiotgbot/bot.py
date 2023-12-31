@@ -332,7 +332,10 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
             user_id = update.pre_checkout_query.from_.id
         elif update.poll is not None:
             pass
-        elif update.poll_answer is not None:
+        elif (
+            update.poll_answer is not None
+            and update.poll_answer.user is not None
+        ):
             user_id = update.poll_answer.user.id
         elif update.my_chat_member is not None:
             assert update.my_chat_member.from_ is not None

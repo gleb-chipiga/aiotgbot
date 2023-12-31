@@ -33,15 +33,15 @@ from aiotgbot.api_types import (
             b'{"type":"all_chat_administrators"}',
         ),
         (
-            BotCommandScopeChat(123),
+            BotCommandScopeChat(chat_id=123),
             b'{"type":"chat","chat_id":123}',
         ),
         (
-            BotCommandScopeChatAdministrators(123),
+            BotCommandScopeChatAdministrators(chat_id=123),
             b'{"type":"chat_administrators","chat_id":123}',
         ),
         (
-            BotCommandScopeChatMember(123, 456),
+            BotCommandScopeChatMember(chat_id=123, user_id=456),
             b'{"type":"chat_member","chat_id":123,"user_id":456}',
         ),
     ),

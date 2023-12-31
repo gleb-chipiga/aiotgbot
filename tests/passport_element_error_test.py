@@ -27,55 +27,74 @@ from aiotgbot.api_types import (
     (
         (
             PassportElementErrorDataField(
-                PassportElementDataType.PASSPORT, "", "", ""
+                type=PassportElementDataType.PASSPORT,
+                field_name="",
+                data_hash="",
+                message="",
             ),
             b'{"source":"data","type":"passport"',
         ),
         (
             PassportElementErrorFrontSide(
-                PassportElementFrontSideType.PASSPORT, "", ""
+                type=PassportElementFrontSideType.PASSPORT,
+                file_hash="",
+                message="",
             ),
             b'{"source":"front_side","type":"passport"',
         ),
         (
             PassportElementErrorReverseSide(
-                PassportElementReverseSideType.IDENTITY_CARD, "", ""
+                type=PassportElementReverseSideType.IDENTITY_CARD,
+                file_hash="",
+                message="",
             ),
             b'{"source":"reverse_side","type":"identity_card"',
         ),
         (
             PassportElementErrorSelfie(
-                PassportElementSelfieType.PASSPORT, "", ""
+                type=PassportElementSelfieType.PASSPORT,
+                file_hash="",
+                message="",
             ),
             b'{"source":"selfie","type":"passport"',
         ),
         (
             PassportElementErrorFile(
-                PassportElementFileType.UTILITY_BILL, "", ""
+                type=PassportElementFileType.UTILITY_BILL,
+                file_hash="",
+                message="",
             ),
             b'{"source":"file","type":"utility_bill"',
         ),
         (
             PassportElementErrorFiles(
-                PassportElementFileType.UTILITY_BILL, "", ""
+                type=PassportElementFileType.UTILITY_BILL,
+                file_hashes="",
+                message="",
             ),
             b'{"source":"files","type":"utility_bill"',
         ),
         (
             PassportElementErrorTranslationFile(
-                PassportElementTranslationFileType.PASSPORT, "", ""
+                type=PassportElementTranslationFileType.PASSPORT,
+                file_hash="",
+                message="",
             ),
             b'{"source":"translation_file","type":"passport"',
         ),
         (
             PassportElementErrorTranslationFiles(
-                PassportElementTranslationFileType.PASSPORT, "", ""
+                type=PassportElementTranslationFileType.PASSPORT,
+                file_hashes=("",),
+                message="",
             ),
             b'{"source":"translation_files","type":"passport"',
         ),
         (
             PassportElementErrorUnspecified(
-                PassportElementType.PASSPORT, "", ""
+                type=PassportElementType.PASSPORT,
+                element_hash="",
+                message="",
             ),
             b'{"source":"unspecified","type":"passport"',
         ),

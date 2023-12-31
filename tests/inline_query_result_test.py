@@ -2,6 +2,7 @@ import msgspec
 import pytest
 
 from aiotgbot.api_types import (
+    DocumentMimeType,
     InlineQueryResult,
     InlineQueryResultArticle,
     InlineQueryResultAudio,
@@ -24,6 +25,7 @@ from aiotgbot.api_types import (
     InlineQueryResultVideo,
     InlineQueryResultVoice,
     InputTextMessageContent,
+    VideoMimeType,
 )
 
 
@@ -31,83 +33,163 @@ from aiotgbot.api_types import (
     "inline_query_result,json",
     (
         (
-            InlineQueryResultArticle("", "", InputTextMessageContent("")),
+            InlineQueryResultArticle(
+                id="",
+                title="",
+                input_message_content=InputTextMessageContent(message_text=""),
+            ),
             b'{"type":"article","id":""',
         ),
         (
-            InlineQueryResultPhoto("", "", ""),
+            InlineQueryResultPhoto(
+                id="",
+                photo_url="",
+                thumbnail_url="",
+            ),
             b'{"type":"photo","id":""',
         ),
         (
-            InlineQueryResultGif("", "", ""),
+            InlineQueryResultGif(
+                id="",
+                gif_url="",
+                thumbnail_url="",
+            ),
             b'{"type":"gif","id":""',
         ),
         (
-            InlineQueryResultMpeg4Gif("", "", ""),
+            InlineQueryResultMpeg4Gif(
+                id="",
+                mpeg4_url="",
+                thumbnail_url="",
+            ),
             b'{"type":"mpeg4_gif","id":""',
         ),
         (
-            InlineQueryResultVideo("", "", "", "", ""),
+            InlineQueryResultVideo(
+                id="",
+                video_url="",
+                mime_type=VideoMimeType.HTML,
+                thumbnail_url="",
+                title="",
+            ),
             b'{"type":"video","id":""',
         ),
         (
-            InlineQueryResultAudio("", "", ""),
+            InlineQueryResultAudio(
+                id="",
+                audio_url="",
+                title="",
+            ),
             b'{"type":"audio","id":""',
         ),
         (
-            InlineQueryResultVoice("", "", ""),
+            InlineQueryResultVoice(
+                id="",
+                voice_url="",
+                title="",
+            ),
             b'{"type":"voice","id":""',
         ),
         (
-            InlineQueryResultDocument("", "", "", ""),
+            InlineQueryResultDocument(
+                id="",
+                title="",
+                document_url="",
+                mime_type=DocumentMimeType.PDF,
+            ),
             b'{"type":"document","id":""',
         ),
         (
-            InlineQueryResultLocation("", 0, 0, ""),
+            InlineQueryResultLocation(
+                id="",
+                latitude=0,
+                longitude=0,
+                title="",
+            ),
             b'{"type":"location","id":""',
         ),
         (
-            InlineQueryResultVenue("", 0, 0, "", ""),
+            InlineQueryResultVenue(
+                id="",
+                latitude=0,
+                longitude=0,
+                title="",
+                address="",
+            ),
             b'{"type":"venue","id":""',
         ),
         (
-            InlineQueryResultContact("", "", ""),
+            InlineQueryResultContact(
+                id="",
+                phone_number="",
+                first_name="",
+            ),
             b'{"type":"contact","id":""',
         ),
         (
-            InlineQueryResultGame("", ""),
+            InlineQueryResultGame(
+                id="",
+                game_short_name="",
+            ),
             b'{"type":"game","id":""',
         ),
         (
-            InlineQueryResultCachedPhoto("", "", ""),
+            InlineQueryResultCachedPhoto(
+                id="",
+                photofileid="",
+            ),
             b'{"type":"photo","id":""',
         ),
         (
-            InlineQueryResultCachedGif("", "", ""),
+            InlineQueryResultCachedGif(
+                id="",
+                gif_file_id="",
+            ),
             b'{"type":"gif","id":""',
         ),
         (
-            InlineQueryResultCachedMpeg4Gif("", "", ""),
+            InlineQueryResultCachedMpeg4Gif(
+                id="",
+                mpeg4_file_id="",
+            ),
             b'{"type":"mpeg4_gif","id":""',
         ),
         (
-            InlineQueryResultCachedSticker("", ""),
+            InlineQueryResultCachedSticker(
+                id="",
+                sticker_file_id="",
+            ),
             b'{"type":"sticker","id":""',
         ),
         (
-            InlineQueryResultCachedDocument("", "", "", ""),
+            InlineQueryResultCachedDocument(
+                id="",
+                title="",
+                document_file_id="",
+            ),
             b'{"type":"document","id":""',
         ),
         (
-            InlineQueryResultCachedVideo("", "", "", "", ""),
+            InlineQueryResultCachedVideo(
+                id="",
+                video_file_id="",
+                title="",
+            ),
             b'{"type":"video","id":""',
         ),
         (
-            InlineQueryResultCachedVoice("", "", ""),
+            InlineQueryResultCachedVoice(
+                id="",
+                voice_file_id="",
+                title="",
+            ),
             b'{"type":"voice","id":""',
         ),
         (
-            InlineQueryResultCachedAudio("", "", ""),
+            InlineQueryResultCachedAudio(
+                id="",
+                audio_file_id="",
+            ),
             b'{"type":"audio","id":""',
         ),
     ),
