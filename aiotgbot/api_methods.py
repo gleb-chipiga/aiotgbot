@@ -27,6 +27,7 @@ from .api_types import (
     InputMediaWithThumbnail,
     InputSticker,
     LabeledPrice,
+    LinkPreviewOptions,
     MaskPosition,
     MenuButton,
     Message,
@@ -34,13 +35,16 @@ from .api_types import (
     MessageId,
     PassportElementError,
     Poll,
+    ReactionType,
     ReplyMarkup,
+    ReplyParameters,
     SentWebAppMessage,
     ShippingOption,
     Sticker,
     StickerSet,
     Update,
     User,
+    UserChatBoosts,
     UserProfilePhotos,
     WebhookInfo,
 )
@@ -207,11 +211,10 @@ class ApiMethods(ABC):
         message_thread_id: int | None = None,
         parse_mode: ParseMode | None = None,
         entities: Sequence[MessageEntity] | None = None,
-        disable_web_page_preview: bool | None = None,
+        link_preview_options: LinkPreviewOptions | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -228,11 +231,10 @@ class ApiMethods(ABC):
             message_thread_id=message_thread_id,
             parse_mode=parse_mode,
             entities=_encode_json(entities),
-            disable_web_page_preview=disable_web_page_preview,
+            link_preview_options=_encode_json(link_preview_options),
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -263,6 +265,32 @@ class ApiMethods(ABC):
             protect_content=protect_content,
         )
 
+    async def forward_messages(
+        self,
+        chat_id: int | str,
+        from_chat_id: int | str,
+        message_ids: Sequence[int],
+        message_thread_id: int | None = None,
+        disable_notification: bool | None = None,
+        protect_content: bool | None = None,
+    ) -> Message:
+        api_logger.debug(
+            'Forward messages from "%s" to "%s"',
+            from_chat_id,
+            chat_id,
+        )
+        return await self._safe_request(
+            RequestMethod.POST,
+            "forwardMessages",
+            chat_id,
+            Message,
+            from_chat_id=from_chat_id,
+            message_ids=_encode_json(sorted(message_ids)),
+            message_thread_id=message_thread_id,
+            disable_notification=disable_notification,
+            protect_content=protect_content,
+        )
+
     async def copy_message(
         self,
         chat_id: int | str,
@@ -274,8 +302,7 @@ class ApiMethods(ABC):
         caption_entities: Sequence[MessageEntity] | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> MessageId:
         api_logger.debug(
@@ -297,9 +324,36 @@ class ApiMethods(ABC):
             caption=caption,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
+        )
+
+    async def copy_messages(
+        self,
+        chat_id: int | str,
+        from_chat_id: int | str,
+        message_ids: Sequence[int],
+        message_thread_id: int | None = None,
+        disable_notification: bool | None = None,
+        protect_content: bool | None = None,
+        remove_caption: bool | None = None,
+    ) -> MessageId:
+        api_logger.debug(
+            'Copy messages from "%s" to "%s"',
+            from_chat_id,
+            chat_id,
+        )
+        return await self._safe_request(
+            RequestMethod.POST,
+            "copyMessages",
+            chat_id,
+            MessageId,
+            from_chat_id=from_chat_id,
+            message_ids=_encode_json(sorted(message_ids)),
+            message_thread_id=message_thread_id,
+            disable_notification=disable_notification,
+            protect_content=protect_content,
+            remove_caption=remove_caption,
         )
 
     async def send_photo(
@@ -313,8 +367,7 @@ class ApiMethods(ABC):
         has_spoiler: bool | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -334,8 +387,7 @@ class ApiMethods(ABC):
             has_spoiler=has_spoiler,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -353,8 +405,7 @@ class ApiMethods(ABC):
         performer: str | None = None,
         title: str | None = None,
         thumbnail: InputFile | str | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -377,8 +428,7 @@ class ApiMethods(ABC):
             performer=performer,
             title=title,
             thumbnail=thumbnail,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -397,8 +447,7 @@ class ApiMethods(ABC):
         duration: int | None = None,
         performer: str | None = None,
         title: str | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -422,8 +471,7 @@ class ApiMethods(ABC):
             duration=duration,
             performer=performer,
             title=title,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -443,8 +491,7 @@ class ApiMethods(ABC):
         supports_streaming: bool | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -469,8 +516,7 @@ class ApiMethods(ABC):
             supports_streaming=supports_streaming,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -489,8 +535,7 @@ class ApiMethods(ABC):
         has_spoiler: bool | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -514,8 +559,7 @@ class ApiMethods(ABC):
             has_spoiler=has_spoiler,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -530,8 +574,7 @@ class ApiMethods(ABC):
         duration: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -551,8 +594,7 @@ class ApiMethods(ABC):
             duration=duration,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -566,8 +608,7 @@ class ApiMethods(ABC):
         thumbnail: InputFile | str | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -586,8 +627,7 @@ class ApiMethods(ABC):
             thumbnail=thumbnail,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -598,8 +638,7 @@ class ApiMethods(ABC):
         message_thread_id: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
     ) -> tuple[Message, ...]:
         api_logger.debug(
             'Send media group to "%s"',
@@ -633,9 +672,8 @@ class ApiMethods(ABC):
             media=_encode_json(attached_media),
             message_thread_id=message_thread_id,
             disable_notification=disable_notification,
-            protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            protect_content=_encode_json(protect_content),
+            reply_parameters=_encode_json(reply_parameters),
             **attachments,
         )
 
@@ -652,8 +690,7 @@ class ApiMethods(ABC):
         length: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -675,8 +712,7 @@ class ApiMethods(ABC):
             length=length,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -746,8 +782,7 @@ class ApiMethods(ABC):
         foursquare_type: str | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -768,8 +803,7 @@ class ApiMethods(ABC):
             foursquare_type=foursquare_type,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -783,8 +817,7 @@ class ApiMethods(ABC):
         vcard: str | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -803,8 +836,7 @@ class ApiMethods(ABC):
             vcard=vcard,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -826,8 +858,7 @@ class ApiMethods(ABC):
         close_date: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -854,8 +885,7 @@ class ApiMethods(ABC):
             close_date=close_date,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -866,8 +896,7 @@ class ApiMethods(ABC):
         emoji: DiceEmoji | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -884,8 +913,7 @@ class ApiMethods(ABC):
             emoji=emoji,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -907,6 +935,27 @@ class ApiMethods(ABC):
             bool,
             action=action,
             message_thread_id=message_thread_id,
+        )
+
+    async def set_message_reaction(
+        self,
+        chat_id: int | str,
+        message_id: int,
+        reaction: Sequence[ReactionType] | None = None,
+        is_big: bool | None = None,
+    ) -> bool:
+        api_logger.debug(
+            'Send set message reaction to chat "%s"',
+            chat_id,
+        )
+        return await self._safe_request(
+            RequestMethod.POST,
+            "setMessageReaction",
+            chat_id,
+            bool,
+            message_id=message_id,
+            reaction=_encode_json(reaction),
+            is_big=is_big,
         )
 
     async def get_user_profile_photos(
@@ -1702,6 +1751,24 @@ class ApiMethods(ABC):
             cache_time=cache_time,
         )
 
+    async def get_user_chat_boosts(
+        self,
+        chat_id: int | str,
+        user_id: int,
+    ) -> UserChatBoosts:
+        api_logger.debug(
+            "Get user chat boosts %r %r",
+            chat_id,
+            user_id,
+        )
+        return await self._request(
+            RequestMethod.GET,
+            "getUserChatBoosts",
+            UserChatBoosts,
+            chat_id=chat_id,
+            user_id=user_id,
+        )
+
     async def set_my_commands(
         self,
         commands: Sequence[BotCommand],
@@ -1914,7 +1981,7 @@ class ApiMethods(ABC):
         inline_message_id: str | None = None,
         parse_mode: ParseMode | None = None,
         entities: Sequence[MessageEntity] | None = None,
-        disable_web_page_preview: bool | None = None,
+        link_preview_options: LinkPreviewOptions | None = None,
         reply_markup: InlineKeyboardMarkup | None = None,
     ) -> Message | bool:
         if (
@@ -1944,7 +2011,7 @@ class ApiMethods(ABC):
             text=text,
             parse_mode=parse_mode,
             entities=_encode_json(entities),
-            disable_web_page_preview=disable_web_page_preview,
+            link_preview_options=_encode_json(link_preview_options),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -2112,6 +2179,23 @@ class ApiMethods(ABC):
             message_id=message_id,
         )
 
+    async def delete_messages(
+        self,
+        chat_id: int | str,
+        message_ids: Sequence[int],
+    ) -> bool:
+        api_logger.debug(
+            'Delete messages in "%s"',
+            chat_id,
+        )
+        return await self._request(
+            RequestMethod.POST,
+            "deleteMessages",
+            bool,
+            chat_id=chat_id,
+            message_ids=_encode_json(sorted(message_ids)),
+        )
+
     async def send_sticker(
         self,
         chat_id: int | str,
@@ -2120,8 +2204,7 @@ class ApiMethods(ABC):
         message_thread_id: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -2138,8 +2221,7 @@ class ApiMethods(ABC):
             message_thread_id=message_thread_id,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -2483,8 +2565,7 @@ class ApiMethods(ABC):
         is_flexible: bool | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: InlineKeyboardMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -2520,8 +2601,7 @@ class ApiMethods(ABC):
             is_flexible=is_flexible,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -2643,8 +2723,7 @@ class ApiMethods(ABC):
         message_thread_id: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-        reply_to_message_id: int | None = None,
-        allow_sending_without_reply: bool | None = None,
+        reply_parameters: ReplyParameters | None = None,
         reply_markup: InlineKeyboardMarkup | None = None,
     ) -> Message:
         api_logger.debug(
@@ -2661,8 +2740,7 @@ class ApiMethods(ABC):
             message_thread_id=message_thread_id,
             disable_notification=disable_notification,
             protect_content=protect_content,
-            reply_to_message_id=reply_to_message_id,
-            allow_sending_without_reply=allow_sending_without_reply,
+            reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
 

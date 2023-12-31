@@ -139,8 +139,6 @@ async def test_api_methods_send_message(
             text="Hello!",
             message_thread_id=None,
             parse_mode=ParseMode.HTML,
-            disable_web_page_preview=True,
-            reply_to_message_id=111,
             reply_markup=reply_kb,
         )
         == message
@@ -154,11 +152,10 @@ async def test_api_methods_send_message(
             message_thread_id=None,
             parse_mode="HTML",
             entities=None,
-            disable_web_page_preview=True,
+            link_preview_options=None,
             disable_notification=None,
             protect_content=None,
-            reply_to_message_id=111,
-            allow_sending_without_reply=None,
+            reply_parameters=None,
             reply_markup=msgspec.json.encode(reply_kb).decode(),
         )
     ]
@@ -176,7 +173,6 @@ async def test_api_methods_send_photo(
             photo="some photo",
             message_thread_id=None,
             parse_mode=ParseMode.HTML,
-            reply_to_message_id=111,
             reply_markup=reply_kb,
         )
         == message
@@ -194,8 +190,7 @@ async def test_api_methods_send_photo(
             has_spoiler=None,
             disable_notification=None,
             protect_content=None,
-            reply_to_message_id=111,
-            allow_sending_without_reply=None,
+            reply_parameters=None,
             reply_markup=msgspec.json.encode(reply_kb).decode(),
         )
     ]
@@ -313,7 +308,7 @@ async def test_api_methods_edit_message_text(
             inline_message_id=None,
             parse_mode=None,
             entities=None,
-            disable_web_page_preview=None,
+            link_preview_options=None,
             reply_markup=None,
         )
     ]
@@ -361,8 +356,7 @@ async def test_send_media_group(_bot: Bot, make_message: _MakeMessage) -> None:
             message_thread_id=None,
             disable_notification=None,
             protect_content=None,
-            reply_to_message_id=None,
-            allow_sending_without_reply=None,
+            reply_parameters=None,
             attachment0=file0,
             attachment1=file1,
             attachment2=file2,

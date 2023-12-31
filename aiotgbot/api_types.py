@@ -39,6 +39,13 @@ __all__ = (
     "CallbackQuery",
     "Chat",
     "ChatAdministratorRights",
+    "ChatBoost",
+    "ChatBoostRemoved",
+    "ChatBoostSource",
+    "ChatBoostSourceGiftCode",
+    "ChatBoostSourceGiveaway",
+    "ChatBoostSourcePremium",
+    "ChatBoostUpdated",
     "ChatInviteLink",
     "ChatLocation",
     "ChatMember",
@@ -60,6 +67,7 @@ __all__ = (
     "Document",
     "EncryptedCredentials",
     "EncryptedPassportElement",
+    "ExternalReplyInfo",
     "File",
     "ForceReply",
     "ForumTopic",
@@ -68,6 +76,10 @@ __all__ = (
     "ForumTopicReopened",
     "Game",
     "GameHighScore",
+    "Giveaway",
+    "GiveawayCompleted",
+    "GiveawayCreated",
+    "GiveawayWinners",
     "InlineKeyboardButton",
     "InlineKeyboardMarkup",
     "InlineQuery",
@@ -111,8 +123,9 @@ __all__ = (
     "KeyboardButton",
     "KeyboardButtonPollType",
     "KeyboardButtonRequestChat",
-    "KeyboardButtonRequestUser",
+    "KeyboardButtonRequestUsers",
     "LabeledPrice",
+    "LinkPreviewOptions",
     "LocalFile",
     "Location",
     "LoginUrl",
@@ -121,6 +134,13 @@ __all__ = (
     "Message",
     "MessageEntity",
     "MessageId",
+    "MessageOrigin",
+    "MessageOriginChannel",
+    "MessageOriginChat",
+    "MessageOriginHiddenUser",
+    "MessageOriginUser",
+    "MessageReactionCountUpdated",
+    "MessageReactionUpdated",
     "OrderInfo",
     "PassportData",
     "PassportElementDataType",
@@ -147,9 +167,14 @@ __all__ = (
     "PollOption",
     "PreCheckoutQuery",
     "ProximityAlertTriggered",
+    "ReactionCount",
+    "ReactionType",
+    "ReactionTypeCustomEmoji",
+    "ReactionTypeEmoji",
     "ReplyKeyboardMarkup",
     "ReplyKeyboardRemove",
     "ReplyMarkup",
+    "ReplyParameters",
     "ResponseParameters",
     "SentWebAppMessage",
     "ShippingAddress",
@@ -160,9 +185,12 @@ __all__ = (
     "StreamFile",
     "SuccessfulPayment",
     "SwitchInlineQueryChosenChat",
+    "TextQuote",
     "Update",
     "User",
+    "UserChatBoosts",
     "UserProfilePhotos",
+    "UsersShared",
     "Venue",
     "Video",
     "VideoNote",
@@ -270,6 +298,8 @@ class Update(API, frozen=True):
     edited_message: "Message | None" = None
     channel_post: "Message | None" = None
     edited_channel_post: "Message | None" = None
+    message_reaction: "MessageReactionUpdated | None" = None
+    message_reaction_count: "MessageReactionCountUpdated | None" = None
     inline_query: "InlineQuery | None" = None
     chosen_inline_result: "ChosenInlineResult | None" = None
     callback_query: "CallbackQuery | None" = None
@@ -318,6 +348,11 @@ class Chat(API, frozen=True):
     is_forum: bool | None = None
     photo: "ChatPhoto | None" = None
     active_usernames: Sequence[str] | None = None
+    available_reactions: tuple["ReactionType", ...] | None = None
+    accent_color_id: int | None = None
+    background_custom_emoji_id: str | None = None
+    profile_accent_color_id: int | None = None
+    profile_background_custom_emoji_id: str | None = None
     emoji_status_custom_emoji_id: str | None = None
     emoji_status_expiration_date: int | None = None
     bio: str | None = None
@@ -332,6 +367,7 @@ class Chat(API, frozen=True):
     has_aggressive_anti_spam_enabled: bool | None = None
     has_hidden_members: bool | None = None
     has_protected_content: bool | None = None
+    has_visible_history: bool | None = None
     has_restricted_voice_and_video_messages: bool | None = None
     sticker_set_name: str | None = None
     can_set_sticker_set: bool | None = None
@@ -346,15 +382,12 @@ class Message(API, frozen=True):
     message_thread_id: int | None = None
     from_: User | None = field(default=None, name="from")
     sender_chat: Chat | None = None
-    forward_from: User | None = None
-    forward_from_chat: Chat | None = None
-    forward_from_message_id: int | None = None
-    forward_signature: str | None = None
-    forward_sender_name: str | None = None
-    forward_date: int | None = None
+    forward_origin: "MessageOrigin | None" = None
     is_topic_message: bool | None = None
     is_automatic_forward: bool | None = None
     reply_to_message: "Message | None" = None
+    external_reply: "ExternalReplyInfo | None" = None
+    quote: "TextQuote | None" = None
     via_bot: User | None = None
     edit_date: int | None = None
     has_protected_content: bool | None = None
@@ -362,6 +395,7 @@ class Message(API, frozen=True):
     author_signature: str | None = None
     text: str | None = None
     entities: tuple["MessageEntity", ...] | None = None
+    link_preview_options: "LinkPreviewOptions | None" = None
     caption_entities: tuple["MessageEntity", ...] | None = None
     has_media_spoiler: bool | None = None
     audio: "Audio | None" = None
@@ -396,7 +430,7 @@ class Message(API, frozen=True):
     pinned_message: "Message | None" = None
     invoice: "Invoice | None" = None
     successful_payment: "SuccessfulPayment | None" = None
-    user_shared: "UserShared | None" = None
+    users_shared: "UsersShared | None" = None
     chat_shared: "ChatShared | None" = None
     connected_website: str | None = None
     write_access_allowed: "WriteAccessAllowed | None" = None
@@ -408,6 +442,10 @@ class Message(API, frozen=True):
     forum_topic_reopened: "ForumTopicReopened | None" = None
     general_forum_topic_hidden: "GeneralForumTopicHidden | None" = None
     general_forum_topic_unhidden: "GeneralForumTopicUnhidden | None" = None
+    giveaway_created: "GiveawayCreated | None" = None
+    giveaway: "Giveaway | None" = None
+    giveaway_winners: "GiveawayWinners | None" = None
+    giveaway_completed: "GiveawayCompleted | None" = None
     video_chat_scheduled: "VideoChatScheduled | None" = None
     video_chat_started: "VideoChatStarted | None" = None
     video_chat_ended: "VideoChatEnded | None" = None
@@ -430,6 +468,102 @@ class MessageEntity(API, frozen=True):
     user: User | None = None
     language: str | None = None
     custom_emoji_id: str | None = None
+
+
+class TextQuote(API, frozen=True):
+    text: str
+    entities: tuple["MessageEntity", ...]
+    position: int
+    is_manual: bool | None = None
+
+
+class ExternalReplyInfo(API, frozen=True):
+    origin: "MessageOrigin"
+    chat: Chat | None = None
+    message_id: int | None = None
+    link_preview_options: "LinkPreviewOptions | None" = None
+    animation: "Animation | None" = None
+    audio: "Audio | None" = None
+    document: "Document | None" = None
+    photo: tuple["PhotoSize", ...] | None = None
+    sticker: "Sticker | None" = None
+    story: "Story | None" = None
+    video: "Video | None" = None
+    video_note: "VideoNote | None" = None
+    voice: "Voice | None" = None
+    has_media_spoiler: bool | None = None
+    contact: "Contact | None" = None
+    dice: "Dice | None" = None
+    game: "Game | None" = None
+    giveaway_created: "GiveawayCreated | None" = None
+    giveaway: "Giveaway | None" = None
+    giveaway_winners: "GiveawayWinners | None" = None
+    invoice: "Invoice | None" = None
+    location: "Location | None" = None
+    poll: "Poll | None" = None
+    venue: "Venue | None" = None
+
+
+class ReplyParameters(API, frozen=True):
+    message_id: int
+    chat_id: int | str | None = None
+    allow_sending_without_reply: bool | None = None
+    quote: str | None = None
+    quote_parse_mode: str | None = None
+    quote_entities: tuple["MessageEntity", ...] | None = None
+    quote_position: int | None = None
+
+
+class MessageOriginBase(
+    API,
+    frozen=True,
+    tag_field="type",
+):
+    date: int
+
+
+class MessageOriginUser(
+    MessageOriginBase,
+    frozen=True,
+    tag="user",
+):
+    sender_user: User
+
+
+class MessageOriginHiddenUser(
+    MessageOriginBase,
+    frozen=True,
+    tag="hidden_user",
+):
+    sender_user_name: str
+
+
+class MessageOriginChat(
+    MessageOriginBase,
+    frozen=True,
+    tag="chat",
+):
+    sender_user_name: str
+    sender_chat: Chat
+    author_signature: str
+
+
+class MessageOriginChannel(
+    MessageOriginBase,
+    frozen=True,
+    tag="channel",
+):
+    chat: Chat
+    message_id: int
+    author_signature: str
+
+
+MessageOrigin = Union[
+    MessageOriginUser,
+    MessageOriginHiddenUser,
+    MessageOriginChat,
+    MessageOriginChannel,
+]
 
 
 class PhotoSize(API, frozen=True):
@@ -552,6 +686,41 @@ class VideoChatParticipantsInvited(API, frozen=True):
     users: tuple[User, ...] | None = None
 
 
+class GiveawayCreated(API, frozen=True):
+    pass
+
+
+class Giveaway(API, frozen=True):
+    chats: tuple[Chat, ...]
+    winners_selection_date: int
+    winner_count: int
+    only_new_members: bool | None = None
+    has_public_winners: bool | None = None
+    prize_description: str | None = None
+    country_codes: tuple[str, ...] | None = None
+    premium_subscription_month_count: int | None = None
+
+
+class GiveawayWinners(API, frozen=True):
+    chat: Chat
+    giveaway_message_id: int
+    winners_selection_date: int
+    winner_count: int
+    winners: tuple[User, ...]
+    additional_chat_count: int | None = None
+    premium_subscription_month_count: int | None = None
+    unclaimed_prize_count: int | None = None
+    only_new_members: bool | None = None
+    was_refunded: bool | None = None
+    prize_description: str | None = None
+
+
+class GiveawayCompleted(API, frozen=True):
+    winner_count: int
+    unclaimed_prize_count: int | None = None
+    giveaway_message: Message | None = None
+
+
 class ProximityAlertTriggered(API, frozen=True):
     traveler: User
     watcher: User
@@ -588,6 +757,11 @@ class GeneralForumTopicHidden(API, frozen=True):
 
 class GeneralForumTopicUnhidden(API, frozen=True):
     pass
+
+
+class UsersShared(API, frozen=True):
+    request_id: int
+    user_ids: tuple[int, ...]
 
 
 class UserShared(API, frozen=True):
@@ -638,6 +812,14 @@ class Poll(API, frozen=True):
     close_date: int | None = None
 
 
+class LinkPreviewOptions(API, frozen=True):
+    is_disabled: bool | None = None
+    url: str | None = None
+    prefer_small_media: bool | None = None
+    prefer_large_media: bool | None = None
+    show_above_text: bool | None = None
+
+
 class UserProfilePhotos(API, frozen=True):
     total_count: int
     photos: tuple[tuple[PhotoSize, ...], ...]
@@ -654,14 +836,6 @@ class WebAppInfo(API, frozen=True):
     url: str
 
 
-ReplyMarkup = Union[
-    "InlineKeyboardMarkup",
-    "ReplyKeyboardMarkup",
-    "ReplyKeyboardRemove",
-    "ForceReply",
-]
-
-
 class ReplyKeyboardMarkup(API, frozen=True):
     keyboard: Sequence[Sequence["KeyboardButton"]]
     is_persistent: bool | None = None
@@ -673,7 +847,7 @@ class ReplyKeyboardMarkup(API, frozen=True):
 
 class KeyboardButton(API, frozen=True):
     text: str
-    request_user: "KeyboardButtonRequestUser | None" = None
+    request_users: "KeyboardButtonRequestUsers | None" = None
     request_chat: "KeyboardButtonRequestChat | None" = None
     request_contact: bool | None = None
     request_location: bool | None = None
@@ -681,10 +855,11 @@ class KeyboardButton(API, frozen=True):
     web_app: WebAppInfo | None = None
 
 
-class KeyboardButtonRequestUser(API, frozen=True):
+class KeyboardButtonRequestUsers(API, frozen=True):
     request_id: int
     user_is_bot: bool | None = None
     user_is_premium: bool | None = None
+    max_quantity: int | None = None
 
 
 class KeyboardButtonRequestChat(API, frozen=True):
@@ -739,12 +914,12 @@ class LoginUrl(API, frozen=True):
     request_write_access: bool | None = None
 
 
-class CallbackQuery(API, frozen=True):
+class CallbackQuery(API, frozen=True, kw_only=True):
     id: str
     from_: User = field(name="from")
-    chat_instance: str
     message: Message | None = None
     inline_message_id: str | None = None
+    chat_instance: str
     data: str | None = None
     game_short_name: str | None = None
 
@@ -757,6 +932,14 @@ class ForceReply(
 ):
     input_field_placeholder: str | None = None
     selective: bool | None = None
+
+
+ReplyMarkup = Union[
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+    ForceReply,
+]
 
 
 class ChatPhoto(API, frozen=True):
@@ -935,6 +1118,58 @@ class ChatLocation(API, frozen=True):
     address: str
 
 
+class ReactionTypeBase(
+    API,
+    frozen=True,
+    tag_field="type",
+):
+    pass
+
+
+class ReactionTypeEmoji(
+    ReactionTypeBase,
+    frozen=True,
+    tag="emoji",
+):
+    emoji: str
+
+
+class ReactionTypeCustomEmoji(
+    ReactionTypeBase,
+    frozen=True,
+    tag="custom_emoji",
+):
+    custom_emoji: str
+
+
+ReactionType = Union[
+    ReactionTypeEmoji,
+    ReactionTypeCustomEmoji,
+]
+
+
+class ReactionCount(API, frozen=True):
+    type: ReactionType
+    total_count: int
+
+
+class MessageReactionUpdated(API, frozen=True):
+    chat: Chat
+    message_id: int
+    user: User
+    actor_chat: Chat
+    date: int
+    old_reaction: tuple[ReactionType, ...]
+    new_reaction: tuple[ReactionType, ...]
+
+
+class MessageReactionCountUpdated(API, frozen=True):
+    chat: Chat
+    message_id: int
+    date: int
+    reactions: tuple[ReactionCount, ...]
+
+
 class ForumTopic(API, frozen=True):
     message_thread_id: int
     name: str
@@ -1028,6 +1263,70 @@ class MenuButton(API, frozen=True):
     type: str
     text: str | None
     web_app: WebAppInfo | None
+
+
+class ChatBoostSourceBase(
+    API,
+    frozen=True,
+    tag_field="source",
+):
+    pass
+
+
+class ChatBoostSourcePremium(
+    ChatBoostSourceBase,
+    frozen=True,
+    tag="premium",
+):
+    user: User
+
+
+class ChatBoostSourceGiftCode(
+    ChatBoostSourceBase,
+    frozen=True,
+    tag="gift_code",
+):
+    user: User
+
+
+class ChatBoostSourceGiveaway(
+    ChatBoostSourceBase,
+    frozen=True,
+    tag="giveaway",
+):
+    giveaway_message_id: int
+    user: User | None = None
+    is_unclaimed: bool | None = None
+
+
+ChatBoostSource = Union[
+    ChatBoostSourcePremium,
+    ChatBoostSourceGiftCode,
+    ChatBoostSourceGiveaway,
+]
+
+
+class ChatBoost(API, frozen=True):
+    boost_id: str
+    add_date: int
+    expiration_date: int
+    source: ChatBoostSource
+
+
+class ChatBoostUpdated(API, frozen=True):
+    chat: Chat
+    boost: ChatBoost
+
+
+class ChatBoostRemoved(API, frozen=True):
+    chat: Chat
+    boost_id: str
+    remove_date: int
+    source: ChatBoostSource
+
+
+class UserChatBoosts(API, frozen=True):
+    boosts: tuple[ChatBoost, ...]
 
 
 class InputMedia(
@@ -1475,19 +1774,11 @@ class InlineQueryResultCachedAudio(
     input_message_content: "InputMessageContent | None" = None
 
 
-InputMessageContent = Union[
-    "InputTextMessageContent",
-    "InputLocationMessageContent",
-    "InputVenueMessageContent",
-    "InputContactMessageContent",
-]
-
-
 class InputTextMessageContent(API, frozen=True):
     message_text: str
     parse_mode: ParseMode | None = None
     entities: Sequence[MessageEntity] | None = None
-    disable_web_page_preview: bool | None = None
+    link_preview_options: LinkPreviewOptions | None = None
 
 
 class InputLocationMessageContent(API, frozen=True):
@@ -1538,6 +1829,14 @@ class InputInvoiceMessageContent:
     send_phone_number_to_provider: bool | None = None
     send_email_to_provider: bool | None = None
     is_flexible: bool | None = None
+
+
+InputMessageContent = Union[
+    InputTextMessageContent,
+    InputLocationMessageContent,
+    InputVenueMessageContent,
+    InputContactMessageContent,
+]
 
 
 class ChosenInlineResult(API, frozen=True):
