@@ -37,7 +37,7 @@ Requirements
 * Python >= 3.8
 * `aiohttp <https://github.com/aio-libs/aiohttp>`_
 * `aiojobs <https://github.com/aio-libs/aiojobs>`_
-* `attrs <https://github.com/python-attrs/attrs>`_
+* `msgspec <https://github.com/jcrist/msgspec>`_
 * `backoff <https://github.com/litl/backoff>`_
 * `frozenlist <https://github.com/aio-libs/frozenlist>`_
 * `aiofreqlimit <https://github.com/gleb-chipiga/aiofreqlimit>`_
