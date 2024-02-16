@@ -366,12 +366,14 @@ class Chat(API, frozen=True, kw_only=True):
     pinned_message: "Message | None" = None
     permissions: "ChatPermissions | None" = None
     slow_mode_delay: int | None = None
+    unrestrict_boost_count: int | None = None
     has_aggressive_anti_spam_enabled: bool | None = None
     has_hidden_members: bool | None = None
     has_protected_content: bool | None = None
     has_visible_history: bool | None = None
     sticker_set_name: str | None = None
     can_set_sticker_set: bool | None = None
+    custom_emoji_sticker_set_name: str | None = None
     linked_chat_id: int | None = None
     location: "ChatLocation | None" = None
 
@@ -381,6 +383,7 @@ class Message(API, frozen=True, kw_only=True):
     message_thread_id: int | None = None
     from_: User | None = field(default=None, name="from")
     sender_chat: Chat | None = None
+    sender_boost_count: int | None = None
     date: int
     chat: Chat
     forward_origin: "MessageOrigin | None" = None
@@ -389,6 +392,7 @@ class Message(API, frozen=True, kw_only=True):
     reply_to_message: "Message | None" = None
     external_reply: "ExternalReplyInfo | None" = None
     quote: "TextQuote | None" = None
+    reply_to_story: "Story | None" = None
     via_bot: User | None = None
     edit_date: int | None = None
     has_protected_content: bool | None = None
@@ -602,7 +606,8 @@ class Document(API, frozen=True, kw_only=True):
 
 
 class Story(API, frozen=True):
-    pass
+    chat: Chat
+    id: int
 
 
 class Video(API, frozen=True, kw_only=True):
@@ -735,6 +740,10 @@ class ProximityAlertTriggered(API, frozen=True, kw_only=True):
 
 class MessageAutoDeleteTimerChanged(API, frozen=True, kw_only=True):
     message_auto_delete_time: int
+
+
+class ChatBoostAdded(API, frozen=True, kw_only=True):
+    boost_count: int
 
 
 class ForumTopicCreated(API, frozen=True, kw_only=True):
