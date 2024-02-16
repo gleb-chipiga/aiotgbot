@@ -36,9 +36,9 @@ def get_software() -> str:
 
 class KeyLock:
     def __init__(self) -> None:
-        self._locks: (
-            "Final[WeakValueDictionary[Hashable," "asyncio.Lock]]"
-        ) = WeakValueDictionary()
+        self._locks: "Final[WeakValueDictionary[Hashable," "asyncio.Lock]]" = (
+            WeakValueDictionary()
+        )
 
     @asynccontextmanager
     async def resource(self, key: Hashable) -> AsyncIterator[None]:

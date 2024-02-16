@@ -29,8 +29,7 @@ from aiotgbot.storage_memory import MemoryStorage
 
 @pytest.fixture
 def handler() -> HandlerCallable:
-    async def _handler(_: Bot, __: BotUpdate) -> None:
-        ...
+    async def _handler(_: Bot, __: BotUpdate) -> None: ...
 
     return _handler
 

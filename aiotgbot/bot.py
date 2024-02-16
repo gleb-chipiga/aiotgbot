@@ -109,23 +109,19 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         self._data: Final[dict[BotKey[Any] | str, object]] = {}
 
     @overload  # type: ignore[override]
-    def __getitem__(self, key: BotKey[T]) -> T:
-        ...
+    def __getitem__(self, key: BotKey[T]) -> T: ...
 
     @overload
-    def __getitem__(self, key: str) -> Any:
-        ...
+    def __getitem__(self, key: str) -> Any: ...
 
     def __getitem__(self, key: str | BotKey[T]) -> Any:
         return self._data[key]
 
     @overload  # type: ignore[override]
-    def __setitem__(self, key: BotKey[T], value: T) -> None:
-        ...
+    def __setitem__(self, key: BotKey[T], value: T) -> None: ...
 
     @overload
-    def __setitem__(self, key: str, value: Any) -> None:
-        ...
+    def __setitem__(self, key: str, value: Any) -> None: ...
 
     def __setitem__(self, key: str | BotKey[T], value: Any) -> None:
         self._data[key] = value
@@ -410,12 +406,10 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         await self._group_limit.clear()
 
     @abstractmethod
-    async def start(self) -> None:
-        ...
+    async def start(self) -> None: ...
 
     @abstractmethod
-    async def stop(self) -> None:
-        ...
+    async def stop(self) -> None: ...
 
 
 class PollBot(Bot):
@@ -510,23 +504,19 @@ class Handler:
 
 @runtime_checkable
 class HandlerTableProtocol(Protocol):
-    def freeze(self) -> None:
-        ...
+    def freeze(self) -> None: ...
 
     @property
     @abstractmethod
-    def frozen(self) -> bool:
-        ...
+    def frozen(self) -> bool: ...
 
     @abstractmethod
     async def get_handler(
         self, bot: Bot, update: BotUpdate
-    ) -> HandlerCallable | None:
-        ...
+    ) -> HandlerCallable | None: ...
 
 
 @runtime_checkable
 class FilterProtocol(Protocol):
     @abstractmethod
-    async def check(self, bot: Bot, update: BotUpdate) -> bool:
-        ...
+    async def check(self, bot: Bot, update: BotUpdate) -> bool: ...

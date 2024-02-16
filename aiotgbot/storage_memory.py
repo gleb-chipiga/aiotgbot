@@ -10,11 +10,9 @@ class MemoryStorage(StorageProtocol):
     def __init__(self) -> None:
         self._data: Final[dict[str, Any]] = {}
 
-    async def connect(self) -> None:
-        ...
+    async def connect(self) -> None: ...
 
-    async def close(self) -> None:
-        ...
+    async def close(self) -> None: ...
 
     async def set(self, key: str, value: Json = None) -> None:
         self._data[key] = value

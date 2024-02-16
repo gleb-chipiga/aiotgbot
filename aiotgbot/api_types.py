@@ -210,8 +210,7 @@ class DataMappingError(BaseException):
 class InputFile(Protocol):
     @property
     @abstractmethod
-    def name(self) -> str:
-        ...
+    def name(self) -> str: ...
 
     @property
     @abstractmethod
@@ -220,8 +219,7 @@ class InputFile(Protocol):
 
     @property
     @abstractmethod
-    def content(self) -> AsyncIterator[bytes]:
-        ...
+    def content(self) -> AsyncIterator[bytes]: ...
 
 
 @dataclass(frozen=True, kw_only=True)

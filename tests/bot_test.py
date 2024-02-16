@@ -61,8 +61,7 @@ async def test_bot_storage(_bot: Bot) -> None:
 
 @pytest.mark.asyncio
 async def test_handler_check() -> None:
-    async def func1(_: Bot, __: BotUpdate) -> None:
-        ...
+    async def func1(_: Bot, __: BotUpdate) -> None: ...
 
     handler = Handler(
         func1,

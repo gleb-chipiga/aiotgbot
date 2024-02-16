@@ -89,8 +89,7 @@ class ApiMethods(ABC):
         api_method: str,
         type_: Type[T],
         **params: ParamType,
-    ) -> T:
-        ...
+    ) -> T: ...
 
     @abstractmethod
     async def _safe_request(
@@ -100,8 +99,7 @@ class ApiMethods(ABC):
         chat_id: int | str,
         type_: Type[T],
         **params: ParamType,
-    ) -> T:
-        ...
+    ) -> T: ...
 
     async def get_updates(
         self,
