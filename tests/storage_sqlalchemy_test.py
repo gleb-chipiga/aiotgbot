@@ -1,18 +1,20 @@
 import pytest
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from aiotgbot import StorageProtocol
 from aiotgbot.storage_sqlalchemy import SqlalchemyStorage
 
 
 def test_storage_protocol() -> None:
-    storage: StorageProtocol = SqlalchemyStorage("sqlite+aiosqlite://")
+    engine = create_async_engine("sqlite+aiosqlite://")
+    storage: StorageProtocol = SqlalchemyStorage(engine)
     assert isinstance(storage, StorageProtocol)
 
 
 @pytest.mark.asyncio
 async def test_sqlalchemy_storage() -> None:
-    storage: StorageProtocol = SqlalchemyStorage("sqlite+aiosqlite://")
+    engine = create_async_engine("sqlite+aiosqlite://")
+    storage: StorageProtocol = SqlalchemyStorage(engine)
     await storage.connect()
     await storage.set("key11", "value22")
     assert await storage.get("key11") == "value22"

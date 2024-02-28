@@ -2,7 +2,7 @@ from typing import Annotated, Any, AsyncIterator, Final
 
 from sqlalchemy import JSON, Text, delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from .helpers import Json
@@ -23,8 +23,8 @@ class KV(Base):
 
 
 class SqlalchemyStorage(StorageProtocol):
-    def __init__(self, url: str) -> None:
-        self._engine: Final = create_async_engine(url)
+    def __init__(self, engine: AsyncEngine) -> None:
+        self._engine: Final = engine
 
     async def connect(self) -> None:
         async with self._engine.begin() as connection:
@@ -57,7 +57,8 @@ class SqlalchemyStorage(StorageProtocol):
             await connection.execute(delete(KV).where(KV.key == key))
 
     async def iterate(
-        self, prefix: str = ""
+        self,
+        prefix: str = "",
     ) -> AsyncIterator[tuple[str, Json]]:
         async with self._engine.begin() as connection:
             result = await connection.stream(
