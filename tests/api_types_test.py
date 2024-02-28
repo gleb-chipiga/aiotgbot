@@ -2,11 +2,11 @@ from io import BytesIO
 from tempfile import TemporaryDirectory
 from typing import Any, AsyncIterator
 
-import msgspec
 import pytest
 from more_itertools import ichunked
 
 from aiotgbot.api_types import (
+    API,
     InputFile,
     InputMedia,
     InputMediaAnimation,
@@ -17,6 +17,24 @@ from aiotgbot.api_types import (
     LocalFile,
     StreamFile,
 )
+
+
+def test_to_builtins() -> None:
+    class XYZ(API, frozen=True, kw_only=True):
+        a: int
+        b: str
+
+    xyz = XYZ(a=1, b="2")
+
+    assert xyz.to_builtins() == {"a": 1, "b": "2"}
+
+
+def test_convert() -> None:
+    class XYZ(API, frozen=True, kw_only=True):
+        a: int
+        b: str
+
+    assert XYZ.convert({"a": 1, "b": "2"}) == XYZ(a=1, b="2")
 
 
 @pytest.mark.skip("need refactoring")
@@ -37,7 +55,7 @@ def test_input_media_serialization(type_: Any) -> None:
         TypeError,
         match="Encoding objects of type _io.BytesIO is unsupported",
     ):
-        msgspec.to_builtins(input_media)
+        input_media.to_builtins()
 
 
 async def check_input_file(

@@ -5,15 +5,18 @@ from enum import StrEnum, unique
 from io import BufferedReader
 from pathlib import Path
 from typing import (
+    Any,
     AsyncIterator,
     Final,
     Protocol,
+    Self,
     Sequence,
     Union,
     cast,
     runtime_checkable,
 )
 
+import msgspec
 from msgspec import UNSET, Raw, Struct, UnsetType, field
 
 from .constants import ParseMode, PollType
@@ -278,6 +281,13 @@ class LocalFile:
 
 class API(Struct, frozen=True, omit_defaults=True):
     pass
+
+    def to_builtins(self) -> Any:
+        return msgspec.to_builtins(self)
+
+    @classmethod
+    def convert(cls, obj: Any) -> Self:
+        return msgspec.convert(obj, cls)
 
 
 class ResponseParameters(API, frozen=True, kw_only=True):
