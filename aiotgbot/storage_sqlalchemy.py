@@ -31,7 +31,7 @@ class SqlalchemyStorage(StorageProtocol):
             await connection.run_sync(Base.metadata.create_all)
 
     async def close(self) -> None:
-        await self._engine.dispose()
+        pass
 
     async def set(self, key: str, value: Json = None) -> None:
         async with self._engine.begin() as connection:
