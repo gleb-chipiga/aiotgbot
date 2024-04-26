@@ -2,6 +2,7 @@ __all__ = (
     "BadGateway",
     "BotBlocked",
     "BotKicked",
+    "ChatNotFound",
     "MigrateToChat",
     "RestartingTelegram",
     "RetryAfter",
@@ -56,3 +57,7 @@ class BotBlocked(TelegramError):
 
 class BotKicked(TelegramError):
     pattern = "bot was kicked from a chat"
+
+
+class ChatNotFound(TelegramError):
+    pattern = "chat not found"
