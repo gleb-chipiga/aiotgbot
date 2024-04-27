@@ -32,6 +32,7 @@ from .exceptions import (
     BadGateway,
     BotBlocked,
     BotKicked,
+    ChatNotFound,
     MigrateToChat,
     RestartingTelegram,
     RetryAfter,
@@ -192,6 +193,8 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
             return BadGateway(error_code, description)
         elif BotBlocked.match(description):
             return BotBlocked(error_code, description)
+        elif ChatNotFound.match(description):
+            return ChatNotFound(error_code, description)
         elif BotKicked.match(description):
             return BotKicked(error_code, description)
         else:
