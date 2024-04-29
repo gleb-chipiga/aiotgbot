@@ -201,6 +201,7 @@ __all__ = (
     "VideoMimeType",
     "VideoNote",
     "Voice",
+    "WebAppInfo",
     "WebhookInfo",
 )
 
