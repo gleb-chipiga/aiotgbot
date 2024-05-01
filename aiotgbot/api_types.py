@@ -8,6 +8,7 @@ from typing import (
     Any,
     AsyncIterator,
     Final,
+    NewType,
     Protocol,
     Self,
     Sequence,
@@ -18,6 +19,7 @@ from typing import (
 
 import msgspec
 from msgspec import UNSET, Raw, Struct, UnsetType, field
+from yarl import URL
 
 from .constants import ParseMode, PollType
 
@@ -49,6 +51,7 @@ __all__ = (
     "ChatBoostSourceGiveaway",
     "ChatBoostSourcePremium",
     "ChatBoostUpdated",
+    "ChatId",
     "ChatInviteLink",
     "ChatLocation",
     "ChatMember",
@@ -73,6 +76,7 @@ __all__ = (
     "EncryptedPassportElement",
     "ExternalReplyInfo",
     "File",
+    "FileId",
     "ForceReply",
     "ForumTopic",
     "ForumTopicClosed",
@@ -145,6 +149,7 @@ __all__ = (
     "MessageOriginUser",
     "MessageReactionCountUpdated",
     "MessageReactionUpdated",
+    "MessageThreadId",
     "OrderInfo",
     "PassportData",
     "PassportElementDataType",
@@ -179,6 +184,7 @@ __all__ = (
     "ReplyKeyboardRemove",
     "ReplyMarkup",
     "ReplyParameters",
+    "ResponseMessageId",
     "ResponseParameters",
     "SentWebAppMessage",
     "ShippingAddress",
@@ -191,9 +197,11 @@ __all__ = (
     "SwitchInlineQueryChosenChat",
     "TextQuote",
     "ThumbnailMimeType",
+    "URLString",
     "Update",
     "User",
     "UserChatBoosts",
+    "UserId",
     "UserProfilePhotos",
     "UsersShared",
     "Venue",
@@ -292,7 +300,7 @@ class API(Struct, frozen=True, omit_defaults=True):
 
 
 class ResponseParameters(API, frozen=True, kw_only=True):
-    migrate_to_chat_id: int | None = None
+    migrate_to_chat_id: "ChatId | None" = None
     retry_after: int | None = None
 
 
@@ -336,8 +344,11 @@ class WebhookInfo(API, frozen=True, kw_only=True):
     allowed_updates: tuple[str, ...] | None = None
 
 
+UserId = NewType("UserId", int)
+
+
 class User(API, frozen=True, kw_only=True):
-    id: int
+    id: UserId
     is_bot: bool
     first_name: str
     last_name: str | None = None
@@ -350,8 +361,11 @@ class User(API, frozen=True, kw_only=True):
     supports_inline_queries: bool | None = None
 
 
+ChatId = NewType("ChatId", int)
+
+
 class Chat(API, frozen=True, kw_only=True):
-    id: int
+    id: ChatId
     type: str
     title: str | None = None
     username: str | None = None
@@ -385,13 +399,17 @@ class Chat(API, frozen=True, kw_only=True):
     sticker_set_name: str | None = None
     can_set_sticker_set: bool | None = None
     custom_emoji_sticker_set_name: str | None = None
-    linked_chat_id: int | None = None
+    linked_chat_id: ChatId | None = None
     location: "ChatLocation | None" = None
 
 
+MessageId = NewType("MessageId", int)
+MessageThreadId = NewType("MessageThreadId", int)
+
+
 class Message(API, frozen=True, kw_only=True):
-    message_id: int
-    message_thread_id: int | None = None
+    message_id: MessageId
+    message_thread_id: MessageThreadId | None = None
     from_: User | None = field(default=None, name="from")
     sender_chat: Chat | None = None
     sender_boost_count: int | None = None
@@ -441,8 +459,8 @@ class Message(API, frozen=True, kw_only=True):
     message_auto_delete_timer_changed: Union[
         "MessageAutoDeleteTimerChanged", None
     ] = None
-    migrate_to_chat_id: int | None = None
-    migrate_from_chat_id: int | None = None
+    migrate_to_chat_id: ChatId | None = None
+    migrate_from_chat_id: ChatId | None = None
     pinned_message: "Message | None" = None
     invoice: "Invoice | None" = None
     successful_payment: "SuccessfulPayment | None" = None
@@ -472,8 +490,8 @@ class Message(API, frozen=True, kw_only=True):
     reply_markup: "InlineKeyboardMarkup | None" = None
 
 
-class MessageId(API, frozen=True):
-    message_id: int
+class ResponseMessageId(API, frozen=True):
+    message_id: MessageId
 
 
 class MessageEntity(API, frozen=True, kw_only=True):
@@ -496,7 +514,7 @@ class TextQuote(API, frozen=True, kw_only=True):
 class ExternalReplyInfo(API, frozen=True, kw_only=True):
     origin: "MessageOrigin"
     chat: Chat | None = None
-    message_id: int | None = None
+    message_id: MessageId | None = None
     link_preview_options: "LinkPreviewOptions | None" = None
     animation: "Animation | None" = None
     audio: "Audio | None" = None
@@ -521,8 +539,8 @@ class ExternalReplyInfo(API, frozen=True, kw_only=True):
 
 
 class ReplyParameters(API, frozen=True, kw_only=True):
-    message_id: int
-    chat_id: int | str | None = None
+    message_id: MessageId
+    chat_id: ChatId | str | None = None
     allow_sending_without_reply: bool | None = None
     quote: str | None = None
     quote_parse_mode: str | None = None
@@ -575,7 +593,7 @@ class MessageOriginChannel(
     kw_only=True,
 ):
     chat: Chat
-    message_id: int
+    message_id: MessageId
     author_signature: str
 
 
@@ -586,9 +604,11 @@ MessageOrigin = Union[
     MessageOriginChannel,
 ]
 
+FileId = NewType("FileId", str)
+
 
 class PhotoSize(API, frozen=True, kw_only=True):
-    file_id: str
+    file_id: FileId
     file_unique_id: str
     width: int
     height: int
@@ -596,7 +616,7 @@ class PhotoSize(API, frozen=True, kw_only=True):
 
 
 class Audio(API, frozen=True, kw_only=True):
-    file_id: str
+    file_id: FileId
     file_unique_id: str
     duration: int
     performer: str | None = None
@@ -608,7 +628,7 @@ class Audio(API, frozen=True, kw_only=True):
 
 
 class Document(API, frozen=True, kw_only=True):
-    file_id: str
+    file_id: FileId
     file_unique_id: str
     thumbnail: PhotoSize | None = None
     file_name: str | None = None
@@ -622,7 +642,7 @@ class Story(API, frozen=True):
 
 
 class Video(API, frozen=True, kw_only=True):
-    file_id: str
+    file_id: FileId
     file_unique_id: str
     width: int
     height: int
@@ -634,7 +654,7 @@ class Video(API, frozen=True, kw_only=True):
 
 
 class Animation(API, frozen=True, kw_only=True):
-    file_id: str
+    file_id: FileId
     file_unique_id: str
     thumbnail: PhotoSize | None = None
     file_name: str | None = None
@@ -643,7 +663,7 @@ class Animation(API, frozen=True, kw_only=True):
 
 
 class Voice(API, frozen=True, kw_only=True):
-    file_id: str
+    file_id: FileId
     file_unique_id: str
     duration: int
     mime_type: str | None = None
@@ -651,7 +671,7 @@ class Voice(API, frozen=True, kw_only=True):
 
 
 class VideoNote(API, frozen=True, kw_only=True):
-    file_id: str
+    file_id: FileId
     file_unique_id: str
     length: int
     duration: int
@@ -663,7 +683,7 @@ class Contact(API, frozen=True, kw_only=True):
     phone_number: str
     first_name: str
     last_name: str | None = None
-    user_id: int | None = None
+    user_id: UserId | None = None
     vcard: int | None = None
 
 
@@ -725,7 +745,7 @@ class Giveaway(API, frozen=True, kw_only=True):
 
 class GiveawayWinners(API, frozen=True, kw_only=True):
     chat: Chat
-    giveaway_message_id: int
+    giveaway_message_id: MessageId
     winners_selection_date: int
     winner_count: int
     winners: tuple[User, ...]
@@ -787,17 +807,17 @@ class GeneralForumTopicUnhidden(API, frozen=True, kw_only=True):
 
 class UsersShared(API, frozen=True, kw_only=True):
     request_id: int
-    user_ids: tuple[int, ...]
+    user_ids: tuple[UserId, ...]
 
 
 class UserShared(API, frozen=True, kw_only=True):
     request_id: int
-    user_id: int
+    user_id: UserId
 
 
 class ChatShared(API, frozen=True, kw_only=True):
     request_id: int
-    chat_id: int
+    chat_id: ChatId
 
 
 class WriteAccessAllowed(API, frozen=True, kw_only=True):
@@ -852,7 +872,7 @@ class UserProfilePhotos(API, frozen=True, kw_only=True):
 
 
 class File(API, frozen=True, kw_only=True):
-    file_id: str
+    file_id: FileId
     file_unique_id: str
     file_size: int | None = None
     file_path: str | None = None
@@ -969,9 +989,9 @@ ReplyMarkup = Union[
 
 
 class ChatPhoto(API, frozen=True, kw_only=True):
-    small_file_id: str
+    small_file_id: FileId
     small_file_unique_id: str
-    big_file_id: str
+    big_file_id: FileId
     big_file_unique_id: str
 
 
@@ -1123,7 +1143,7 @@ class ChatMemberUpdated(API, frozen=True, kw_only=True):
 class ChatJoinRequest(API, frozen=True, kw_only=True):
     chat: Chat
     from_: User = field(name="from")
-    user_chat_id: int
+    user_chat_id: ChatId
     date: int
     bio: str | None = None
     invite_link: ChatInviteLink | None = None
@@ -1191,7 +1211,7 @@ class ReactionCount(API, frozen=True, kw_only=True):
 
 class MessageReactionUpdated(API, frozen=True, kw_only=True):
     chat: Chat
-    message_id: int
+    message_id: MessageId
     user: User | None = None
     actor_chat: Chat | None = None
     date: int
@@ -1201,13 +1221,13 @@ class MessageReactionUpdated(API, frozen=True, kw_only=True):
 
 class MessageReactionCountUpdated(API, frozen=True, kw_only=True):
     chat: Chat
-    message_id: int
+    message_id: MessageId
     date: int
     reactions: tuple[ReactionCount, ...]
 
 
 class ForumTopic(API, frozen=True, kw_only=True):
-    message_thread_id: int
+    message_thread_id: MessageThreadId
     name: str
     icon_color: int
     icon_custom_emoji_id: str | None = None
@@ -1269,7 +1289,7 @@ class BotCommandScopeChat(
     tag="chat",
     kw_only=True,
 ):
-    chat_id: int | str
+    chat_id: ChatId | str
 
 
 class BotCommandScopeChatAdministrators(
@@ -1278,7 +1298,7 @@ class BotCommandScopeChatAdministrators(
     tag="chat_administrators",
     kw_only=True,
 ):
-    chat_id: int | str
+    chat_id: ChatId | str
 
 
 class BotCommandScopeChatMember(
@@ -1287,8 +1307,8 @@ class BotCommandScopeChatMember(
     tag="chat_member",
     kw_only=True,
 ):
-    chat_id: int | str
-    user_id: int
+    chat_id: ChatId | str
+    user_id: UserId
 
 
 class BotName(API, frozen=True, kw_only=True):
@@ -1342,7 +1362,7 @@ class ChatBoostSourceGiveaway(
     tag="giveaway",
     kw_only=True,
 ):
-    giveaway_message_id: int
+    giveaway_message_id: MessageId
     user: User | None = None
     is_unclaimed: bool | None = None
 
@@ -1377,13 +1397,17 @@ class UserChatBoosts(API, frozen=True, kw_only=True):
     boosts: tuple[ChatBoost, ...]
 
 
+Attach = NewType("Attach", str)
+URLString = NewType("URLString", str)
+
+
 class InputMedia(
     API,
     frozen=True,
     tag_field="type",
     kw_only=True,
 ):
-    media: str | InputFile
+    media: FileId | URL | URLString | InputFile | Attach
     caption: str | None = None
     parse_mode: str | None = None
     caption_entities: Sequence[MessageEntity] | None = None
@@ -1403,7 +1427,7 @@ class InputMediaWithThumbnail(
     frozen=True,
     kw_only=True,
 ):
-    thumbnail: InputFile | str | None = None
+    thumbnail: InputFile | Attach | None = None
 
 
 class InputMediaVideo(
@@ -1452,14 +1476,14 @@ class InputMediaDocument(
 
 
 class InputSticker(API, frozen=True):
-    sticker: str | InputFile
+    sticker: FileId | URL | URLString | InputFile | Attach
     emoji_list: Sequence[str]
     mask_position: "MaskPosition | None"
     keywords: Sequence[str] | None
 
 
 class Sticker(API, frozen=True):
-    file_id: str
+    file_id: FileId
     file_unique_id: str
     type: str
     width: int
@@ -1777,7 +1801,7 @@ class InlineQueryResultCachedGif(
     tag="gif",
     kw_only=True,
 ):
-    gif_file_id: str
+    gif_file_id: FileId
     title: str | None = None
     caption: str | None = None
     parse_mode: ParseMode | None = None
@@ -1792,7 +1816,7 @@ class InlineQueryResultCachedMpeg4Gif(
     tag="mpeg4_gif",
     kw_only=True,
 ):
-    mpeg4_file_id: str
+    mpeg4_file_id: FileId
     title: str | None = None
     caption: str | None = None
     parse_mode: ParseMode | None = None
@@ -1807,7 +1831,7 @@ class InlineQueryResultCachedSticker(
     tag="sticker",
     kw_only=True,
 ):
-    sticker_file_id: str
+    sticker_file_id: FileId
     reply_markup: InlineKeyboardMarkup | None = None
     input_message_content: "InputMessageContent | None" = None
 
@@ -1819,7 +1843,7 @@ class InlineQueryResultCachedDocument(
     kw_only=True,
 ):
     title: str
-    document_file_id: str
+    document_file_id: FileId
     description: str | None = None
     caption: str | None = None
     parse_mode: ParseMode | None = None
@@ -1834,7 +1858,7 @@ class InlineQueryResultCachedVideo(
     tag="video",
     kw_only=True,
 ):
-    video_file_id: str
+    video_file_id: FileId
     title: str
     description: str | None = None
     caption: str | None = None
@@ -1850,7 +1874,7 @@ class InlineQueryResultCachedVoice(
     tag="voice",
     kw_only=True,
 ):
-    voice_file_id: str
+    voice_file_id: FileId
     title: str
     caption: str | None = None
     parse_mode: ParseMode | None = None
@@ -1865,7 +1889,7 @@ class InlineQueryResultCachedAudio(
     tag="audio",
     kw_only=True,
 ):
-    audio_file_id: str
+    audio_file_id: FileId
     caption: str | None = None
     parse_mode: ParseMode | None = None
     caption_entities: Sequence[MessageEntity] | None = None
@@ -2018,7 +2042,7 @@ class PassportData(API, frozen=True, kw_only=True):
 
 
 class PassportFile(API, frozen=True, kw_only=True):
-    file_id: str
+    file_id: FileId
     file_unique_id: str
     file_date: int
     file_size: int | None = None

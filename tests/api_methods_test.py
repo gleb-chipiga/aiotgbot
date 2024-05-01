@@ -8,13 +8,17 @@ import pytest_asyncio
 
 from aiotgbot.api_methods import ApiMethods, ParamType
 from aiotgbot.api_types import (
+    Attach,
     BotCommand,
     BotCommandScopeChat,
     Chat,
+    ChatId,
     File,
+    FileId,
     InputMediaPhoto,
     KeyboardButton,
     Message,
+    MessageId,
     ReplyKeyboardMarkup,
     StreamFile,
     Update,
@@ -135,7 +139,7 @@ async def test_api_methods_send_message(
 
     assert (
         await _bot.send_message(
-            chat_id=1,
+            chat_id=ChatId(1),
             text="Hello!",
             message_thread_id=None,
             parse_mode=ParseMode.HTML,
@@ -169,8 +173,8 @@ async def test_api_methods_send_photo(
     _bot.safe_request_mock.return_value = message
     assert (
         await _bot.send_photo(
-            chat_id=1,
-            photo="some photo",
+            chat_id=ChatId(1),
+            photo=FileId("some photo"),
             message_thread_id=None,
             parse_mode=ParseMode.HTML,
             reply_markup=reply_kb,
@@ -203,7 +207,11 @@ async def test_api_methods_forward_message(
     message = make_message(text="Hello!")
     _bot.safe_request_mock.return_value = message
     assert (
-        await _bot.forward_message(chat_id=1, from_chat_id=2, message_id=9)
+        await _bot.forward_message(
+            chat_id=ChatId(1),
+            from_chat_id=ChatId(2),
+            message_id=MessageId(9),
+        )
         == message
     )
     assert _bot.safe_request_mock.call_args_list == [
@@ -223,7 +231,9 @@ async def test_api_methods_forward_message(
 @pytest.mark.asyncio
 async def test_api_methods_send_chat_action(_bot: Bot) -> None:
     _bot.safe_request_mock.return_value = True
-    assert await _bot.send_chat_action(chat_id=1, action=ChatAction.TYPING)
+    assert await _bot.send_chat_action(
+        chat_id=ChatId(1), action=ChatAction.TYPING
+    )
     assert _bot.safe_request_mock.call_args_list == [
         call(
             RequestMethod.POST,
@@ -256,7 +266,7 @@ async def test_api_methods_get_file(_bot: Bot) -> None:
 @pytest.mark.asyncio
 async def test_api_methods_leave_chat(_bot: Bot) -> None:
     _bot.request_mock.return_value = True
-    assert await _bot.leave_chat(chat_id=1)
+    assert await _bot.leave_chat(chat_id=ChatId(1))
     assert _bot.request_mock.call_args_list == [
         call(RequestMethod.POST, "leaveChat", chat_id=1)
     ]
@@ -266,7 +276,7 @@ async def test_api_methods_leave_chat(_bot: Bot) -> None:
 async def test_api_methods_get_chat(_bot: Bot) -> None:
     chat = msgspec.convert({"id": 1, "type": "private"}, Chat)
     _bot.request_mock.return_value = chat
-    assert await _bot.get_chat(chat_id=1)
+    assert await _bot.get_chat(chat_id=ChatId(1))
     assert _bot.request_mock.call_args_list == [
         call(RequestMethod.GET, "getChat", chat_id=1)
     ]
@@ -297,7 +307,9 @@ async def test_api_methods_edit_message_text(
 ) -> None:
     message = make_message(text="text2")
     _bot.request_mock.return_value = message
-    assert await _bot.edit_message_text(text="text2", chat_id=1, message_id=1)
+    assert await _bot.edit_message_text(
+        text="text2", chat_id=ChatId(1), message_id=MessageId(1)
+    )
     assert _bot.request_mock.call_args_list == [
         call(
             RequestMethod.POST,
@@ -327,7 +339,7 @@ async def test_send_media_group(_bot: Bot, make_message: _MakeMessage) -> None:
     )
 
     await _bot.send_media_group(
-        1,
+        ChatId(1),
         media=(
             InputMediaPhoto(media=file0, caption="f1"),
             InputMediaPhoto(media=file1, caption="f2"),
@@ -343,13 +355,13 @@ async def test_send_media_group(_bot: Bot, make_message: _MakeMessage) -> None:
             media=msgspec.json.encode(
                 [
                     InputMediaPhoto(
-                        media="attach://attachment0", caption="f1"
+                        media=Attach("attach://attachment0"), caption="f1"
                     ),
                     InputMediaPhoto(
-                        media="attach://attachment1", caption="f2"
+                        media=Attach("attach://attachment1"), caption="f2"
                     ),
                     InputMediaPhoto(
-                        media="attach://attachment2", caption="f3"
+                        media=Attach("attach://attachment2"), caption="f3"
                     ),
                 ]
             ).decode(),
@@ -372,8 +384,8 @@ async def test_edit_message_media(
     _bot.request_mock.return_value = make_message()
     await _bot.edit_message_media(
         media=InputMediaPhoto(media=file, caption="f1"),
-        chat_id=1,
-        message_id=1,
+        chat_id=ChatId(1),
+        message_id=MessageId(1),
     )
     assert _bot.request_mock.call_args_list == [
         call(
@@ -383,7 +395,10 @@ async def test_edit_message_media(
             message_id=1,
             inline_message_id=None,
             media=msgspec.json.encode(
-                InputMediaPhoto(media="attach://attachment0", caption="f1")
+                InputMediaPhoto(
+                    media=Attach("attach://attachment0"),
+                    caption="f1",
+                )
             ).decode(),
             reply_markup=None,
             attachment0=file,
@@ -399,7 +414,9 @@ async def test_get_my_commands(_bot: Bot, make_message: _MakeMessage) -> None:
     )
     _bot.request_mock.return_value = commands
     assert (
-        await _bot.get_my_commands(BotCommandScopeChat(chat_id=123), "ru")
+        await _bot.get_my_commands(
+            BotCommandScopeChat(chat_id=ChatId(123)), "ru"
+        )
         == commands
     )
     assert _bot.request_mock.call_args_list == [

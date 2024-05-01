@@ -4,8 +4,10 @@ from itertools import count
 from typing import Any, Final, Iterable, Sequence, Type, TypeVar
 
 import msgspec
+from yarl import URL
 
 from .api_types import (
+    Attach,
     BotCommand,
     BotCommandScope,
     BotDescription,
@@ -13,10 +15,12 @@ from .api_types import (
     BotShortDescription,
     Chat,
     ChatAdministratorRights,
+    ChatId,
     ChatInviteLink,
     ChatMember,
     ChatPermissions,
     File,
+    FileId,
     ForumTopic,
     GameHighScore,
     InlineKeyboardMarkup,
@@ -24,6 +28,10 @@ from .api_types import (
     InlineQueryResultsButton,
     InputFile,
     InputMedia,
+    InputMediaAudio,
+    InputMediaDocument,
+    InputMediaPhoto,
+    InputMediaVideo,
     InputMediaWithThumbnail,
     InputSticker,
     LabeledPrice,
@@ -33,6 +41,7 @@ from .api_types import (
     Message,
     MessageEntity,
     MessageId,
+    MessageThreadId,
     PassportElementError,
     Poll,
     ReactionType,
@@ -43,8 +52,10 @@ from .api_types import (
     Sticker,
     StickerSet,
     Update,
+    URLString,
     User,
     UserChatBoosts,
+    UserId,
     UserProfilePhotos,
     WebhookInfo,
 )
@@ -96,7 +107,7 @@ class ApiMethods(ABC):
         self,
         http_method: RequestMethod,
         api_method: str,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         type_: Type[T],
         **params: ParamType,
     ) -> T: ...
@@ -204,9 +215,9 @@ class ApiMethods(ABC):
 
     async def send_message(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         text: str,
-        message_thread_id: int | None = None,
+        message_thread_id: MessageThreadId | None = None,
         parse_mode: ParseMode | None = None,
         entities: Sequence[MessageEntity] | None = None,
         link_preview_options: LinkPreviewOptions | None = None,
@@ -238,10 +249,10 @@ class ApiMethods(ABC):
 
     async def forward_message(
         self,
-        chat_id: int | str,
-        from_chat_id: int | str,
-        message_id: int,
-        message_thread_id: int | None = None,
+        chat_id: ChatId | str,
+        from_chat_id: ChatId | str,
+        message_id: MessageId,
+        message_thread_id: MessageThreadId | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
     ) -> Message:
@@ -265,10 +276,10 @@ class ApiMethods(ABC):
 
     async def forward_messages(
         self,
-        chat_id: int | str,
-        from_chat_id: int | str,
-        message_ids: Sequence[int],
-        message_thread_id: int | None = None,
+        chat_id: ChatId | str,
+        from_chat_id: ChatId | str,
+        message_ids: Sequence[MessageId],
+        message_thread_id: MessageThreadId | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
     ) -> Message:
@@ -291,10 +302,10 @@ class ApiMethods(ABC):
 
     async def copy_message(
         self,
-        chat_id: int | str,
-        from_chat_id: int | str,
-        message_id: int,
-        message_thread_id: int | None = None,
+        chat_id: ChatId | str,
+        from_chat_id: ChatId | str,
+        message_id: MessageId,
+        message_thread_id: MessageThreadId | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -328,10 +339,10 @@ class ApiMethods(ABC):
 
     async def copy_messages(
         self,
-        chat_id: int | str,
-        from_chat_id: int | str,
-        message_ids: Sequence[int],
-        message_thread_id: int | None = None,
+        chat_id: ChatId | str,
+        from_chat_id: ChatId | str,
+        message_ids: Sequence[MessageId],
+        message_thread_id: MessageThreadId | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         remove_caption: bool | None = None,
@@ -356,9 +367,9 @@ class ApiMethods(ABC):
 
     async def send_photo(
         self,
-        chat_id: int | str,
-        photo: InputFile | str,
-        message_thread_id: int | None = None,
+        chat_id: ChatId | str,
+        photo: InputFile | FileId,
+        message_thread_id: MessageThreadId | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -391,9 +402,9 @@ class ApiMethods(ABC):
 
     async def send_audio(
         self,
-        chat_id: int | str,
-        audio: InputFile | str,
-        message_thread_id: int | None = None,
+        chat_id: ChatId | str,
+        audio: InputFile | FileId,
+        message_thread_id: MessageThreadId | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -402,7 +413,7 @@ class ApiMethods(ABC):
         duration: int | None = None,
         performer: str | None = None,
         title: str | None = None,
-        thumbnail: InputFile | str | None = None,
+        thumbnail: InputFile | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -432,10 +443,10 @@ class ApiMethods(ABC):
 
     async def send_document(
         self,
-        chat_id: int | str,
-        document: InputFile | str,
-        message_thread_id: int | None = None,
-        thumbnail: InputFile | str | None = None,
+        chat_id: ChatId | str,
+        document: InputFile | FileId,
+        message_thread_id: MessageThreadId | None = None,
+        thumbnail: InputFile | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -475,13 +486,13 @@ class ApiMethods(ABC):
 
     async def send_video(
         self,
-        chat_id: int | str,
-        video: InputFile | str,
-        message_thread_id: int | None = None,
+        chat_id: ChatId | str,
+        video: InputFile | FileId,
+        message_thread_id: MessageThreadId | None = None,
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
-        thumbnail: InputFile | str | None = None,
+        thumbnail: InputFile | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -520,13 +531,13 @@ class ApiMethods(ABC):
 
     async def send_animation(
         self,
-        chat_id: int | str,
-        animation: InputFile | str,
-        message_thread_id: int | None = None,
+        chat_id: ChatId | str,
+        animation: InputFile | FileId,
+        message_thread_id: MessageThreadId | None = None,
         duration: int | None = None,
         width: int | None = None,
         height: int | None = None,
-        thumbnail: InputFile | str | None = None,
+        thumbnail: InputFile | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -563,9 +574,9 @@ class ApiMethods(ABC):
 
     async def send_voice(
         self,
-        chat_id: int | str,
-        voice: InputFile | str,
-        message_thread_id: int | None = None,
+        chat_id: ChatId | str,
+        voice: InputFile | FileId,
+        message_thread_id: MessageThreadId | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
         caption_entities: Sequence[MessageEntity] | None = None,
@@ -598,12 +609,12 @@ class ApiMethods(ABC):
 
     async def send_video_note(
         self,
-        chat_id: int | str,
-        video_note: InputFile | str,
-        message_thread_id: int | None = None,
+        chat_id: ChatId | str,
+        video_note: InputFile | FileId,
+        message_thread_id: MessageThreadId | None = None,
         duration: int | None = None,
         length: int | None = None,
-        thumbnail: InputFile | str | None = None,
+        thumbnail: InputFile | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         reply_parameters: ReplyParameters | None = None,
@@ -631,9 +642,14 @@ class ApiMethods(ABC):
 
     async def send_media_group(
         self,
-        chat_id: int | str,
-        media: Iterable[InputMedia],
-        message_thread_id: int | None = None,
+        chat_id: ChatId | str,
+        media: Iterable[
+            InputMediaAudio
+            | InputMediaDocument
+            | InputMediaPhoto
+            | InputMediaVideo
+        ],
+        message_thread_id: MessageThreadId | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         reply_parameters: ReplyParameters | None = None,
@@ -650,16 +666,19 @@ class ApiMethods(ABC):
                 attachment_name = f"attachment{next(counter)}"
                 attachments[attachment_name] = item.media
                 item = msgspec.structs.replace(
-                    item, media=f"attach://{attachment_name}"
+                    item, media=Attach(f"attach://{attachment_name}")
                 )
-
+            elif isinstance(item.media, URL):
+                item = msgspec.structs.replace(
+                    item, media=URLString(str(item.media))
+                )
             if isinstance(item, InputMediaWithThumbnail) and isinstance(
                 item.thumbnail, InputFile
             ):
                 attachment_name = f"attachment{next(counter)}"
                 attachments[attachment_name] = item.thumbnail
                 item = msgspec.structs.replace(
-                    item, thumbnail=f"attach://{attachment_name}"
+                    item, thumbnail=Attach(f"attach://{attachment_name}")
                 )
             attached_media.append(item)
         return await self._safe_request(
@@ -677,10 +696,10 @@ class ApiMethods(ABC):
 
     async def send_location(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         latitude: float,
         longitude: float,
-        message_thread_id: int | None = None,
+        message_thread_id: MessageThreadId | None = None,
         horizontal_accuracy: float | None = None,
         live_period: int | None = None,
         heading: int | None = None,
@@ -721,8 +740,8 @@ class ApiMethods(ABC):
         horizontal_accuracy: float | None = None,
         heading: int | None = None,
         proximity_alert_radius: int | None = None,
-        chat_id: int | str | None = None,
-        message_id: int | None = None,
+        chat_id: ChatId | str | None = None,
+        message_id: MessageId | None = None,
         inline_message_id: str | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message | bool:
@@ -748,8 +767,8 @@ class ApiMethods(ABC):
 
     async def stop_message_live_location(
         self,
-        chat_id: int | str | None = None,
-        message_id: int | None = None,
+        chat_id: ChatId | str | None = None,
+        message_id: MessageId | None = None,
         inline_message_id: str | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message | bool:
@@ -770,12 +789,12 @@ class ApiMethods(ABC):
 
     async def send_venue(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         latitude: float,
         longitude: float,
         title: str,
         address: str,
-        message_thread_id: int | None = None,
+        message_thread_id: MessageThreadId | None = None,
         foursquare_id: str | None = None,
         foursquare_type: str | None = None,
         disable_notification: bool | None = None,
@@ -807,10 +826,10 @@ class ApiMethods(ABC):
 
     async def send_contact(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         phone_number: str,
         first_name: str,
-        message_thread_id: int | None = None,
+        message_thread_id: MessageThreadId | None = None,
         last_name: str | None = None,
         vcard: str | None = None,
         disable_notification: bool | None = None,
@@ -840,10 +859,10 @@ class ApiMethods(ABC):
 
     async def send_poll(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         question: str,
         options: Sequence[str],
-        message_thread_id: int | None = None,
+        message_thread_id: MessageThreadId | None = None,
         is_anonymous: bool | None = None,
         type_: PollType | None = None,
         allows_multiple_answers: bool | None = None,
@@ -889,8 +908,8 @@ class ApiMethods(ABC):
 
     async def send_dice(
         self,
-        chat_id: int | str,
-        message_thread_id: int | None = None,
+        chat_id: ChatId | str,
+        message_thread_id: MessageThreadId | None = None,
         emoji: DiceEmoji | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
@@ -917,9 +936,9 @@ class ApiMethods(ABC):
 
     async def send_chat_action(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         action: ChatAction,
-        message_thread_id: int | None = None,
+        message_thread_id: MessageThreadId | None = None,
     ) -> bool:
         api_logger.debug(
             'Send action "%s" to chat "%s"',
@@ -937,8 +956,8 @@ class ApiMethods(ABC):
 
     async def set_message_reaction(
         self,
-        chat_id: int | str,
-        message_id: int,
+        chat_id: ChatId | str,
+        message_id: MessageId,
         reaction: Sequence[ReactionType] | None = None,
         is_big: bool | None = None,
     ) -> bool:
@@ -958,7 +977,7 @@ class ApiMethods(ABC):
 
     async def get_user_profile_photos(
         self,
-        user_id: int,
+        user_id: UserId,
         offset: int | None = None,
         limit: int | None = None,
     ) -> UserProfilePhotos:
@@ -994,8 +1013,8 @@ class ApiMethods(ABC):
 
     async def ban_chat_member(
         self,
-        chat_id: int | str,
-        user_id: int,
+        chat_id: ChatId | str,
+        user_id: UserId,
         until_date: int | None = None,
         revoke_messages: bool | None = None,
     ) -> bool:
@@ -1011,8 +1030,8 @@ class ApiMethods(ABC):
 
     async def unban_chat_member(
         self,
-        chat_id: int | str,
-        user_id: int,
+        chat_id: ChatId | str,
+        user_id: UserId,
         only_if_banned: bool | None = None,
     ) -> bool:
         api_logger.debug(
@@ -1031,8 +1050,8 @@ class ApiMethods(ABC):
 
     async def restrict_chat_member(
         self,
-        chat_id: int | str,
-        user_id: int,
+        chat_id: ChatId | str,
+        user_id: UserId,
         permissions: ChatPermissions,
         use_independent_chat_permissions: bool | None = None,
         until_date: int | None = None,
@@ -1055,8 +1074,8 @@ class ApiMethods(ABC):
 
     async def promote_chat_member(
         self,
-        chat_id: int | str,
-        user_id: int,
+        chat_id: ChatId | str,
+        user_id: UserId,
         is_anonymous: int | None = None,
         can_manage_chat: int | None = None,
         can_change_info: int | None = None,
@@ -1103,8 +1122,8 @@ class ApiMethods(ABC):
 
     async def set_chat_administrator_custom_title(
         self,
-        chat_id: int | str,
-        user_id: int,
+        chat_id: ChatId | str,
+        user_id: UserId,
         custom_title: str,
     ) -> bool:
         api_logger.debug(
@@ -1124,7 +1143,7 @@ class ApiMethods(ABC):
 
     async def ban_chat_sender_chat(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         sender_chat_id: int,
         until_date: int | None,
     ) -> bool:
@@ -1144,7 +1163,7 @@ class ApiMethods(ABC):
 
     async def unban_chat_sender_chat(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         sender_chat_id: int,
     ) -> bool:
         api_logger.debug(
@@ -1162,7 +1181,7 @@ class ApiMethods(ABC):
 
     async def export_chat_invite_link(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> str:
         api_logger.debug(
             'Export chat "%s" invite link',
@@ -1177,7 +1196,7 @@ class ApiMethods(ABC):
 
     async def create_chat_invite_link(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         name: str | None = None,
         expire_date: int | None = None,
         member_limit: int | None = None,
@@ -1200,7 +1219,7 @@ class ApiMethods(ABC):
 
     async def edit_chat_invite_link(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         invite_link: str,
         name: str | None = None,
         expire_date: int | None = None,
@@ -1225,7 +1244,7 @@ class ApiMethods(ABC):
 
     async def revoke_chat_invite_link(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         invite_link: str,
     ) -> ChatInviteLink:
         api_logger.debug(
@@ -1242,8 +1261,8 @@ class ApiMethods(ABC):
 
     async def approve_chat_join_request(
         self,
-        chat_id: int | str,
-        user_id: int,
+        chat_id: ChatId | str,
+        user_id: UserId,
     ) -> bool:
         api_logger.debug(
             'Approve "%s" chat "%s" join request',
@@ -1260,8 +1279,8 @@ class ApiMethods(ABC):
 
     async def decline_chat_join_request(
         self,
-        chat_id: int | str,
-        user_id: int,
+        chat_id: ChatId | str,
+        user_id: UserId,
     ) -> bool:
         api_logger.debug(
             'Decline "%s" chat "%s" join request',
@@ -1278,7 +1297,7 @@ class ApiMethods(ABC):
 
     async def set_chat_permissions(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         permissions: ChatPermissions,
         use_independent_chat_permissions: bool | None = None,
     ) -> bool:
@@ -1297,7 +1316,7 @@ class ApiMethods(ABC):
 
     async def set_chat_photo(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         photo: InputFile,
     ) -> bool:
         api_logger.debug(
@@ -1314,7 +1333,7 @@ class ApiMethods(ABC):
 
     async def delete_chat_photo(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> bool:
         api_logger.debug(
             'Delete chat "%s" photo',
@@ -1329,7 +1348,7 @@ class ApiMethods(ABC):
 
     async def set_chat_title(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         title: str,
     ) -> bool:
         api_logger.debug(
@@ -1347,7 +1366,7 @@ class ApiMethods(ABC):
 
     async def set_chat_description(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         description: str,
     ) -> bool:
         api_logger.debug(
@@ -1364,8 +1383,8 @@ class ApiMethods(ABC):
 
     async def pin_chat_message(
         self,
-        chat_id: int | str,
-        message_id: int,
+        chat_id: ChatId | str,
+        message_id: MessageId,
         disable_notification: bool | None = None,
     ) -> bool:
         api_logger.debug(
@@ -1384,7 +1403,7 @@ class ApiMethods(ABC):
 
     async def unpin_chat_message(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         message_id: int | None,
     ) -> bool:
         api_logger.debug(
@@ -1402,7 +1421,7 @@ class ApiMethods(ABC):
 
     async def unpin_all_chat_messages(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> bool:
         api_logger.debug(
             'Unpin all messages in chat "%s"',
@@ -1417,7 +1436,7 @@ class ApiMethods(ABC):
 
     async def leave_chat(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> bool:
         api_logger.debug(
             'Leave chat "%s"',
@@ -1432,7 +1451,7 @@ class ApiMethods(ABC):
 
     async def get_chat(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> Chat:
         api_logger.debug(
             'Get chat "%s"',
@@ -1447,7 +1466,7 @@ class ApiMethods(ABC):
 
     async def get_chat_administrators(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> tuple[ChatMember, ...]:
         api_logger.debug(
             'Get chat administrators "%s"',
@@ -1462,7 +1481,7 @@ class ApiMethods(ABC):
 
     async def get_chat_member_count(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> int:
         api_logger.debug(
             'Get chat member count "%s"',
@@ -1476,7 +1495,9 @@ class ApiMethods(ABC):
         )
 
     async def get_chat_member(
-        self, chat_id: int | str, user_id: int
+        self,
+        chat_id: ChatId | str,
+        user_id: UserId,
     ) -> ChatMember:
         api_logger.debug(
             'Get chat "%s" member %s',
@@ -1493,7 +1514,7 @@ class ApiMethods(ABC):
 
     async def set_chat_sticker_set(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         sticker_set_name: str,
     ) -> bool:
         api_logger.debug(
@@ -1511,7 +1532,7 @@ class ApiMethods(ABC):
 
     async def delete_chat_sticker_set(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> bool:
         api_logger.debug(
             'Delete chat "%s" sticker set',
@@ -1538,7 +1559,7 @@ class ApiMethods(ABC):
 
     async def create_forum_topic(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         name: str,
         icon_color: IconColor | None = None,
         icon_custom_emoji_id: str | None = None,
@@ -1559,8 +1580,8 @@ class ApiMethods(ABC):
 
     async def edit_forum_topic(
         self,
-        chat_id: int | str,
-        message_thread_id: int,
+        chat_id: ChatId | str,
+        message_thread_id: MessageThreadId,
         name: str | None = None,
         icon_custom_emoji_id: str | None = None,
     ) -> bool:
@@ -1581,8 +1602,8 @@ class ApiMethods(ABC):
 
     async def close_forum_topic(
         self,
-        chat_id: int | str,
-        message_thread_id: int,
+        chat_id: ChatId | str,
+        message_thread_id: MessageThreadId,
     ) -> bool:
         api_logger.debug(
             "Close forum topic %r %r",
@@ -1599,8 +1620,8 @@ class ApiMethods(ABC):
 
     async def reopen_forum_topic(
         self,
-        chat_id: int | str,
-        message_thread_id: int,
+        chat_id: ChatId | str,
+        message_thread_id: MessageThreadId,
     ) -> bool:
         api_logger.debug(
             "Reopen forum topic %r %r",
@@ -1617,8 +1638,8 @@ class ApiMethods(ABC):
 
     async def unpin_all_forum_topic_messages(
         self,
-        chat_id: int | str,
-        message_thread_id: int,
+        chat_id: ChatId | str,
+        message_thread_id: MessageThreadId,
     ) -> bool:
         api_logger.debug(
             "Unpin all forum topic messages %r %r",
@@ -1635,7 +1656,7 @@ class ApiMethods(ABC):
 
     async def edit_general_forum_topic(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         name: str,
     ) -> bool:
         api_logger.debug(
@@ -1653,7 +1674,7 @@ class ApiMethods(ABC):
 
     async def close_general_forum_topic(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> bool:
         api_logger.debug(
             "Close general forum topic %r",
@@ -1668,7 +1689,7 @@ class ApiMethods(ABC):
 
     async def reopen_general_forum_topic(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> bool:
         api_logger.debug(
             "Reopen general forum topic %r",
@@ -1683,7 +1704,7 @@ class ApiMethods(ABC):
 
     async def hide_general_forum_topic(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> bool:
         api_logger.debug(
             "Hide general forum topic %r",
@@ -1698,7 +1719,7 @@ class ApiMethods(ABC):
 
     async def unhide_general_forum_topic(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> bool:
         api_logger.debug(
             "Unhide general forum topic %r",
@@ -1713,7 +1734,7 @@ class ApiMethods(ABC):
 
     async def unpin_all_general_forum_topic_messages(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | str,
     ) -> bool:
         api_logger.debug(
             "Unpin all general forum topic messages %r",
@@ -1751,8 +1772,8 @@ class ApiMethods(ABC):
 
     async def get_user_chat_boosts(
         self,
-        chat_id: int | str,
-        user_id: int,
+        chat_id: ChatId | str,
+        user_id: UserId,
     ) -> UserChatBoosts:
         api_logger.debug(
             "Get user chat boosts %r %r",
@@ -1974,8 +1995,8 @@ class ApiMethods(ABC):
     async def edit_message_text(
         self,
         text: str,
-        chat_id: int | str | None = None,
-        message_id: int | None = None,
+        chat_id: ChatId | str | None = None,
+        message_id: MessageId | None = None,
         inline_message_id: str | None = None,
         parse_mode: ParseMode | None = None,
         entities: Sequence[MessageEntity] | None = None,
@@ -2015,8 +2036,8 @@ class ApiMethods(ABC):
 
     async def edit_message_caption(
         self,
-        chat_id: int | str | None = None,
-        message_id: int | None = None,
+        chat_id: ChatId | str | None = None,
+        message_id: MessageId | None = None,
         inline_message_id: str | None = None,
         caption: str | None = None,
         parse_mode: ParseMode | None = None,
@@ -2056,8 +2077,8 @@ class ApiMethods(ABC):
     async def edit_message_media(
         self,
         media: InputMedia,
-        chat_id: int | str | None = None,
-        message_id: int | None = None,
+        chat_id: ChatId | str | None = None,
+        message_id: MessageId | None = None,
         inline_message_id: str | None = None,
         reply_markup: InlineKeyboardMarkup | None = None,
     ) -> Message | bool:
@@ -2085,6 +2106,10 @@ class ApiMethods(ABC):
             media = msgspec.structs.replace(
                 media, media=f"attach://{attachment_name}"
             )
+        elif isinstance(media.media, URL):
+            media = msgspec.structs.replace(
+                media, media=URLString(str(media.media))
+            )
         if isinstance(media, InputMediaWithThumbnail) and isinstance(
             media.thumbnail, InputFile
         ):
@@ -2107,8 +2132,8 @@ class ApiMethods(ABC):
 
     async def edit_message_reply_markup(
         self,
-        chat_id: int | str | None = None,
-        message_id: int | None = None,
+        chat_id: ChatId | str | None = None,
+        message_id: MessageId | None = None,
         inline_message_id: str | None = None,
         reply_markup: InlineKeyboardMarkup | None = None,
     ) -> Message | bool:
@@ -2141,8 +2166,8 @@ class ApiMethods(ABC):
 
     async def stop_poll(
         self,
-        chat_id: int | str,
-        message_id: int,
+        chat_id: ChatId | str,
+        message_id: MessageId,
         reply_markup: InlineKeyboardMarkup | None = None,
     ) -> Poll:
         api_logger.debug(
@@ -2161,8 +2186,8 @@ class ApiMethods(ABC):
 
     async def delete_message(
         self,
-        chat_id: int | str | None = None,
-        message_id: int | None = None,
+        chat_id: ChatId | str | None = None,
+        message_id: MessageId | None = None,
     ) -> bool:
         api_logger.debug(
             'Delete message %s in "%s"',
@@ -2179,8 +2204,8 @@ class ApiMethods(ABC):
 
     async def delete_messages(
         self,
-        chat_id: int | str,
-        message_ids: Sequence[int],
+        chat_id: ChatId | str,
+        message_ids: Sequence[MessageId],
     ) -> bool:
         api_logger.debug(
             'Delete messages in "%s"',
@@ -2196,10 +2221,10 @@ class ApiMethods(ABC):
 
     async def send_sticker(
         self,
-        chat_id: int | str,
+        chat_id: ChatId | FileId,
         sticker: InputFile | str,
         emoji: str | None = None,
-        message_thread_id: int | None = None,
+        message_thread_id: MessageThreadId | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         reply_parameters: ReplyParameters | None = None,
@@ -2252,7 +2277,7 @@ class ApiMethods(ABC):
 
     async def upload_sticker_file(
         self,
-        user_id: int,
+        user_id: UserId,
         sticker: InputFile,
         sticker_format: StickerFormat,
     ) -> File:
@@ -2271,7 +2296,7 @@ class ApiMethods(ABC):
 
     async def create_new_sticker_set(
         self,
-        user_id: int,
+        user_id: UserId,
         name: str,
         title: str,
         stickers: Iterable[InputSticker],
@@ -2290,12 +2315,20 @@ class ApiMethods(ABC):
         for sticker in stickers:
             if isinstance(sticker.sticker, str):
                 attached_media.append(sticker)
+            elif isinstance(sticker.sticker, URL):
+                attached_media.append(
+                    msgspec.structs.replace(
+                        sticker,
+                        sticker=URLString(str(sticker.sticker)),
+                    )
+                )
             else:
                 attachment_name = f"attachment{next(counter)}"
                 attachments[attachment_name] = sticker.sticker
                 attached_media.append(
                     msgspec.structs.replace(
-                        sticker, sticker=f"attach://{attachment_name}"
+                        sticker,
+                        sticker=Attach(f"attach://{attachment_name}"),
                     )
                 )
         return await self._request(
@@ -2309,11 +2342,12 @@ class ApiMethods(ABC):
             sticker_format=sticker_format,
             sticker_type=sticker_type,
             needs_repainting=needs_repainting,
+            **attachments,
         )
 
     async def add_sticker_to_set(
         self,
-        user_id: int,
+        user_id: UserId,
         name: str,
         sticker: InputSticker,
     ) -> bool:
@@ -2323,11 +2357,11 @@ class ApiMethods(ABC):
             user_id,
         )
         attachments = {}
-        if not isinstance(sticker.sticker, str):
+        if isinstance(sticker.sticker, InputFile):
             attachment_name = "attachment0"
             attachments[attachment_name] = sticker.sticker
             sticker = msgspec.structs.replace(
-                sticker, media=f"attach://{attachment_name}"
+                sticker, media=Attach(f"attach://{attachment_name}")
             )
         return await self._request(
             RequestMethod.POST,
@@ -2444,7 +2478,7 @@ class ApiMethods(ABC):
     async def set_sticker_set_thumbnail(
         self,
         name: str,
-        user_id: int,
+        user_id: UserId,
         thumbnail: InputFile | str | None = None,
     ) -> bool:
         api_logger.debug(
@@ -2538,14 +2572,14 @@ class ApiMethods(ABC):
 
     async def send_invoice(
         self,
-        chat_id: int,
+        chat_id: ChatId,
         title: str,
         description: str,
         payload: str,
         provider_token: str,
         currency: str,
         prices: Sequence[LabeledPrice],
-        message_thread_id: int | None = None,
+        message_thread_id: MessageThreadId | None = None,
         max_tip_amount: int | None = None,
         suggested_tip_amounts: tuple[int, ...] | None = None,
         start_parameter: str | None = None,
@@ -2699,7 +2733,7 @@ class ApiMethods(ABC):
 
     async def set_passport_data_errors(
         self,
-        user_id: int,
+        user_id: UserId,
         errors: Sequence[PassportElementError],
     ) -> bool:
         api_logger.debug(
@@ -2716,9 +2750,9 @@ class ApiMethods(ABC):
 
     async def send_game(
         self,
-        chat_id: int,
+        chat_id: ChatId,
         game_short_name: str,
-        message_thread_id: int | None = None,
+        message_thread_id: MessageThreadId | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         reply_parameters: ReplyParameters | None = None,
@@ -2744,12 +2778,12 @@ class ApiMethods(ABC):
 
     async def set_game_score(
         self,
-        user_id: int,
+        user_id: UserId,
         score: int,
         force: bool | None = None,
         disable_edit_message: bool | None = None,
         chat_id: int | None = None,
-        message_id: int | None = None,
+        message_id: MessageId | None = None,
         inline_message_id: str | None = None,
     ) -> Message | bool:
         api_logger.debug(
@@ -2772,9 +2806,9 @@ class ApiMethods(ABC):
 
     async def get_game_high_scores(
         self,
-        user_id: int,
+        user_id: UserId,
         chat_id: int | None = None,
-        message_id: int | None = None,
+        message_id: MessageId | None = None,
         inline_message_id: str | None = None,
     ) -> tuple[GameHighScore, ...]:
         api_logger.debug(

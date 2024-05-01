@@ -8,6 +8,7 @@ from aiotgbot.api_types import (
     InputMediaDocument,
     InputMediaPhoto,
     InputMediaVideo,
+    URLString,
 )
 
 
@@ -15,23 +16,23 @@ from aiotgbot.api_types import (
     "input_media,json",
     (
         (
-            InputMediaPhoto(media="media"),
+            InputMediaPhoto(media=URLString("media")),
             b'{"type":"photo","media":"media"}',
         ),
         (
-            InputMediaVideo(media="media"),
+            InputMediaVideo(media=URLString("media")),
             b'{"type":"video","media":"media"}',
         ),
         (
-            InputMediaAnimation(media="media"),
+            InputMediaAnimation(media=URLString("media")),
             b'{"type":"animation","media":"media"}',
         ),
         (
-            InputMediaAudio(media="media"),
+            InputMediaAudio(media=URLString("media")),
             b'{"type":"audio","media":"media"}',
         ),
         (
-            InputMediaDocument(media="media"),
+            InputMediaDocument(media=URLString("media")),
             b'{"type":"document","media":"media"}',
         ),
     ),

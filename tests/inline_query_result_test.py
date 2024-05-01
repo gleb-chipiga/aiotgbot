@@ -3,6 +3,7 @@ import pytest
 
 from aiotgbot.api_types import (
     DocumentMimeType,
+    FileId,
     InlineQueryResult,
     InlineQueryResultArticle,
     InlineQueryResultAudio,
@@ -143,21 +144,21 @@ from aiotgbot.api_types import (
         (
             InlineQueryResultCachedGif(
                 id="",
-                gif_file_id="",
+                gif_file_id=FileId(""),
             ),
             b'{"type":"gif","id":""',
         ),
         (
             InlineQueryResultCachedMpeg4Gif(
                 id="",
-                mpeg4_file_id="",
+                mpeg4_file_id=FileId(""),
             ),
             b'{"type":"mpeg4_gif","id":""',
         ),
         (
             InlineQueryResultCachedSticker(
                 id="",
-                sticker_file_id="",
+                sticker_file_id=FileId(""),
             ),
             b'{"type":"sticker","id":""',
         ),
@@ -165,14 +166,14 @@ from aiotgbot.api_types import (
             InlineQueryResultCachedDocument(
                 id="",
                 title="",
-                document_file_id="",
+                document_file_id=FileId(""),
             ),
             b'{"type":"document","id":""',
         ),
         (
             InlineQueryResultCachedVideo(
                 id="",
-                video_file_id="",
+                video_file_id=FileId(""),
                 title="",
             ),
             b'{"type":"video","id":""',
@@ -180,7 +181,7 @@ from aiotgbot.api_types import (
         (
             InlineQueryResultCachedVoice(
                 id="",
-                voice_file_id="",
+                voice_file_id=FileId(""),
                 title="",
             ),
             b'{"type":"voice","id":""',
@@ -188,7 +189,7 @@ from aiotgbot.api_types import (
         (
             InlineQueryResultCachedAudio(
                 id="",
-                audio_file_id="",
+                audio_file_id=FileId(""),
             ),
             b'{"type":"audio","id":""',
         ),
