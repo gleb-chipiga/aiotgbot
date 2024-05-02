@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any, Final, Iterator, MutableMapping
 
 from .api_types import (
@@ -16,11 +17,15 @@ from .api_types import (
 __all__ = (
     "BotUpdate",
     "Context",
+    "StateContext",
 )
 
 
-class Context(MutableMapping[str, Any]):
-    def __init__(self, data: dict[str, Any]) -> None:
+class Context(MutableMapping[str, Any]):  # TODO: add json type annotation
+    def __init__(
+        self,
+        data: dict[str, Any],
+    ) -> None:
         self._data: Final[dict[str, Any]] = data
 
     def __getitem__(self, key: str) -> Any:
@@ -45,9 +50,18 @@ class Context(MutableMapping[str, Any]):
         return self._data
 
 
+@dataclass
+class StateContext:
+    state: str | None
+    context: Context
+
+
 class BotUpdate(MutableMapping[str, Any]):
     def __init__(
-        self, state: str | None, context: Context, update: Update
+        self,
+        state: str | None,
+        context: Context,
+        update: Update,
     ) -> None:
         self._state: str | None = state
         self._context: Final[Context] = context

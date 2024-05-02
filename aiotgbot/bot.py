@@ -1,16 +1,19 @@
 import asyncio
 import logging
 from abc import abstractmethod
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from functools import partial
 from http import HTTPStatus
 from typing import (
     Any,
+    AsyncIterator,
     Awaitable,
     Callable,
     Final,
     Iterator,
     MutableMapping,
+    NewType,
     Protocol,
     Type,
     TypeVar,
@@ -25,8 +28,8 @@ from aiofreqlimit import FreqLimit
 from aiohttp import ClientError, ClientSession, FormData, TCPConnector
 
 from .api_methods import ApiMethods, ParamType
-from .api_types import APIResponse, InputFile, Update, User
-from .bot_update import BotUpdate, Context
+from .api_types import APIResponse, ChatId, InputFile, Update, User, UserId
+from .bot_update import BotUpdate, Context, StateContext
 from .constants import ChatType, RequestMethod
 from .exceptions import (
     BadGateway,
@@ -67,6 +70,9 @@ EventHandler = Callable[["Bot"], Awaitable[None]]
 
 T = TypeVar("T")
 V = TypeVar("V")
+UserChatKey = NewType("UserChatKey", str)
+StateKey = NewType("StateKey", str)
+ContextKey = NewType("ContextKey", str)
 
 
 class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
@@ -98,7 +104,7 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
                 headers={"User-Agent": SOFTWARE},
             )
         self._client_session: Final[ClientSession] = client_session
-        self._context_lock: Final[KeyLock] = KeyLock()
+        self._user_chat_lock: Final[KeyLock] = KeyLock()
         self._message_limit: Final[FreqLimit] = FreqLimit(MESSAGE_INTERVAL)
         self._chat_limit: Final[FreqLimit] = FreqLimit(CHAT_INTERVAL)
         self._group_limit: Final[FreqLimit] = FreqLimit(GROUP_INTERVAL)
@@ -254,7 +260,7 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         self,
         http_method: RequestMethod,
         api_method: str,
-        chat_id: int | str,
+        chat_id: ChatId | str,
         type_: Type[V],
         **params: ParamType,
     ) -> V:
@@ -292,9 +298,11 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
                     raise
 
     @staticmethod
-    def _update_state(update: Update) -> str:
-        user_id: int | None = None
-        chat_id: int | None = None
+    def _update_user_chat_key(
+        update: Update,
+    ) -> tuple[UserId | None, ChatId | None]:
+        user_id: UserId | None = None
+        chat_id: ChatId | None = None
 
         if update.message is not None:
             assert update.message.from_ is not None
@@ -347,28 +355,22 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
             assert update.chat_member.chat is not None
             chat_id = update.chat_member.chat.id
 
-        return "{}|{}".format(
-            str(user_id) if user_id is not None else "",
-            str(chat_id) if chat_id is not None else "",
-        )
+        return user_id, chat_id
 
     async def _handle_update(self, update: Update) -> None:
         assert self._handler_table.frozen
-        assert self._context_lock is not None, "Context lock not initialized"
+        assert self._user_chat_lock is not None
         bot_logger.debug(
             'Dispatch update "%s"',
             update.update_id,
         )
-        update_state = self._update_state(update)
-        state_key = f"{STATE_PREFIX}|{update_state}"
-        context_key = f"{CONTEXT_PREFIX}|{update_state}"
-        async with self._context_lock.resource(state_key):
-            state = await self._storage.get(state_key)
-            assert isinstance(state, str) or state is None
-            context_dict = await self._storage.get(context_key)
-            assert isinstance(context_dict, dict) or context_dict is None
-            context = Context(context_dict if context_dict is not None else {})
-            bot_update = BotUpdate(state, context, update)
+        user_id, chat_id = self._update_user_chat_key(update)
+        async with self.state_context(user_id, chat_id) as state_context:
+            bot_update = BotUpdate(
+                state_context.state,
+                state_context.context,
+                update,
+            )
             handler = await self._handler_table.get_handler(self, bot_update)
             if handler is not None:
                 bot_logger.debug(
@@ -377,19 +379,65 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
                     handler.__name__,
                 )
                 await handler(self, bot_update)
-                await self._storage.set(state_key, bot_update.state)
-                await self._storage.set(
-                    context_key, bot_update.context.to_dict()
-                )
-                bot_logger.debug(
-                    'Set context for update "%s"',
-                    update.update_id,
-                )
+                state_context.state = bot_update.state
             else:
                 bot_logger.debug(
                     'Not found handler for update "%s". Skip.',
                     update.update_id,
                 )
+
+    @staticmethod
+    def _user_chat_key(
+        user_id: UserId | None,
+        chat_id: ChatId | None,
+    ) -> UserChatKey:
+        return UserChatKey(
+            "{}|{}".format(
+                user_id if user_id is not None else "",
+                chat_id if chat_id is not None else "",
+            )
+        )
+
+    @staticmethod
+    def _state_key(user_chat_key: UserChatKey) -> StateKey:
+        return StateKey(f"{STATE_PREFIX}|{user_chat_key}")
+
+    @staticmethod
+    def _context_key(user_chat_key: UserChatKey) -> ContextKey:
+        return ContextKey(f"{CONTEXT_PREFIX}|{user_chat_key}")
+
+    @asynccontextmanager
+    async def state_context(
+        self,
+        user_id: UserId | None,
+        chat_id: ChatId | None,
+    ) -> AsyncIterator[StateContext]:
+        user_chat_key = self._user_chat_key(user_id, chat_id)
+        state_key = self._state_key(user_chat_key)
+        context_key = self._context_key(user_chat_key)
+        bot_logger.debug(
+            'Lock and receive  state and context for user "%s" and chat %s',
+            user_id,
+            chat_id,
+        )
+        async with self._user_chat_lock.resource(user_chat_key):
+            state = await self._storage.get(state_key)
+            assert isinstance(state, str) or state is None
+            context_dict = await self._storage.get(context_key)
+            assert isinstance(context_dict, dict) or context_dict is None
+            context = Context(context_dict if context_dict is not None else {})
+            state_context = StateContext(state, context)
+            yield state_context
+            await self._storage.set(state_key, state_context.state)
+            await self._storage.set(
+                context_key,
+                state_context.context.to_dict(),
+            )
+            bot_logger.debug(
+                'Set state and context for user "%s" and chat %s',
+                user_id,
+                chat_id,
+            )
 
     async def _start(self) -> None:
         self._started = True
