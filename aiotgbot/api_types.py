@@ -42,6 +42,7 @@ __all__ = (
     "BotShortDescription",
     "CallbackGame",
     "CallbackQuery",
+    "CallbackQueryId",
     "Chat",
     "ChatAdministratorRights",
     "ChatBoost",
@@ -66,6 +67,7 @@ __all__ = (
     "ChatMemberUpdated",
     "ChatPermissions",
     "ChatPhoto",
+    "ChatTitle",
     "ChosenInlineResult",
     "Contact",
     "DataMappingError",
@@ -77,6 +79,8 @@ __all__ = (
     "ExternalReplyInfo",
     "File",
     "FileId",
+    "FileUniqueId",
+    "FirstName",
     "ForceReply",
     "ForumTopic",
     "ForumTopicClosed",
@@ -91,6 +95,7 @@ __all__ = (
     "InlineKeyboardButton",
     "InlineKeyboardMarkup",
     "InlineQuery",
+    "InlineQueryId",
     "InlineQueryResult",
     "InlineQueryResultArticle",
     "InlineQueryResultAudio",
@@ -133,6 +138,8 @@ __all__ = (
     "KeyboardButtonRequestChat",
     "KeyboardButtonRequestUsers",
     "LabeledPrice",
+    "LanguageCode",
+    "LastName",
     "LinkPreviewOptions",
     "LocalFile",
     "Location",
@@ -203,6 +210,7 @@ __all__ = (
     "UserChatBoosts",
     "UserId",
     "UserProfilePhotos",
+    "Username",
     "UsersShared",
     "Venue",
     "Video",
@@ -345,15 +353,19 @@ class WebhookInfo(API, frozen=True, kw_only=True):
 
 
 UserId = NewType("UserId", int)
+FirstName = NewType("FirstName", str)
+LastName = NewType("LastName", str)
+Username = NewType("Username", str)
+LanguageCode = NewType("LanguageCode", str)
 
 
 class User(API, frozen=True, kw_only=True):
     id: UserId
     is_bot: bool
-    first_name: str
-    last_name: str | None = None
-    username: str | None = None
-    language_code: str | None = None
+    first_name: FirstName
+    last_name: LastName | None = None
+    username: Username | None = None
+    language_code: LanguageCode | None = None
     is_premium: bool | None = None
     added_to_attachment_menu: bool | None = None
     can_join_groups: bool | None = None
@@ -362,15 +374,16 @@ class User(API, frozen=True, kw_only=True):
 
 
 ChatId = NewType("ChatId", int)
+ChatTitle = NewType("ChatTitle", int)
 
 
 class Chat(API, frozen=True, kw_only=True):
     id: ChatId
     type: str
-    title: str | None = None
-    username: str | None = None
-    first_name: str | None = None
-    last_name: str | None = None
+    title: ChatTitle | None = None
+    username: Username | None = None
+    first_name: FirstName | None = None
+    last_name: LastName | None = None
     is_forum: bool | None = None
     photo: "ChatPhoto | None" = None
     active_usernames: Sequence[str] | None = None
@@ -605,11 +618,12 @@ MessageOrigin = Union[
 ]
 
 FileId = NewType("FileId", str)
+FileUniqueId = NewType("FileUniqueId", str)
 
 
 class PhotoSize(API, frozen=True, kw_only=True):
     file_id: FileId
-    file_unique_id: str
+    file_unique_id: FileUniqueId
     width: int
     height: int
     file_size: int
@@ -617,7 +631,7 @@ class PhotoSize(API, frozen=True, kw_only=True):
 
 class Audio(API, frozen=True, kw_only=True):
     file_id: FileId
-    file_unique_id: str
+    file_unique_id: FileUniqueId
     duration: int
     performer: str | None = None
     title: str | None = None
@@ -629,7 +643,7 @@ class Audio(API, frozen=True, kw_only=True):
 
 class Document(API, frozen=True, kw_only=True):
     file_id: FileId
-    file_unique_id: str
+    file_unique_id: FileUniqueId
     thumbnail: PhotoSize | None = None
     file_name: str | None = None
     mime_type: str | None = None
@@ -643,7 +657,7 @@ class Story(API, frozen=True):
 
 class Video(API, frozen=True, kw_only=True):
     file_id: FileId
-    file_unique_id: str
+    file_unique_id: FileUniqueId
     width: int
     height: int
     duration: int
@@ -655,7 +669,7 @@ class Video(API, frozen=True, kw_only=True):
 
 class Animation(API, frozen=True, kw_only=True):
     file_id: FileId
-    file_unique_id: str
+    file_unique_id: FileUniqueId
     thumbnail: PhotoSize | None = None
     file_name: str | None = None
     mime_type: str | None = None
@@ -664,7 +678,7 @@ class Animation(API, frozen=True, kw_only=True):
 
 class Voice(API, frozen=True, kw_only=True):
     file_id: FileId
-    file_unique_id: str
+    file_unique_id: FileUniqueId
     duration: int
     mime_type: str | None = None
     file_size: int | None = None
@@ -672,7 +686,7 @@ class Voice(API, frozen=True, kw_only=True):
 
 class VideoNote(API, frozen=True, kw_only=True):
     file_id: FileId
-    file_unique_id: str
+    file_unique_id: FileUniqueId
     length: int
     duration: int
     thumbnail: PhotoSize | None = None
@@ -873,7 +887,7 @@ class UserProfilePhotos(API, frozen=True, kw_only=True):
 
 class File(API, frozen=True, kw_only=True):
     file_id: FileId
-    file_unique_id: str
+    file_unique_id: FileUniqueId
     file_size: int | None = None
     file_path: str | None = None
 
@@ -960,8 +974,11 @@ class LoginUrl(API, frozen=True, kw_only=True):
     request_write_access: bool | None = None
 
 
+CallbackQueryId = NewType("CallbackQueryId", str)
+
+
 class CallbackQuery(API, frozen=True, kw_only=True):
-    id: str
+    id: CallbackQueryId
     from_: User = field(name="from")
     message: Message | None = None
     inline_message_id: str | None = None
@@ -990,9 +1007,9 @@ ReplyMarkup = Union[
 
 class ChatPhoto(API, frozen=True, kw_only=True):
     small_file_id: FileId
-    small_file_unique_id: str
+    small_file_unique_id: FileUniqueId
     big_file_id: FileId
-    big_file_unique_id: str
+    big_file_unique_id: FileUniqueId
 
 
 class ChatInviteLink(API, frozen=True, kw_only=True):
@@ -1484,7 +1501,7 @@ class InputSticker(API, frozen=True):
 
 class Sticker(API, frozen=True):
     file_id: FileId
-    file_unique_id: str
+    file_unique_id: FileUniqueId
     type: str
     width: int
     height: int
@@ -1523,8 +1540,11 @@ class InlineQueryResultsButton(API, frozen=True):
     start_parameter: str | None = None
 
 
+InlineQueryId = NewType("InlineQueryId", str)
+
+
 class InlineQuery(API, frozen=True):
-    id: str
+    id: InlineQueryId
     from_: User = field(name="from")
     query: str
     offset: str
@@ -2043,7 +2063,7 @@ class PassportData(API, frozen=True, kw_only=True):
 
 class PassportFile(API, frozen=True, kw_only=True):
     file_id: FileId
-    file_unique_id: str
+    file_unique_id: FileUniqueId
     file_date: int
     file_size: int | None = None
 

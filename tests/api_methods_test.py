@@ -11,6 +11,7 @@ from aiotgbot.api_types import (
     Attach,
     BotCommand,
     BotCommandScopeChat,
+    CallbackQueryId,
     Chat,
     ChatId,
     File,
@@ -286,7 +287,7 @@ async def test_api_methods_get_chat(_bot: Bot) -> None:
 async def test_api_methods_answer_callback_query(_bot: Bot) -> None:
     _bot.request_mock.return_value = True
     assert await _bot.answer_callback_query(
-        callback_query_id="1", text="message", show_alert=True
+        callback_query_id=CallbackQueryId("1"), text="message", show_alert=True
     )
     assert _bot.request_mock.call_args_list == [
         call(

@@ -416,7 +416,7 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         state_key = self._state_key(user_chat_key)
         context_key = self._context_key(user_chat_key)
         bot_logger.debug(
-            'Lock and receive  state and context for user "%s" and chat %s',
+            "Lock and receive state and context for user %s and chat %s",
             user_id,
             chat_id,
         )
