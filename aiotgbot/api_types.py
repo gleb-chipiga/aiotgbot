@@ -39,6 +39,7 @@ __all__ = (
     "BotCommandScopeChatMember",
     "BotCommandScopeDefault",
     "BotDescription",
+    "BotName",
     "BotShortDescription",
     "CallbackGame",
     "CallbackQuery",
