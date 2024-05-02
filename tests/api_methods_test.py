@@ -257,7 +257,7 @@ async def test_api_methods_get_file(_bot: Bot) -> None:
         File,
     )
     _bot.request_mock.return_value = _file
-    assert await _bot.get_file(file_id="1")
+    assert await _bot.get_file(file_id=FileId("1"))
     assert _bot.request_mock.call_args_list == [
         call(RequestMethod.GET, "getFile", file_id="1")
     ]

@@ -998,7 +998,7 @@ class ApiMethods(ABC):
 
     async def get_file(
         self,
-        file_id: str,
+        file_id: FileId,
     ) -> File:
         api_logger.debug(
             'Get file "%s"',
