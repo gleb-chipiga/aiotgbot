@@ -8,7 +8,7 @@ __all__ = ("MemoryStorage",)
 
 class MemoryStorage(StorageProtocol):
     def __init__(self) -> None:
-        self._data: Final[dict[str, Any]] = {}
+        self._data: Final[dict[str, Json]] = {}
 
     async def connect(self) -> None: ...
 

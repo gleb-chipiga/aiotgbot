@@ -20,18 +20,20 @@ __all__ = (
     "StateContext",
 )
 
+from .helpers import Json
 
-class Context(MutableMapping[str, Any]):  # TODO: add json type annotation
+
+class Context(MutableMapping[str, Json]):
     def __init__(
         self,
         data: dict[str, Any],
     ) -> None:
-        self._data: Final[dict[str, Any]] = data
+        self._data: Final[dict[str, Json]] = data
 
-    def __getitem__(self, key: str) -> Any:
+    def __getitem__(self, key: str) -> Json:
         return self._data[key]
 
-    def __setitem__(self, key: str, value: Any) -> None:
+    def __setitem__(self, key: str, value: Json) -> None:
         self._data[key] = value
 
     def __delitem__(self, key: str) -> None:
@@ -46,7 +48,7 @@ class Context(MutableMapping[str, Any]):  # TODO: add json type annotation
     def clear(self) -> None:
         self._data.clear()
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> dict[str, Json]:
         return self._data
 
 
