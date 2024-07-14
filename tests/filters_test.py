@@ -270,10 +270,10 @@ async def test_group_chat_filter(
 
 
 @dataclass(frozen=True)
-class FlagFilter:
+class FlagFilter(FilterProtocol):
     flag: bool
 
-    async def check(self, _: Bot, __: BotUpdate) -> bool:
+    async def check(self, bot: Bot, update: BotUpdate) -> bool:
         return self.flag
 
 

@@ -22,9 +22,7 @@ async def test_key_lock_intervals() -> None:
     key_lock = KeyLock()
     loop = asyncio.get_running_loop()
 
-    time_marks = tuple[float, float, float]
-
-    async def lock(_key_lock: KeyLock) -> time_marks:
+    async def lock(_key_lock: KeyLock) -> tuple[float, float, float]:
         time1 = loop.time()
         async with _key_lock.resource("key"):
             time2 = loop.time()
@@ -33,7 +31,10 @@ async def test_key_lock_intervals() -> None:
         return time2, time3, time2 - time1
 
     tasks = (lock(key_lock), lock(key_lock), lock(key_lock))
-    intervals = cast(list[time_marks], await asyncio.gather(*tasks))
+    intervals = cast(
+        list[tuple[float, float, float]],
+        await asyncio.gather(*tasks),
+    )
     intervals = sorted(intervals, key=lambda i: i[0])
     assert intervals[0][2] < 0.01
     assert 0.09 < intervals[1][2] < 0.11

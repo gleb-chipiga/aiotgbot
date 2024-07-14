@@ -21,26 +21,26 @@ __all__ = (
 
 
 @dataclass(frozen=True)
-class UpdateTypeFilter:
+class UpdateTypeFilter(FilterProtocol):
     update_type: UpdateType
 
-    async def check(self, _: Bot, update: BotUpdate) -> bool:
+    async def check(self, bot: Bot, update: BotUpdate) -> bool:
         return getattr(update, self.update_type) is not None
 
 
 @dataclass(frozen=True)
-class StateFilter:
+class StateFilter(FilterProtocol):
     state: str
 
-    async def check(self, _: Bot, update: BotUpdate) -> bool:
+    async def check(self, bot: Bot, update: BotUpdate) -> bool:
         return update.state == self.state
 
 
 @dataclass(frozen=True)
-class CommandsFilter:
+class CommandsFilter(FilterProtocol):
     commands: tuple[str, ...]
 
-    async def check(self, _: Bot, update: BotUpdate) -> bool:
+    async def check(self, bot: Bot, update: BotUpdate) -> bool:
         if update.message is None or update.message.text is None:
             return False
         if any(
@@ -52,10 +52,10 @@ class CommandsFilter:
 
 
 @dataclass(frozen=True)
-class ContentTypeFilter:
+class ContentTypeFilter(FilterProtocol):
     content_types: tuple[ContentType, ...]
 
-    async def check(self, _: Bot, update: BotUpdate) -> bool:
+    async def check(self, bot: Bot, update: BotUpdate) -> bool:
         if update.message is not None:
             message = update.message
         elif update.edited_message is not None:
@@ -73,10 +73,10 @@ class ContentTypeFilter:
 
 
 @dataclass(frozen=True)
-class MessageTextFilter:
+class MessageTextFilter(FilterProtocol):
     pattern: "re.Pattern[str]"
 
-    async def check(self, _: Bot, update: BotUpdate) -> bool:
+    async def check(self, bot: Bot, update: BotUpdate) -> bool:
         return (
             update.message is not None
             and update.message.text is not None
@@ -85,10 +85,10 @@ class MessageTextFilter:
 
 
 @dataclass(frozen=True)
-class CallbackQueryDataFilter:
+class CallbackQueryDataFilter(FilterProtocol):
     pattern: "re.Pattern[str]"
 
-    async def check(self, _: Bot, update: BotUpdate) -> bool:
+    async def check(self, bot: Bot, update: BotUpdate) -> bool:
         return (
             update.callback_query is not None
             and update.callback_query.data is not None
@@ -97,8 +97,8 @@ class CallbackQueryDataFilter:
 
 
 @dataclass(frozen=True)
-class PrivateChatFilter:
-    async def check(self, _: Bot, update: BotUpdate) -> bool:  # noqa
+class PrivateChatFilter(FilterProtocol):
+    async def check(self, bot: Bot, update: BotUpdate) -> bool:
         return (
             update.message is not None
             and update.message.chat is not None
@@ -107,8 +107,8 @@ class PrivateChatFilter:
 
 
 @dataclass(frozen=True)
-class GroupChatFilter:
-    async def check(self, _: Bot, update: BotUpdate) -> bool:  # noqa
+class GroupChatFilter(FilterProtocol):
+    async def check(self, bot: Bot, update: BotUpdate) -> bool:
         group_types = (ChatType.GROUP, ChatType.SUPERGROUP)
         return (
             update.message is not None
@@ -117,7 +117,7 @@ class GroupChatFilter:
         )
 
 
-class ORFilter:
+class ORFilter(FilterProtocol):
     def __init__(self, *filters: FilterProtocol) -> None:
         self._filters: Final[tuple[FilterProtocol, ...]] = filters
 
@@ -128,7 +128,7 @@ class ORFilter:
         return False
 
 
-class ANDFilter:
+class ANDFilter(FilterProtocol):
     def __init__(self, *filters: FilterProtocol) -> None:
         self._filters: Final[tuple[FilterProtocol, ...]] = filters
 

@@ -21,6 +21,7 @@ legacy_tox_ini = """
         hypothesis
         mypy
         more-itertools
+        pyright
         pytest
         pytest-asyncio
         sqlalchemy
@@ -30,5 +31,6 @@ legacy_tox_ini = """
     commands =
         flake8 aiotgbot tests
         mypy --strict aiotgbot tests
+        pyright
         pytest tests
 """
