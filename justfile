@@ -1,9 +1,3 @@
-flake8:
-    flake8 --exclude .tox .
-
-mypy:
-    mypy --strict .
-
 isort:
     isort --skip .mypy_cache --skip .hypothesis --skip .tox .
 
@@ -13,6 +7,15 @@ sort-all:
 black:
     black --extend-exclude="\.env/|\.tox/" .
 
+flake8:
+    flake8 --exclude .tox .
+
+mypy:
+    mypy --strict .
+
+pyright:
+    pyright
+
 coverage:
     COVERAGE_FILE=.coverage/.coverage python -m pytest --cov=aiotgbot \
       --cov-report term --cov-report html:.coverage tests
@@ -20,7 +23,7 @@ coverage:
 test:
     python -m pytest tests
 
-all: isort sort-all black flake8 mypy test
+all: isort sort-all black flake8 mypy pyright test
 
 build:
     if [ -d dist ]; then rm -rf dist; fi

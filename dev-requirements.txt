@@ -16,3 +16,4 @@ twine
 black
 tox
 sort-all
+pyright
