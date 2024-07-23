@@ -137,6 +137,9 @@ def test_context_set_typed() -> None:
     assert c2.get_typed(k1) == v
     assert c2.get_typed(k2) == 10
     assert c2.get_typed(k3) == "val3"
+    c2.del_typed(k3)
+    with pytest.raises(KeyError, match="key3"):
+        c2.get_typed(k3)
 
 
 def test_bot_update_init(context: Context, update: Update) -> None:

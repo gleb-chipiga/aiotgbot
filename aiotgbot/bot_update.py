@@ -112,6 +112,9 @@ class Context(MutableMapping[str, Json]):
     def set_typed(self, key: ContextKey[_T], value: _T) -> None:
         self._data[key.name] = msgspec.to_builtins(value)
 
+    def del_typed(self, key: ContextKey[Any]) -> None:
+        del self._data[key.name]
+
 
 @dataclass
 class StateContext:
