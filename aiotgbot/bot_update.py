@@ -1,5 +1,18 @@
+import functools
+from contextlib import suppress
 from dataclasses import dataclass
-from typing import Any, Final, Iterator, MutableMapping
+from typing import (
+    Any,
+    Final,
+    Generic,
+    Iterator,
+    MutableMapping,
+    Type,
+    TypeVar,
+    get_args,
+)
+
+import msgspec
 
 from .api_types import (
     CallbackQuery,
@@ -13,20 +26,62 @@ from .api_types import (
     ShippingQuery,
     Update,
 )
+from .helpers import Json
 
 __all__ = (
     "BotUpdate",
     "Context",
+    "ContextKey",
     "StateContext",
 )
 
-from .helpers import Json
+
+_T = TypeVar("_T")
+
+
+@functools.total_ordering
+class ContextKey(Generic[_T]):
+    __slots__ = ("_name", "_type", "__orig_class__")
+    __orig_class__: Type[object]
+
+    def __init__(self, name: str, type_: Type[_T]):
+        self._name: Final = name
+        self._type: Final = type_
+
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def type(self) -> Type[_T]:
+        return self._type
+
+    def __lt__(self, other: object) -> bool:
+        if isinstance(other, ContextKey):
+            return self._name < other._name
+        return True
+
+    def __repr__(self) -> str:
+        type_ = self._type
+        if type_ is None:
+            with suppress(AttributeError):
+                type_ = get_args(self.__orig_class__)[0]
+        if type_ is None:
+            t_repr = "<<Unknown>>"
+        elif isinstance(type_, type):
+            if type_.__module__ == "builtins":
+                t_repr = type_.__qualname__
+            else:
+                t_repr = f"{type_.__module__}.{type_.__qualname__}"
+        else:
+            t_repr = repr(type_)
+        return f"<ContextKey({self._name}, type={t_repr})>"
 
 
 class Context(MutableMapping[str, Json]):
     def __init__(
         self,
-        data: dict[str, Any],
+        data: dict[str, Json],
     ) -> None:
         self._data: Final[dict[str, Json]] = data
 
@@ -50,6 +105,12 @@ class Context(MutableMapping[str, Json]):
 
     def to_dict(self) -> dict[str, Json]:
         return self._data
+
+    def get_typed(self, key: ContextKey[_T]) -> _T:
+        return msgspec.convert(self._data[key.name], key.type)
+
+    def set_typed(self, key: ContextKey[_T], value: _T) -> None:
+        self._data[key.name] = msgspec.to_builtins(value)
 
 
 @dataclass

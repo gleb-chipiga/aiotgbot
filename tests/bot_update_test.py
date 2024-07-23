@@ -1,3 +1,6 @@
+import json
+from datetime import UTC, datetime
+
 import msgspec
 import pytest
 
@@ -13,7 +16,7 @@ from aiotgbot.api_types import (
     ShippingQuery,
     Update,
 )
-from aiotgbot.bot_update import BotUpdate, Context
+from aiotgbot.bot_update import BotUpdate, Context, ContextKey
 
 
 @pytest.fixture
@@ -49,6 +52,20 @@ _UserDict = dict[str, int | bool | str]
 @pytest.fixture
 def user_dict() -> _UserDict:
     return {"id": 1, "is_bot": False, "first_name": "2"}
+
+
+def test_context_key() -> None:
+    ck1 = ContextKey("key1", int)
+    assert ck1.name == "key1"
+    assert ck1.type is int
+    assert ck1 < ""
+    assert repr(ck1) == "<ContextKey(key1, type=int)>"
+
+    ck2 = ContextKey("key2", Update)
+    assert ck2.name == "key2"
+    assert ck2.type is Update
+    assert ck2 < ""
+    assert repr(ck2) == "<ContextKey(key2, type=aiotgbot.api_types.Update)>"
 
 
 def test_context_init() -> None:
@@ -94,6 +111,32 @@ def test_context_clear(context: Context) -> None:
 
 def test_context_to_dict(context: Context) -> None:
     assert context.to_dict() == {"key1": "str1", "key2": "str2", "key3": 4}
+
+
+def test_context_set_typed() -> None:
+    class A(msgspec.Struct):
+        a: int
+        b: bool
+        c: datetime | None
+
+    k1 = ContextKey("key1", list[A | float])
+    k2 = ContextKey("key2", int)
+    k3 = ContextKey("key3", str)
+    c1 = Context({})
+    dt = datetime.now(UTC)
+    v: list[A | float] = [
+        A(11, False, dt),
+        A(22, True, None),
+        3.14,
+    ]
+    c1.set_typed(k1, v)
+    c1.set_typed(k2, 10)
+    c1.set_typed(k3, "val3")
+    j = json.dumps(c1.to_dict())
+    c2 = Context(json.loads(j))
+    assert c2.get_typed(k1) == v
+    assert c2.get_typed(k2) == 10
+    assert c2.get_typed(k3) == "val3"
 
 
 def test_bot_update_init(context: Context, update: Update) -> None:
