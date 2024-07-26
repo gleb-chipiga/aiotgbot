@@ -375,7 +375,7 @@ class User(API, frozen=True, kw_only=True):
 
 
 ChatId = NewType("ChatId", int)
-ChatTitle = NewType("ChatTitle", int)
+ChatTitle = NewType("ChatTitle", str)
 
 
 class Chat(API, frozen=True, kw_only=True):
