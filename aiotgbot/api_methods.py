@@ -51,6 +51,7 @@ from .api_types import (
     ReactionType,
     ReplyMarkup,
     ReplyParameters,
+    ResponseMessageId,
     SentWebAppMessage,
     ShippingOption,
     Sticker,
@@ -286,7 +287,7 @@ class ApiMethods(ABC):
         message_thread_id: MessageThreadId | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
-    ) -> Message:
+    ) -> tuple[ResponseMessageId, ...]:
         api_logger.debug(
             'Forward messages from "%s" to "%s"',
             from_chat_id,
@@ -296,7 +297,7 @@ class ApiMethods(ABC):
             RequestMethod.POST,
             "forwardMessages",
             chat_id,
-            Message,
+            tuple[ResponseMessageId, ...],
             from_chat_id=from_chat_id,
             message_ids=_encode_json(sorted(message_ids)),
             message_thread_id=message_thread_id,
@@ -317,7 +318,7 @@ class ApiMethods(ABC):
         protect_content: bool | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
-    ) -> MessageId:
+    ) -> ResponseMessageId:
         api_logger.debug(
             'Copy message %s to "%s" from "%s"',
             message_id,
@@ -328,7 +329,7 @@ class ApiMethods(ABC):
             RequestMethod.POST,
             "copyMessage",
             chat_id,
-            MessageId,
+            ResponseMessageId,
             from_chat_id=from_chat_id,
             message_id=message_id,
             message_thread_id=message_thread_id,
@@ -350,7 +351,7 @@ class ApiMethods(ABC):
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
         remove_caption: bool | None = None,
-    ) -> MessageId:
+    ) -> tuple[ResponseMessageId, ...]:
         api_logger.debug(
             'Copy messages from "%s" to "%s"',
             from_chat_id,
@@ -360,7 +361,7 @@ class ApiMethods(ABC):
             RequestMethod.POST,
             "copyMessages",
             chat_id,
-            MessageId,
+            tuple[ResponseMessageId, ...],
             from_chat_id=from_chat_id,
             message_ids=_encode_json(sorted(message_ids)),
             message_thread_id=message_thread_id,
