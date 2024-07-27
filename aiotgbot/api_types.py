@@ -27,6 +27,7 @@ __all__ = (
     "API",
     "APIResponse",
     "Animation",
+    "Attach",
     "Audio",
     "BotCommand",
     "BotCommandScope",
