@@ -504,6 +504,10 @@ class Message(API, frozen=True, kw_only=True):
     web_app_data: "WebAppData | None" = None
     reply_markup: "InlineKeyboardMarkup | None" = None
 
+    @property
+    def is_inaccessible(self) -> bool:
+        return self.date == 0
+
 
 class ResponseMessageId(API, frozen=True):
     message_id: MessageId

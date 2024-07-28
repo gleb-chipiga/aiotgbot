@@ -5,6 +5,7 @@ from typing import Any, AsyncIterator
 import pytest
 from more_itertools import ichunked
 
+from aiotgbot import ChatType
 from aiotgbot.api_types import (
     API,
     InputFile,
@@ -16,6 +17,8 @@ from aiotgbot.api_types import (
     InputMediaVideo,
     LocalFile,
     StreamFile,
+    Message,
+    Chat,
 )
 
 
@@ -108,3 +111,22 @@ async def test_stream_file(count: int) -> None:
         "text/plain",
         b"bytes" * count,
     )
+
+
+@pytest.mark.parametrize(
+    "date,is_inaccessible",
+    (
+        (0, True),
+        (1, False),
+    ),
+)
+async def test_message(date, is_inaccessible) -> None:
+    message = Message(
+        message_id=1,
+        date=date,
+        chat=Chat(
+            id=1,
+            type=ChatType.PRIVATE,
+        ),
+    )
+    assert message.is_inaccessible is is_inaccessible
