@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from typing import Final
+from typing import ClassVar, Final
 
 from .bot import Bot, FilterProtocol
 from .bot_update import BotUpdate
@@ -101,19 +101,30 @@ class PrivateChatFilter(FilterProtocol):
     async def check(self, bot: Bot, update: BotUpdate) -> bool:
         return (
             update.message is not None
-            and update.message.chat is not None
             and update.message.chat.type == ChatType.PRIVATE
+            or update.callback_query is not None
+            and update.callback_query.message is not None
+            and update.callback_query.message.chat.type == ChatType.PRIVATE
+            or update.my_chat_member is not None
+            and update.my_chat_member.chat.type == ChatType.PRIVATE
         )
 
 
 @dataclass(frozen=True)
 class GroupChatFilter(FilterProtocol):
+    __group_types: ClassVar = (ChatType.GROUP, ChatType.SUPERGROUP)
+
     async def check(self, bot: Bot, update: BotUpdate) -> bool:
-        group_types = (ChatType.GROUP, ChatType.SUPERGROUP)
         return (
             update.message is not None
             and update.message.chat is not None
-            and update.message.chat.type in group_types
+            and update.message.chat.type in self.__group_types
+            or update.callback_query is not None
+            and update.callback_query.message is not None
+            and update.callback_query.message.chat is not None
+            and update.callback_query.message.chat.type in self.__group_types
+            or update.my_chat_member is not None
+            and update.my_chat_member.chat.type in self.__group_types
         )
 
 
