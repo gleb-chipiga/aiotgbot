@@ -307,18 +307,14 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         if update.message is not None:
             assert update.message.from_ is not None
             user_id = update.message.from_.id
-            assert update.message.chat is not None
             chat_id = update.message.chat.id
         elif update.edited_message is not None:
             assert update.edited_message.from_ is not None
             user_id = update.edited_message.from_.id
-            assert update.edited_message.chat is not None
             chat_id = update.edited_message.chat.id
         elif update.channel_post is not None:
-            assert update.channel_post.chat is not None
             chat_id = update.channel_post.chat.id
         elif update.edited_channel_post is not None:
-            assert update.edited_channel_post.chat is not None
             chat_id = update.edited_channel_post.chat.id
         elif update.inline_query is not None:
             user_id = update.inline_query.from_.id
@@ -329,7 +325,6 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
             and update.callback_query.message is not None
         ):
             user_id = update.callback_query.from_.id
-            assert update.callback_query.message.chat is not None
             chat_id = update.callback_query.message.chat.id
         elif update.callback_query is not None:
             user_id = update.callback_query.from_.id
@@ -345,14 +340,10 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         ):
             user_id = update.poll_answer.user.id
         elif update.my_chat_member is not None:
-            assert update.my_chat_member.from_ is not None
             user_id = update.my_chat_member.from_.id
-            assert update.my_chat_member.chat is not None
             chat_id = update.my_chat_member.chat.id
         elif update.chat_member is not None:
-            assert update.chat_member.from_ is not None
             user_id = update.chat_member.from_.id
-            assert update.chat_member.chat is not None
             chat_id = update.chat_member.chat.id
 
         return user_id, chat_id
