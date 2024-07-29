@@ -131,7 +131,7 @@ class GroupChatFilter(FilterProtocol):
 
 class ORFilter(FilterProtocol):
     def __init__(self, *filters: FilterProtocol) -> None:
-        self._filters: Final[tuple[FilterProtocol, ...]] = filters
+        self._filters: Final = filters
 
     async def check(self, bot: Bot, update: BotUpdate) -> bool:
         for filter_item in self._filters:
@@ -142,7 +142,7 @@ class ORFilter(FilterProtocol):
 
 class ANDFilter(FilterProtocol):
     def __init__(self, *filters: FilterProtocol) -> None:
-        self._filters: Final[tuple[FilterProtocol, ...]] = filters
+        self._filters: Final = filters
 
     async def check(self, bot: Bot, update: BotUpdate) -> bool:
         for filter_item in self._filters:
