@@ -18,6 +18,7 @@ from aiotgbot.filters import (
     ContentTypeFilter,
     GroupChatFilter,
     MessageTextFilter,
+    NOTFilter,
     ORFilter,
     PrivateChatFilter,
     StateFilter,
@@ -317,5 +318,24 @@ async def test_and_filter(
     result: bool,
 ) -> None:
     _filter: FilterProtocol = ANDFilter(FlagFilter(flag1), FlagFilter(flag2))
+    update = make_bot_update(None, Context({}))
+    assert await _filter.check(_bot, update) == result
+
+
+@pytest.mark.parametrize(
+    "flag, result",
+    (
+        (False, True),
+        (True, False),
+    ),
+)
+@pytest.mark.asyncio
+async def test_not_filter(
+    _bot: Bot,
+    make_bot_update: _MakeBotUpdate,
+    flag: bool,
+    result: bool,
+) -> None:
+    _filter: FilterProtocol = NOTFilter(FlagFilter(flag))
     update = make_bot_update(None, Context({}))
     assert await _filter.check(_bot, update) == result

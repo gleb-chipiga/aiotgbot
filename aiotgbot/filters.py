@@ -13,6 +13,7 @@ __all__ = (
     "ContentTypeFilter",
     "GroupChatFilter",
     "MessageTextFilter",
+    "NOTFilter",
     "ORFilter",
     "PrivateChatFilter",
     "StateFilter",
@@ -148,3 +149,11 @@ class ANDFilter(FilterProtocol):
             if not await filter_item.check(bot, update):
                 return False
         return True
+
+
+class NOTFilter(FilterProtocol):
+    def __init__(self, filters: FilterProtocol) -> None:
+        self._filter: Final = filters
+
+    async def check(self, bot: Bot, update: BotUpdate) -> bool:
+        return not await self._filter.check(bot, update)
