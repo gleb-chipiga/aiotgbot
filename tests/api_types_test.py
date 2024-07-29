@@ -8,6 +8,8 @@ from more_itertools import ichunked
 from aiotgbot import ChatType
 from aiotgbot.api_types import (
     API,
+    Chat,
+    ChatId,
     InputFile,
     InputMedia,
     InputMediaAnimation,
@@ -16,9 +18,9 @@ from aiotgbot.api_types import (
     InputMediaPhoto,
     InputMediaVideo,
     LocalFile,
-    StreamFile,
     Message,
-    Chat,
+    MessageId,
+    StreamFile,
 )
 
 
@@ -120,12 +122,12 @@ async def test_stream_file(count: int) -> None:
         (1, False),
     ),
 )
-async def test_message(date, is_inaccessible) -> None:
+async def test_message(date: int, is_inaccessible: bool) -> None:
     message = Message(
-        message_id=1,
+        message_id=MessageId(1),
         date=date,
         chat=Chat(
-            id=1,
+            id=ChatId(1),
             type=ChatType.PRIVATE,
         ),
     )
