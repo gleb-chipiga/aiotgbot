@@ -1,40 +1,133 @@
-name: Publish Release
+name: Release
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
+    branches:
+      - master
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
-    environment: pypi
+    if: github.event.workflow_run.conclusion == 'success'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if version changed
+        id: version_check
+        run: |
+          if git diff HEAD~1 HEAD -- pyproject.toml | grep -q '^[+-]version'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up Python
+        if: steps.version_check.outputs.changed == 'true'
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
+
+      - name: Install tools
+        if: steps.version_check.outputs.changed == 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install openai
+
+      - name: Read version from pyproject.toml
+        if: steps.version_check.outputs.changed == 'true'
+        id: version
+        run: |
+          python - <<PY
+          import tomllib
+          from pathlib import Path
+
+          data = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+          version = data["project"]["version"]
+          print(f"Detected version: {version}")
+          with open("$GITHUB_OUTPUT", "a", encoding="utf-8") as f:
+              f.write(f"version={version}\n")
+          PY
+
+      - name: Check if tag already exists
+        if: steps.version_check.outputs.changed == 'true'
+        id: check_tag
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Get previous tag
+        if: steps.version_check.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
+        id: prev_tag
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          echo "Using previous tag: $PREV_TAG"
+          echo "prev_tag=$PREV_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release notes with OpenAI
+        if: steps.version_check.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python .github/scripts/generate_release_notes.py \
+            --version "${{ steps.version.outputs.version }}" \
+            --prev-tag "${{ steps.prev_tag.outputs.prev_tag }}" \
+            --output "release_notes.md"
+
+          echo "=== Preview release_notes.md ==="
+          sed -n '1,40p' release_notes.md
+
+      - name: Create and push git tag
+        if: steps.version_check.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
+        run: |
+          TAG="v${{ steps.version.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      - name: Create GitHub Release
+        if: steps.version_check.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          body_path: release_notes.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install uv
+        if: steps.version_check.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
         uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.11"
           enable-cache: true
 
       - name: Sync project environment
+        if: steps.version_check.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
         run: uv sync --locked
 
       - name: Build distributions
+        if: steps.version_check.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
         run: uv build
 
       - name: Validate artifacts
+        if: steps.version_check.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
         run: uvx twine check dist/*
 
-      - name: Publish with uv
+      - name: Publish to PyPI
+        if: steps.version_check.outputs.changed == 'true' && steps.check_tag.outputs.exists == 'false'
         run: uv publish --token ${{ secrets.PYPI_API_TOKEN }}
