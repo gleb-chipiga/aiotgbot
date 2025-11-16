@@ -93,9 +93,9 @@ Upgrading to 0.18.0
 
 **New features:**
 
-* **BotUpdateKey** - новый класс для типизированного хранения данных в ``BotUpdate``
-* Новые методы ``BotUpdate``: ``get_typed(key)``, ``set_typed(key, value)``, ``del_typed(key)`` - для работы с ``BotUpdateKey``
-* ``BotUpdateKey`` выполняет runtime проверку типов через ``isinstance()``
+* **BotUpdateKey** – a dedicated typed key object for items stored on ``BotUpdate``.
+* ``BotUpdate`` exposes ``get_typed(key)``, ``set_typed(key, value)``, and ``del_typed(key)`` helpers for working with ``BotUpdateKey`` instances.
+* Each ``BotUpdateKey`` enforces runtime type checking via ``isinstance()`` so handlers only see the expected payload.
 
 ``BotUpdate`` remains a regular mutable mapping so filters and handlers can stash arbitrary helper objects between each other. To keep gopher data structured, use ``BotUpdateKey`` which enforces types per slot::
 

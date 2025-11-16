@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "aiotgbot"
-version = "0.18.0"
+version = "0.18.1"
 description = "Asynchronous library for Telegram bot API"
 readme = "README.rst"
 license = { file = "LICENSE" }
