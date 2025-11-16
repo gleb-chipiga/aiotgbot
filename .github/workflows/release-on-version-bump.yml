@@ -32,7 +32,7 @@ jobs:
       - name: Read version from pyproject.toml
         id: version
         run: |
-          python - <<'PY'
+          python - <<PY
           import tomllib
           from pathlib import Path
 
@@ -42,6 +42,14 @@ jobs:
           with open("$GITHUB_OUTPUT", "a", encoding="utf-8") as f:
               f.write(f"version={version}\n")
           PY
+
+      - name: Wait for CI to complete
+        run: |
+          echo "Waiting for CI workflow to complete..."
+          gh run watch --repo ${{ github.repository }} \
+            $(gh run list --workflow=ci.yml --commit=${{ github.sha }} --json databaseId --jq '.[0].databaseId')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Check if tag already exists
         id: check_tag
