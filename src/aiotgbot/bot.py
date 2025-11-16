@@ -1,22 +1,27 @@
+from __future__ import annotations  # Python 3.11 compatibility
+
 import asyncio
 import logging
-from abc import abstractmethod
+from abc import ABC, abstractmethod
+from collections.abc import (
+    AsyncIterator,
+    Awaitable,
+    Callable,
+    Iterator,
+    Mapping,
+    MutableMapping,
+)
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from functools import partial
 from http import HTTPStatus
 from typing import (
     Any,
-    AsyncIterator,
-    Awaitable,
-    Callable,
     Final,
-    Iterator,
-    MutableMapping,
     NewType,
     Protocol,
-    Type,
     TypeVar,
+    cast,
     overload,
     runtime_checkable,
 )
@@ -26,6 +31,7 @@ import backoff
 import msgspec
 from aiofreqlimit import FreqLimit
 from aiohttp import ClientError, ClientSession, FormData, TCPConnector
+from typing_extensions import override  # Python 3.11 compatibility
 
 from .api_methods import ApiMethods, ParamType
 from .api_types import APIResponse, ChatId, InputFile, Update, User, UserId
@@ -70,34 +76,31 @@ EventHandler = Callable[["Bot"], Awaitable[None]]
 
 T = TypeVar("T")
 V = TypeVar("V")
+StorageKey = str | BotKey[Any]  # pyright: ignore[reportExplicitAny] -- need top type for AppKey invariance
+StoredValue = object
 UserChatKey = NewType("UserChatKey", str)
 StateKey = NewType("StateKey", str)
 ContextKey = NewType("ContextKey", str)
 
 
-class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
+class Bot(MutableMapping[StorageKey, StoredValue], ApiMethods, ABC):
+    _stopped: bool
+    _updates_offset: int
+
     def __init__(
         self,
         token: str,
-        handler_table: "HandlerTableProtocol",
+        handler_table: HandlerTableProtocol,
         storage: StorageProtocol,
         client_session: ClientSession | None = None,
     ) -> None:
         if not handler_table.frozen:
             raise RuntimeError("Can't use unfrozen handler table")
-        if not isinstance(handler_table, HandlerTableProtocol):
-            raise RuntimeError(
-                "Handler table is not HandlerTableProtocol instance"
-            )
-        if not isinstance(storage, StorageProtocol):
-            raise RuntimeError(
-                "Storage parameter is not StorageProtocol instance"
-            )
         self._token: Final[str] = token
-        self._handler_table: Final["HandlerTableProtocol"] = handler_table
+        self._handler_table: Final[HandlerTableProtocol] = handler_table
         self._storage: Final[StorageProtocol] = storage
         if client_session is not None:
-            client_session.headers.setdefault("User-Agent", SOFTWARE)
+            _ = client_session.headers.setdefault("User-Agent", SOFTWARE)
         else:
             client_session = ClientSession(
                 connector=TCPConnector(keepalive_timeout=60),
@@ -110,36 +113,56 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         self._group_limit: Final[FreqLimit] = FreqLimit(GROUP_INTERVAL)
         self._scheduler: aiojobs.Scheduler | None = None
         self._started: bool = False
-        self._stopped: bool = False
-        self._updates_offset: int = 0
+        self._stopped = False
+        self._updates_offset = 0
         self._me: User | None = None
-        self._data: Final[dict[BotKey[Any] | str, object]] = {}
+        self._data: Final[dict[StorageKey, StoredValue]] = {}
 
-    @overload  # type: ignore[override]
+    @staticmethod
+    def _normalize_storage_key(key: str | BotKey[T]) -> StorageKey:
+        if isinstance(key, str):
+            return key
+        return cast(
+            BotKey[Any],  # pyright: ignore[reportExplicitAny]
+            key,
+        )
+
+    @overload
     def __getitem__(self, key: BotKey[T]) -> T: ...
 
     @overload
-    def __getitem__(self, key: str) -> Any: ...
+    def __getitem__(self, key: StorageKey) -> StoredValue: ...
 
-    def __getitem__(self, key: str | BotKey[T]) -> Any:
-        return self._data[key]
+    @override
+    def __getitem__(self, key: StorageKey) -> StoredValue:
+        storage_key = self._normalize_storage_key(key)
+        value = self._data[storage_key]
+        if isinstance(key, str):
+            return value
+        return value
 
-    @overload  # type: ignore[override]
+    @overload
     def __setitem__(self, key: BotKey[T], value: T) -> None: ...
 
     @overload
-    def __setitem__(self, key: str, value: Any) -> None: ...
+    def __setitem__(self, key: StorageKey, value: StoredValue) -> None: ...
 
-    def __setitem__(self, key: str | BotKey[T], value: Any) -> None:
-        self._data[key] = value
+    @override
+    def __setitem__(self, key: StorageKey, value: StoredValue) -> None:
+        storage_key = self._normalize_storage_key(key)
+        self._data[storage_key] = value
 
+    @override
     def __delitem__(self, key: str | BotKey[T]) -> None:
-        del self._data[key]
+        storage_key = self._normalize_storage_key(key)
+        del self._data[storage_key]
 
+    @override
     def __len__(self) -> int:
         return len(self._data)
 
-    def __iter__(self) -> Iterator[str | BotKey[Any]]:
+    @override
+    def __iter__(self) -> Iterator[StorageKey]:
         return iter(self._data)
 
     @property
@@ -152,21 +175,20 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
 
     @property
     def client(self) -> ClientSession:
-        if self._client_session is None:
-            raise RuntimeError("Access to client during bot is not running.")
-        else:
-            return self._client_session
+        return self._client_session
 
     def file_url(self, path: str) -> str:
         return TG_FILE_URL.format(token=self._token, path=path)
 
     @staticmethod
     def _scheduler_exception_handler(
-        _: aiojobs.Scheduler, context: dict[str, Any]
+        _: aiojobs.Scheduler, context: Mapping[str, object]
     ) -> None:
-        bot_logger.exception(
-            "Update handle error", exc_info=context["exception"]
-        )
+        exception = context.get("exception")
+        if isinstance(exception, BaseException):
+            bot_logger.exception("Update handle error", exc_info=exception)
+        else:
+            bot_logger.exception("Update handle error")
 
     @staticmethod
     def _telegram_exception(api_response: APIResponse) -> TelegramError:
@@ -181,7 +203,7 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
             retry_after = api_response.parameters.retry_after
             assert retry_after is not None
             return RetryAfter(error_code, description, retry_after)
-        elif (
+        if (
             api_response.parameters is not None
             and api_response.parameters.migrate_to_chat_id is not None
         ):
@@ -190,31 +212,30 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
                 description,
                 api_response.parameters.migrate_to_chat_id,
             )
-        elif (
-            error_code >= HTTPStatus.INTERNAL_SERVER_ERROR
-            and RestartingTelegram.match(description)
+        if error_code >= HTTPStatus.INTERNAL_SERVER_ERROR and RestartingTelegram.match(
+            description
         ):
             return RestartingTelegram(error_code, description)
-        elif BadGateway.match(description):
+        if BadGateway.match(description):
             return BadGateway(error_code, description)
-        elif BotBlocked.match(description):
+        if BotBlocked.match(description):
             return BotBlocked(error_code, description)
-        elif ChatNotFound.match(description):
+        if ChatNotFound.match(description):
             return ChatNotFound(error_code, description)
-        elif BotKicked.match(description):
+        if BotKicked.match(description):
             return BotKicked(error_code, description)
-        else:
-            return TelegramError(error_code, description)
+        return TelegramError(error_code, description)
 
+    @override
     @backoff.on_exception(backoff.expo, ClientError)
     async def _request(
         self,
         http_method: RequestMethod,
         api_method: str,
-        type_: Type[V],
+        type_: type[V],
         **params: ParamType,
     ) -> V:
-        data = {
+        normalized_params = {
             name: str(value) if isinstance(value, (int, float)) else value
             for name, value in params.items()
             if value is not None
@@ -223,17 +244,21 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
             "Request %s %s %r",
             http_method,
             api_method,
-            data,
+            normalized_params,
         )
         if http_method == RequestMethod.GET:
-            if len(data) > 0:
-                assert all(isinstance(value, str) for value in data.values())
-                request = partial(self.client.get, params=data)
+            if len(normalized_params) > 0:
+                query_params: dict[str, str] = {}
+                for name, value in normalized_params.items():
+                    if not isinstance(value, str):
+                        raise TypeError("GET parameters must be strings")
+                    query_params[name] = value
+                request = partial(self.client.get, params=query_params)
             else:
                 request = partial(self.client.get)
         else:
             form_data = FormData()
-            for name, value in data.items():
+            for name, value in normalized_params.items():
                 if isinstance(value, InputFile):
                     form_data.add_field(
                         name,
@@ -252,29 +277,30 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
         if api_response.ok:
             assert isinstance(api_response.result, msgspec.Raw)
             return msgspec.json.decode(api_response.result, type=type_)
-        else:
-            assert api_response.result is msgspec.UNSET
-            raise Bot._telegram_exception(api_response)
+        assert api_response.result is msgspec.UNSET
+        raise Bot._telegram_exception(api_response)
 
+    @override
     async def _safe_request(
         self,
         http_method: RequestMethod,
         api_method: str,
         chat_id: ChatId | str,
-        type_: Type[V],
+        type_: type[V],
         **params: ParamType,
     ) -> V:
         retry_allowed = all(
             not isinstance(param, InputFile) for param in params.values()
         )
-        request: Callable[[], Awaitable[V]] = partial(
-            self._request,
-            http_method,
-            api_method,
-            type_,
-            chat_id=chat_id,
-            **params,
-        )
+
+        async def perform_request() -> V:
+            return await self._request(
+                http_method,
+                api_method,
+                type_,
+                chat_id=chat_id,
+                **params,
+            )
 
         chat = await self.get_chat(chat_id)
         while True:
@@ -283,11 +309,11 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
                 if chat.type in (ChatType.GROUP, ChatType.SUPERGROUP):
                     group_limit = self._group_limit.resource(chat.id)
                     async with message_limit, group_limit:
-                        return await request()
+                        return await perform_request()
                 else:
                     chat_limit = self._chat_limit.resource(chat.id)
                     async with message_limit, chat_limit:
-                        return await request()
+                        return await perform_request()
             except RetryAfter as retry_after:
                 if retry_allowed:
                     await asyncio.sleep(retry_after.retry_after)
@@ -334,10 +360,7 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
             user_id = update.pre_checkout_query.from_.id
         elif update.poll is not None:
             pass
-        elif (
-            update.poll_answer is not None
-            and update.poll_answer.user is not None
-        ):
+        elif update.poll_answer is not None and update.poll_answer.user is not None:
             user_id = update.poll_answer.user.id
         elif update.my_chat_member is not None:
             user_id = update.my_chat_member.from_.id
@@ -455,10 +478,13 @@ class Bot(MutableMapping[str | BotKey[Any], Any], ApiMethods):
 
 
 class PollBot(Bot):
+    _stopped: bool
+    _updates_offset: int
+
     def __init__(
         self,
         token: str,
-        handler_table: "HandlerTableProtocol",
+        handler_table: HandlerTableProtocol,
         storage: StorageProtocol,
         client_session: ClientSession | None = None,
     ) -> None:
@@ -470,6 +496,7 @@ class PollBot(Bot):
         )
         self._poll_task: asyncio.Task[None] | None = None
 
+    @override
     async def start(self) -> None:
         if self._started:
             raise RuntimeError("Polling already started")
@@ -482,6 +509,7 @@ class PollBot(Bot):
             self._me.username,
         )
 
+    @override
     async def stop(self) -> None:
         if not self._started:
             raise RuntimeError("Polling not started")
@@ -491,7 +519,7 @@ class PollBot(Bot):
         bot_logger.debug("Stop polling")
         self._stopped = True
         if not self._poll_task.done():
-            self._poll_task.cancel()
+            _ = self._poll_task.cancel()
 
     async def _poll_wrapper(self) -> None:
         assert self._me is not None
@@ -521,7 +549,7 @@ class PollBot(Bot):
                 timeout=TG_GET_UPDATES_TIMEOUT,
             )
             for update in updates:
-                await self._scheduler.spawn(
+                _ = await self._scheduler.spawn(
                     self._handle_update(update),
                     f"handle_update_{update.update_id}",
                 )
@@ -539,9 +567,7 @@ class Handler:
     filters: FiltersType
 
     async def check(self, bot: Bot, update: BotUpdate) -> bool:
-        return all(
-            [await _filter.check(bot, update) for _filter in self.filters]
-        )
+        return all([await _filter.check(bot, update) for _filter in self.filters])
 
 
 @runtime_checkable
@@ -549,10 +575,8 @@ class HandlerTableProtocol(Protocol):
     def freeze(self) -> None: ...
 
     @property
-    @abstractmethod
     def frozen(self) -> bool: ...
 
-    @abstractmethod
     async def get_handler(
         self, bot: Bot, update: BotUpdate
     ) -> HandlerCallable | None: ...
@@ -560,5 +584,4 @@ class HandlerTableProtocol(Protocol):
 
 @runtime_checkable
 class FilterProtocol(Protocol):
-    @abstractmethod
     async def check(self, bot: Bot, update: BotUpdate) -> bool: ...

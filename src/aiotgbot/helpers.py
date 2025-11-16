@@ -1,10 +1,13 @@
 import asyncio
+from collections.abc import AsyncIterator, Hashable
 from contextlib import asynccontextmanager
-from typing import AsyncIterator, Final, Hashable
+from typing import Final
 from weakref import WeakValueDictionary
 
 import msgspec.json
 from aiohttp import web
+
+from ._version import __version__
 
 __all__ = (
     "BotKey",
@@ -29,8 +32,6 @@ def get_python_version() -> str:
 
 
 def get_software() -> str:
-    from . import __version__
-
     return f"Python/{get_python_version()} aiotgbot/{__version__}"
 
 

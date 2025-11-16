@@ -1,0 +1,51 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.14.5
+    hooks:
+      - id: ruff-check
+        args:
+          - --fix
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.18.2
+    hooks:
+      - id: mypy
+        name: mypy --strict
+        args:
+          - --strict
+          - src/aiotgbot
+          - tests
+        pass_filenames: false
+        additional_dependencies:
+          - aiofreqlimit>=0.0.12
+          - aiohttp>=3.9
+          - aiojobs>=1.2.1
+          - backoff>=2
+          - frozenlist
+          - msgspec
+          - yarl
+          - aiosqlite
+          - sqlalchemy
+          - cryptography<=38
+          - pytest
+          - pytest-asyncio>=0.19
+          - more-itertools
+          - types-setuptools
+
+  - repo: https://github.com/DetachHead/basedpyright-prek-mirror
+    rev: 1.33.0
+    hooks:
+      - id: basedpyright
+        pass_filenames: false
+        additional_dependencies:
+          - aiofreqlimit>=0.0.12
+          - aiohttp>=3.9
+          - aiojobs>=1.2.1
+          - backoff>=2
+          - frozenlist
+          - msgspec
+          - yarl
+          - aiosqlite
+          - sqlalchemy
+          - cryptography<=38

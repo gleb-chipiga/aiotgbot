@@ -1,21 +1,10 @@
 import asyncio
-from abc import abstractmethod
+from collections.abc import AsyncIterator, Sequence
 from dataclasses import dataclass
 from enum import StrEnum, unique
 from io import BufferedReader
 from pathlib import Path
-from typing import (
-    Any,
-    AsyncIterator,
-    Final,
-    NewType,
-    Protocol,
-    Self,
-    Sequence,
-    Union,
-    cast,
-    runtime_checkable,
-)
+from typing import Final, NewType, Protocol, Self, cast, runtime_checkable
 
 import msgspec
 from msgspec import UNSET, Raw, Struct, UnsetType, field
@@ -231,16 +220,12 @@ class DataMappingError(BaseException):
 @runtime_checkable
 class InputFile(Protocol):
     @property
-    @abstractmethod
     def name(self) -> str: ...
 
     @property
-    @abstractmethod
-    def content_type(self) -> str | None:
-        pass
+    def content_type(self) -> str | None: ...
 
     @property
-    @abstractmethod
     def content(self) -> AsyncIterator[bytes]: ...
 
 
@@ -257,9 +242,7 @@ class LocalFile:
         path: str | Path,
         content_type: str | None = None,
     ) -> None:
-        self._path: Final[Path] = (
-            path if isinstance(path, Path) else Path(path)
-        )
+        self._path: Final[Path] = path if isinstance(path, Path) else Path(path)
         self._content_type: Final[str | None] = content_type
 
     @property
@@ -301,11 +284,11 @@ class LocalFile:
 class API(Struct, frozen=True, omit_defaults=True):
     pass
 
-    def to_builtins(self) -> Any:
-        return msgspec.to_builtins(self)
+    def to_builtins(self) -> object:
+        return cast(object, msgspec.to_builtins(self))
 
     @classmethod
-    def convert(cls, obj: Any) -> Self:
+    def convert(cls, obj: object) -> Self:
         return msgspec.convert(obj, cls)
 
 
@@ -471,9 +454,7 @@ class Message(API, frozen=True, kw_only=True):
     group_chat_created: bool | None = None
     supergroup_chat_created: bool | None = None
     channel_chat_created: bool | None = None
-    message_auto_delete_timer_changed: Union[
-        "MessageAutoDeleteTimerChanged", None
-    ] = None
+    message_auto_delete_timer_changed: "MessageAutoDeleteTimerChanged | None" = None
     migrate_to_chat_id: ChatId | None = None
     migrate_from_chat_id: ChatId | None = None
     pinned_message: "Message | None" = None
@@ -498,9 +479,7 @@ class Message(API, frozen=True, kw_only=True):
     video_chat_scheduled: "VideoChatScheduled | None" = None
     video_chat_started: "VideoChatStarted | None" = None
     video_chat_ended: "VideoChatEnded | None" = None
-    video_chat_participants_invited: Union[
-        "VideoChatParticipantsInvited", None
-    ] = None
+    video_chat_participants_invited: "VideoChatParticipantsInvited | None" = None
     web_app_data: "WebAppData | None" = None
     reply_markup: "InlineKeyboardMarkup | None" = None
 
@@ -616,12 +595,12 @@ class MessageOriginChannel(
     author_signature: str
 
 
-MessageOrigin = Union[
-    MessageOriginUser,
-    MessageOriginHiddenUser,
-    MessageOriginChat,
-    MessageOriginChannel,
-]
+MessageOrigin = (
+    MessageOriginUser
+    | MessageOriginHiddenUser
+    | MessageOriginChat
+    | MessageOriginChannel
+)
 
 FileId = NewType("FileId", str)
 FileUniqueId = NewType("FileUniqueId", str)
@@ -1003,12 +982,9 @@ class ForceReply(
     selective: bool | None = None
 
 
-ReplyMarkup = Union[
-    InlineKeyboardMarkup,
-    ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
-    ForceReply,
-]
+ReplyMarkup = (
+    InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply
+)
 
 
 class ChatPhoto(API, frozen=True, kw_only=True):
@@ -1143,14 +1119,14 @@ class ChatMemberBanned(
     until_date: int
 
 
-ChatMember = Union[
-    ChatMemberOwner,
-    ChatMemberAdministrator,
-    ChatMemberMember,
-    ChatMemberRestricted,
-    ChatMemberLeft,
-    ChatMemberBanned,
-]
+ChatMember = (
+    ChatMemberOwner
+    | ChatMemberAdministrator
+    | ChatMemberMember
+    | ChatMemberRestricted
+    | ChatMemberLeft
+    | ChatMemberBanned
+)
 
 
 class ChatMemberUpdated(API, frozen=True, kw_only=True):
@@ -1221,10 +1197,7 @@ class ReactionTypeCustomEmoji(
     custom_emoji: str
 
 
-ReactionType = Union[
-    ReactionTypeEmoji,
-    ReactionTypeCustomEmoji,
-]
+ReactionType = ReactionTypeEmoji | ReactionTypeCustomEmoji
 
 
 class ReactionCount(API, frozen=True, kw_only=True):
@@ -1390,11 +1363,9 @@ class ChatBoostSourceGiveaway(
     is_unclaimed: bool | None = None
 
 
-ChatBoostSource = Union[
-    ChatBoostSourcePremium,
-    ChatBoostSourceGiftCode,
-    ChatBoostSourceGiveaway,
-]
+ChatBoostSource = (
+    ChatBoostSourcePremium | ChatBoostSourceGiftCode | ChatBoostSourceGiveaway
+)
 
 
 class ChatBoost(API, frozen=True, kw_only=True):
@@ -1980,12 +1951,12 @@ class InputInvoiceMessageContent(API, frozen=True, kw_only=True):
     is_flexible: bool | None = None
 
 
-InputMessageContent = Union[
-    InputTextMessageContent,
-    InputLocationMessageContent,
-    InputVenueMessageContent,
-    InputContactMessageContent,
-]
+InputMessageContent = (
+    InputTextMessageContent
+    | InputLocationMessageContent
+    | InputVenueMessageContent
+    | InputContactMessageContent
+)
 
 
 class ChosenInlineResult(API, frozen=True, kw_only=True):
@@ -2129,7 +2100,7 @@ class PassportElementDataType(StrEnum):
     ADDRESS = PassportElementType.ADDRESS
 
 
-class PassportElementErrorDataField(
+class PassportElementErrorDataField(  # noqa: N818 - Telegram API naming
     PassportElementError,
     frozen=True,
     tag="data",
@@ -2149,7 +2120,7 @@ class PassportElementFrontSideType(StrEnum):
     INTERNAL_PASSPORT = PassportElementType.INTERNAL_PASSPORT
 
 
-class PassportElementErrorFrontSide(
+class PassportElementErrorFrontSide(  # noqa: N818 - Telegram API naming
     PassportElementError,
     frozen=True,
     tag="front_side",
@@ -2166,7 +2137,7 @@ class PassportElementReverseSideType(StrEnum):
     IDENTITY_CARD = PassportElementType.IDENTITY_CARD
 
 
-class PassportElementErrorReverseSide(
+class PassportElementErrorReverseSide(  # noqa: N818 - Telegram API naming
     PassportElementError,
     frozen=True,
     tag="reverse_side",
@@ -2185,7 +2156,7 @@ class PassportElementSelfieType(StrEnum):
     INTERNAL_PASSPORT = PassportElementType.INTERNAL_PASSPORT
 
 
-class PassportElementErrorSelfie(
+class PassportElementErrorSelfie(  # noqa: N818 - Telegram API naming
     PassportElementError,
     frozen=True,
     tag="selfie",
@@ -2205,7 +2176,7 @@ class PassportElementFileType(StrEnum):
     TEMPORARY_REGISTRATION = PassportElementType.TEMPORARY_REGISTRATION
 
 
-class PassportElementErrorFile(
+class PassportElementErrorFile(  # noqa: N818 - Telegram API naming
     PassportElementError,
     frozen=True,
     tag="file",
@@ -2216,7 +2187,7 @@ class PassportElementErrorFile(
     message: str
 
 
-class PassportElementErrorFiles(
+class PassportElementErrorFiles(  # noqa: N818 - Telegram API naming
     PassportElementError,
     frozen=True,
     tag="files",
@@ -2240,7 +2211,7 @@ class PassportElementTranslationFileType(StrEnum):
     TEMPORARY_REGISTRATION = PassportElementType.TEMPORARY_REGISTRATION
 
 
-class PassportElementErrorTranslationFile(
+class PassportElementErrorTranslationFile(  # noqa: N818 - Telegram API naming
     PassportElementError,
     frozen=True,
     tag="translation_file",
@@ -2251,7 +2222,7 @@ class PassportElementErrorTranslationFile(
     message: str
 
 
-class PassportElementErrorTranslationFiles(
+class PassportElementErrorTranslationFiles(  # noqa: N818 - Telegram API naming
     PassportElementError,
     frozen=True,
     tag="translation_files",
@@ -2262,7 +2233,7 @@ class PassportElementErrorTranslationFiles(
     message: str
 
 
-class PassportElementErrorUnspecified(
+class PassportElementErrorUnspecified(  # noqa: N818 - Telegram API naming
     PassportElementError,
     frozen=True,
     tag="unspecified",

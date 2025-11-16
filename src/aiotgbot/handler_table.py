@@ -1,5 +1,6 @@
 import re
-from typing import Callable, Final, Iterable
+from collections.abc import Callable, Iterable
+from typing import Final
 
 from frozenlist import FrozenList
 
@@ -31,9 +32,7 @@ class HandlerTable:
     def frozen(self) -> bool:
         return self._handlers.frozen
 
-    async def get_handler(
-        self, bot: Bot, update: BotUpdate
-    ) -> HandlerCallable | None:
+    async def get_handler(self, bot: Bot, update: BotUpdate) -> HandlerCallable | None:
         for handler in self._handlers:
             if await handler.check(bot, update):
                 return handler.callable
@@ -105,9 +104,7 @@ class HandlerTable:
         filters: Iterable[FilterProtocol] | None = None,
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
-            self.edited_message_handler(
-                handler=handler, state=state, filters=filters
-            )
+            self.edited_message_handler(handler=handler, state=state, filters=filters)
             return handler
 
         return decorator
@@ -132,9 +129,7 @@ class HandlerTable:
         filters: Iterable[FilterProtocol] | None = None,
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
-            self.channel_post_handler(
-                handler=handler, state=state, filters=filters
-            )
+            self.channel_post_handler(handler=handler, state=state, filters=filters)
             return handler
 
         return decorator
@@ -186,9 +181,7 @@ class HandlerTable:
         filters: Iterable[FilterProtocol] | None = None,
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
-            self.inline_query_handler(
-                handler=handler, state=state, filters=filters
-            )
+            self.inline_query_handler(handler=handler, state=state, filters=filters)
             return handler
 
         return decorator
@@ -234,9 +227,7 @@ class HandlerTable:
         if isinstance(data_match, re.Pattern):
             handler_filters.append(CallbackQueryDataFilter(data_match))
         elif isinstance(data_match, str):
-            handler_filters.append(
-                CallbackQueryDataFilter(re.compile(data_match))
-            )
+            handler_filters.append(CallbackQueryDataFilter(re.compile(data_match)))
         if filters is not None:
             handler_filters.extend(filters)
         self._handlers.append(Handler(handler, tuple(handler_filters)))
@@ -278,9 +269,7 @@ class HandlerTable:
         filters: Iterable[FilterProtocol] | None = None,
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
-            self.shipping_query_handler(
-                handler=handler, state=state, filters=filters
-            )
+            self.shipping_query_handler(handler=handler, state=state, filters=filters)
             return handler
 
         return decorator
@@ -357,9 +346,7 @@ class HandlerTable:
         filters: Iterable[FilterProtocol] | None = None,
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
-            self.poll_answer_handler(
-                handler=handler, state=state, filters=filters
-            )
+            self.poll_answer_handler(handler=handler, state=state, filters=filters)
             return handler
 
         return decorator
@@ -384,9 +371,7 @@ class HandlerTable:
         filters: Iterable[FilterProtocol] | None = None,
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
-            self.my_chat_member_handler(
-                handler=handler, state=state, filters=filters
-            )
+            self.my_chat_member_handler(handler=handler, state=state, filters=filters)
             return handler
 
         return decorator
@@ -411,9 +396,7 @@ class HandlerTable:
         filters: Iterable[FilterProtocol] | None = None,
     ) -> HandlerDecorator:
         def decorator(handler: HandlerCallable) -> HandlerCallable:
-            self.chat_member_handler(
-                handler=handler, state=state, filters=filters
-            )
+            self.chat_member_handler(handler=handler, state=state, filters=filters)
             return handler
 
         return decorator

@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from aiotgbot.exceptions import MigrateToChat, RetryAfter, TelegramError
 
 
@@ -10,7 +12,7 @@ def test_telegram_error_init() -> None:
 
 def test_telegram_error_match() -> None:
     class SomeError(TelegramError):
-        pattern = "substring"
+        pattern: ClassVar[str | None] = "substring"
 
     assert not TelegramError.match("some string")
     assert SomeError.match("str substring str")

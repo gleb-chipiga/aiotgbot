@@ -1,36 +1,162 @@
-[tool.isort]
-profile = "black"
-line_length = 79
+[build-system]
+requires = ["uv_build>=0.9.6,<0.10.0"]
+build-backend = "uv_build"
 
-[tool.black]
-line-length = 79
+[project]
+name = "aiotgbot"
+version = "0.18.0"
+description = "Asynchronous library for Telegram bot API"
+readme = "README.rst"
+license = { file = "LICENSE" }
+authors = [{ name = "Gleb Chipiga" }]
+requires-python = ">=3.11,<3.14"
+urls = { Homepage = "https://github.com/gleb-chipiga/aiotgbot" }
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: MIT License",
+    "Development Status :: 4 - Beta",
+    "Operating System :: POSIX",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Internet",
+    "Topic :: Communications :: Chat",
+    "Framework :: AsyncIO",
+]
+dependencies = [
+    "aiofreqlimit>=0.0.12",
+    "aiohttp>=3.9",
+    "aiojobs>=1.2.1",
+    "backoff>=2",
+    "frozenlist",
+    "msgspec",
+    "yarl",
+]
+
+[project.optional-dependencies]
+sqlite = ["aiosqlite"]
+passport = ["cryptography<=38"]
+sqlalchemy = ["sqlalchemy"]
+
+[dependency-groups]
+lint = [
+    "basedpyright",
+    "mypy",
+    "ruff",
+    "pytest",
+    "pytest-asyncio>=0.19",
+    "more-itertools",
+    "aiosqlite",
+    "sqlalchemy",
+    "cryptography<=38",
+    "types-setuptools",
+]
+test = [
+    "aiosqlite",
+    "cryptography",
+    "hypothesis",
+    "more-itertools",
+    "pytest",
+    "pytest-asyncio>=0.19",
+    "pytest-cov",
+    "sqlalchemy",
+    "uvloop",
+]
+dev = [
+    "aiosqlite",
+    "basedpyright",
+    "build",
+    "cryptography",
+    "hypothesis",
+    "more-itertools",
+    "mypy",
+    "pytest",
+    "pytest-asyncio>=0.19",
+    "pytest-cov",
+    "ruff",
+    "sqlalchemy",
+    "twine",
+    "types-setuptools",
+    "upload",
+    "uvloop",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+preview = true
+
+[tool.ruff.format]
+docstring-code-format = true
+indent-style = "space"
+line-ending = "lf"
+quote-style = "double"
+skip-magic-trailing-comma = false
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "W",
+    "B",
+    "C4",
+    "I",
+    "N",
+    "RET",
+    "RUF",
+    "SIM",
+    "UP",
+    "YTT",
+]
+fixable = ["ALL"]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 88
+max-doc-length = 72
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["aiotgbot"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 
 [tool.tox]
-legacy_tox_ini = """
-    [tox]
-    envlist = py311,py312
+requires = ["tox>=4.22", "tox-uv>=1.15"]
+env_list = ["py311", "py312", "py313", "lint"]
 
-    [testenv]
-    deps =
-        aiosqlite
-        cryptography
-        flake8
-        hypothesis
-        mypy
-        more-itertools
-        pyright
-        pytest
-        pytest-asyncio
-        sqlalchemy
-        types-setuptools
-        uvloop
+[tool.tox.env_run_base]
+runner = "uv-venv-lock-runner"
+commands = [
+    ["pytest", "tests"],
+]
 
-    commands =
-        flake8 aiotgbot tests
-        mypy --strict aiotgbot tests
-        pyright
-        pytest tests
-"""
+[tool.tox.env.py311]
+description = "Tests on CPython 3.11"
+base_python = ["python3.11"]
+dependency_groups = ["test"]
+
+[tool.tox.env.py312]
+description = "Tests on CPython 3.12"
+base_python = ["python3.12"]
+dependency_groups = ["test"]
+
+[tool.tox.env.py313]
+description = "Tests on CPython 3.13"
+base_python = ["python3.13"]
+dependency_groups = ["test"]
+
+[tool.tox.env.lint]
+description = "Lint + type checks on CPython 3.11"
+base_python = ["python3.11"]
+dependency_groups = ["lint"]
+commands = [
+    ["ruff", "format", "--check", "src/aiotgbot", "tests"],
+    ["ruff", "check", "src/aiotgbot", "tests"],
+    ["mypy", "--strict", "src/aiotgbot", "tests"],
+    ["basedpyright"],
+]

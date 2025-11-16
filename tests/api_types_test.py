@@ -1,6 +1,8 @@
+import asyncio
+from collections.abc import AsyncIterator
 from io import BytesIO
 from tempfile import TemporaryDirectory
-from typing import Any, AsyncIterator
+from typing import cast
 
 import pytest
 from more_itertools import ichunked
@@ -54,13 +56,14 @@ def test_convert() -> None:
         InputMediaDocument,
     ),
 )
-def test_input_media_serialization(type_: Any) -> None:
-    input_media = type_(media=BytesIO(b"bytes"))
+def test_input_media_serialization(type_: type[InputMedia]) -> None:
+    bad_media = cast(object, BytesIO(b"bytes"))
+    input_media = type_(media=cast(InputFile, bad_media))
     with pytest.raises(
         TypeError,
-        match="Encoding objects of type _io.BytesIO is unsupported",
+        match=r"Encoding objects of type _io\.BytesIO is unsupported",
     ):
-        input_media.to_builtins()
+        _ = input_media.to_builtins()
 
 
 async def check_input_file(
@@ -85,7 +88,7 @@ async def test_local_file(count: int) -> None:
         file_name = f"{tmpdirname}/file.tmp"
         with open(file_name, "wb") as writer:
             for _ in range(count):
-                writer.write(b"bytes")
+                _ = writer.write(b"bytes")
         file = LocalFile(file_name)
         await check_input_file(
             file,
@@ -100,6 +103,7 @@ async def test_local_file(count: int) -> None:
 async def test_stream_file(count: int) -> None:
     async def content() -> AsyncIterator[bytes]:
         for chunk in ichunked(b"bytes" * count, 32):
+            await asyncio.sleep(0)
             yield bytes(chunk)
 
     file = StreamFile(
@@ -122,7 +126,7 @@ async def test_stream_file(count: int) -> None:
         (1, False),
     ),
 )
-async def test_message(date: int, is_inaccessible: bool) -> None:
+def test_message(date: int, is_inaccessible: bool) -> None:
     message = Message(
         message_id=MessageId(1),
         date=date,

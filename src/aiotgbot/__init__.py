@@ -1,5 +1,4 @@
-__version__ = "0.17.18"
-
+from ._version import __version__
 from .api_types import (
     API,
     CallbackQuery,
@@ -21,7 +20,7 @@ from .api_types import (
     User,
 )
 from .bot import Bot, FilterProtocol, PollBot
-from .bot_update import BotUpdate
+from .bot_update import BotUpdate, BotUpdateKey
 from .constants import (
     ChatAction,
     ChatMemberStatus,
@@ -56,13 +55,14 @@ from .handler_table import HandlerTable
 from .storage import StorageProtocol
 
 __all__ = (
-    "ANDFilter",
     "API",
+    "ANDFilter",
     "BadGateway",
     "Bot",
     "BotBlocked",
     "BotKicked",
     "BotUpdate",
+    "BotUpdateKey",
     "CallbackQuery",
     "CallbackQueryDataFilter",
     "Chat",

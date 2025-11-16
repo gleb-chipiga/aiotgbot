@@ -50,7 +50,7 @@ Using aiotgbot
 
     from typing import AsyncIterator
 
-    from aiotgbot import (Bot, BotUpdate, HandlerTable, PollBot,
+    from aiotgbot import (Bot, BotUpdate, BotUpdateKey, HandlerTable, PollBot,
                           PrivateChatFilter, Runner)
     from aiotgbot.storage_memory import MemoryStorage
 
@@ -62,6 +62,7 @@ Using aiotgbot
         assert update.message is not None
         name = (f'{update.message.chat.first_name} '
                 f'{update.message.chat.last_name}')
+        update["greeting_count"] = update.get("greeting_count", 0) + 1
         await bot.send_message(update.message.chat.id, f'Hello, {name}!')
 
 
@@ -86,3 +87,56 @@ Using aiotgbot
 
     if __name__ == '__main__':
         main()
+
+Upgrading to 0.18.0
+===================
+
+**New features:**
+
+* **BotUpdateKey** - новый класс для типизированного хранения данных в ``BotUpdate``
+* Новые методы ``BotUpdate``: ``get_typed(key)``, ``set_typed(key, value)``, ``del_typed(key)`` - для работы с ``BotUpdateKey``
+* ``BotUpdateKey`` выполняет runtime проверку типов через ``isinstance()``
+
+``BotUpdate`` remains a regular mutable mapping so filters and handlers can stash arbitrary helper objects between each other. To keep gopher data structured, use ``BotUpdateKey`` which enforces types per slot::
+
+    from dataclasses import dataclass
+
+    from aiotgbot import BotUpdateKey
+
+
+    @dataclass
+    class Session:
+        trace_id: str
+        retries: int
+
+
+    session_key = BotUpdateKey("session", Session)
+
+
+    async def my_handler(bot: Bot, update: BotUpdate) -> None:
+        if session_key.name not in update:
+            update.set_typed(session_key, Session(trace_id="abc", retries=0))
+        session = update.get_typed(session_key)
+        ...
+
+Development
+===========
+
+We use `Prek <https://github.com/DetachHead/prek>`_ as a drop-in ``pre-commit`` replacement backed by ``uv`` so hook environments resolve quickly and reproducibly. Install it once and run the configured Ruff, ``mypy --strict``, and Basedpyright checks via:
+
+.. code-block:: bash
+
+    uv tool install prek
+    prek install
+    prek run --all-files
+
+``prek run`` reads ``.pre-commit-config.yaml``, so you can still target a subset of hooks or files during local development.
+
+``mise.toml`` at the repo root mirrors the common workflows, so you can rely on `mise <https://mise.jdx.dev/>`_ instead of remembering the raw commands. Trust the config once via ``mise trust mise.toml`` and then run, for example:
+
+.. code-block:: bash
+
+    mise run lint
+    mise run mypy
+    mise run basedpyright
+    mise run test

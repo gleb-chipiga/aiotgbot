@@ -27,20 +27,26 @@ from aiotgbot.handler_table import HandlerTable
 from aiotgbot.storage_memory import MemoryStorage
 
 
+class InspectableHandlerTable(HandlerTable):
+    @property
+    def handlers(self) -> list[Handler]:
+        return list(self._handlers)
+
+
 @pytest.fixture
 def handler() -> HandlerCallable:
-    async def _handler(_: Bot, __: BotUpdate) -> None: ...
+    async def _handler(_: Bot, _update: BotUpdate) -> None: ...
 
     return _handler
 
 
 def test_protocol() -> None:
-    ht: HandlerTableProtocol = HandlerTable()
+    ht: HandlerTableProtocol = InspectableHandlerTable()
     assert isinstance(ht, HandlerTableProtocol)
 
 
 def test_freeze(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
+    ht = InspectableHandlerTable()
     assert not ht.frozen
     ht.message_handler(
         handler,
@@ -52,7 +58,7 @@ def test_freeze(handler: HandlerCallable) -> None:
     )
     ht.freeze()
     assert ht.frozen
-    with pytest.raises(RuntimeError, match="Cannot modify frozen list."):
+    with pytest.raises(RuntimeError, match=r"Cannot modify frozen list\."):
         ht.message_handler(
             handler,
             state="state1",
@@ -64,18 +70,18 @@ def test_freeze(handler: HandlerCallable) -> None:
 
 
 def test_message_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
+    ht = InspectableHandlerTable()
 
     ht.message_handler(
         handler,
         state="state1",
         commands=["command1"],
         content_types=[ContentType.CONTACT],
-        text_match=re.compile("pattern"),
+        text_match=re.compile(r"pattern"),
         filters=[PrivateChatFilter()],
     )
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -83,7 +89,7 @@ def test_message_handler(handler: HandlerCallable) -> None:
                 StateFilter("state1"),
                 CommandsFilter(("command1",)),
                 ContentTypeFilter((ContentType.CONTACT,)),
-                MessageTextFilter(re.compile("pattern")),
+                MessageTextFilter(re.compile(r"pattern")),
                 PrivateChatFilter(),
             ),
         )
@@ -91,8 +97,8 @@ def test_message_handler(handler: HandlerCallable) -> None:
 
 
 def test_message(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.message(
+    ht = InspectableHandlerTable()
+    _ = ht.message(
         state="state1",
         commands=["command1"],
         content_types=[ContentType.CONTACT],
@@ -100,7 +106,7 @@ def test_message(handler: HandlerCallable) -> None:
         filters=[PrivateChatFilter()],
     )(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -108,7 +114,7 @@ def test_message(handler: HandlerCallable) -> None:
                 StateFilter("state1"),
                 CommandsFilter(("command1",)),
                 ContentTypeFilter((ContentType.CONTACT,)),
-                MessageTextFilter(re.compile("pattern")),
+                MessageTextFilter(re.compile(r"pattern")),
                 PrivateChatFilter(),
             ),
         )
@@ -116,12 +122,10 @@ def test_message(handler: HandlerCallable) -> None:
 
 
 def test_edited_message_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.edited_message_handler(
-        handler, state="state1", filters=[GroupChatFilter()]
-    )
+    ht = InspectableHandlerTable()
+    ht.edited_message_handler(handler, state="state1", filters=[GroupChatFilter()])
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -134,10 +138,10 @@ def test_edited_message_handler(handler: HandlerCallable) -> None:
 
 
 def test_edited_message(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.edited_message(state="state1", filters=[GroupChatFilter()])(handler)
+    ht = InspectableHandlerTable()
+    _ = ht.edited_message(state="state1", filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -150,12 +154,10 @@ def test_edited_message(handler: HandlerCallable) -> None:
 
 
 def test_channel_post_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.channel_post_handler(
-        handler, state="state1", filters=[GroupChatFilter()]
-    )
+    ht = InspectableHandlerTable()
+    ht.channel_post_handler(handler, state="state1", filters=[GroupChatFilter()])
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -168,10 +170,10 @@ def test_channel_post_handler(handler: HandlerCallable) -> None:
 
 
 def test_table_channel_post(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.channel_post(state="state1", filters=[GroupChatFilter()])(handler)
+    ht = InspectableHandlerTable()
+    _ = ht.channel_post(state="state1", filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -184,12 +186,10 @@ def test_table_channel_post(handler: HandlerCallable) -> None:
 
 
 def test_edited_channel_post_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.edited_channel_post_handler(
-        handler, state="state1", filters=[GroupChatFilter()]
-    )
+    ht = InspectableHandlerTable()
+    ht.edited_channel_post_handler(handler, state="state1", filters=[GroupChatFilter()])
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -202,12 +202,10 @@ def test_edited_channel_post_handler(handler: HandlerCallable) -> None:
 
 
 def test_table_edited_channel_post(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.edited_channel_post(state="state1", filters=[GroupChatFilter()])(
-        handler
-    )
+    ht = InspectableHandlerTable()
+    _ = ht.edited_channel_post(state="state1", filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -220,12 +218,10 @@ def test_table_edited_channel_post(handler: HandlerCallable) -> None:
 
 
 def test_inline_query_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.inline_query_handler(
-        handler, state="state1", filters=[GroupChatFilter()]
-    )
+    ht = InspectableHandlerTable()
+    ht.inline_query_handler(handler, state="state1", filters=[GroupChatFilter()])
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -238,10 +234,10 @@ def test_inline_query_handler(handler: HandlerCallable) -> None:
 
 
 def test_table_inline_query(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.inline_query(state="state1", filters=[GroupChatFilter()])(handler)
+    ht = InspectableHandlerTable()
+    _ = ht.inline_query(state="state1", filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -254,12 +250,12 @@ def test_table_inline_query(handler: HandlerCallable) -> None:
 
 
 def test_chosen_inline_result_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
+    ht = InspectableHandlerTable()
     ht.chosen_inline_result_handler(
         handler, state="state1", filters=[GroupChatFilter()]
     )
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -272,12 +268,10 @@ def test_chosen_inline_result_handler(handler: HandlerCallable) -> None:
 
 
 def test_chosen_inline_result(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.chosen_inline_result(state="state1", filters=[GroupChatFilter()])(
-        handler
-    )
+    ht = InspectableHandlerTable()
+    _ = ht.chosen_inline_result(state="state1", filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -290,21 +284,21 @@ def test_chosen_inline_result(handler: HandlerCallable) -> None:
 
 
 def test_callback_query_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
+    ht = InspectableHandlerTable()
     ht.callback_query_handler(
         handler,
         state="state1",
-        data_match=re.compile("pattern"),
+        data_match=re.compile(r"pattern"),
         filters=[GroupChatFilter()],
     )
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
                 UpdateTypeFilter(UpdateType.CALLBACK_QUERY),
                 StateFilter("state1"),
-                CallbackQueryDataFilter(re.compile("pattern")),
+                CallbackQueryDataFilter(re.compile(r"pattern")),
                 GroupChatFilter(),
             ),
         )
@@ -312,18 +306,18 @@ def test_callback_query_handler(handler: HandlerCallable) -> None:
 
 
 def test_callback_query(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.callback_query(
+    ht = InspectableHandlerTable()
+    _ = ht.callback_query(
         state="state1", data_match="pattern", filters=[GroupChatFilter()]
     )(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
                 UpdateTypeFilter(UpdateType.CALLBACK_QUERY),
                 StateFilter("state1"),
-                CallbackQueryDataFilter(re.compile("pattern")),
+                CallbackQueryDataFilter(re.compile(r"pattern")),
                 GroupChatFilter(),
             ),
         )
@@ -331,12 +325,10 @@ def test_callback_query(handler: HandlerCallable) -> None:
 
 
 def test_shipping_query_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.shipping_query_handler(
-        handler, state="state1", filters=[GroupChatFilter()]
-    )
+    ht = InspectableHandlerTable()
+    ht.shipping_query_handler(handler, state="state1", filters=[GroupChatFilter()])
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -349,10 +341,10 @@ def test_shipping_query_handler(handler: HandlerCallable) -> None:
 
 
 def test_shipping_query(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.shipping_query(state="state1", filters=[GroupChatFilter()])(handler)
+    ht = InspectableHandlerTable()
+    _ = ht.shipping_query(state="state1", filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -365,12 +357,10 @@ def test_shipping_query(handler: HandlerCallable) -> None:
 
 
 def test_pre_checkout_query_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.pre_checkout_query_handler(
-        handler, state="state1", filters=[GroupChatFilter()]
-    )
+    ht = InspectableHandlerTable()
+    ht.pre_checkout_query_handler(handler, state="state1", filters=[GroupChatFilter()])
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -383,10 +373,10 @@ def test_pre_checkout_query_handler(handler: HandlerCallable) -> None:
 
 
 def test_pre_checkout_query(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.pre_checkout_query(state="state1", filters=[GroupChatFilter()])(handler)
+    ht = InspectableHandlerTable()
+    _ = ht.pre_checkout_query(state="state1", filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -399,10 +389,10 @@ def test_pre_checkout_query(handler: HandlerCallable) -> None:
 
 
 def test_poll_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
+    ht = InspectableHandlerTable()
     ht.poll_handler(handler, state="state1", filters=[GroupChatFilter()])
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -415,10 +405,10 @@ def test_poll_handler(handler: HandlerCallable) -> None:
 
 
 def test_poll(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.poll(state="state1", filters=[GroupChatFilter()])(handler)
+    ht = InspectableHandlerTable()
+    _ = ht.poll(state="state1", filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -431,12 +421,10 @@ def test_poll(handler: HandlerCallable) -> None:
 
 
 def test_poll_answer_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.poll_answer_handler(
-        handler, state="state1", filters=[GroupChatFilter()]
-    )
+    ht = InspectableHandlerTable()
+    ht.poll_answer_handler(handler, state="state1", filters=[GroupChatFilter()])
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -449,10 +437,10 @@ def test_poll_answer_handler(handler: HandlerCallable) -> None:
 
 
 def test_poll_answer(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.poll_answer(state="state1", filters=[GroupChatFilter()])(handler)
+    ht = InspectableHandlerTable()
+    _ = ht.poll_answer(state="state1", filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -465,12 +453,10 @@ def test_poll_answer(handler: HandlerCallable) -> None:
 
 
 def test_my_chat_member_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.my_chat_member_handler(
-        handler, state="state1", filters=[GroupChatFilter()]
-    )
+    ht = InspectableHandlerTable()
+    ht.my_chat_member_handler(handler, state="state1", filters=[GroupChatFilter()])
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -483,10 +469,10 @@ def test_my_chat_member_handler(handler: HandlerCallable) -> None:
 
 
 def test_my_chat_member(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.my_chat_member(state="state1", filters=[GroupChatFilter()])(handler)
+    ht = InspectableHandlerTable()
+    _ = ht.my_chat_member(state="state1", filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -499,12 +485,10 @@ def test_my_chat_member(handler: HandlerCallable) -> None:
 
 
 def test_chat_member_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.chat_member_handler(
-        handler, state="state1", filters=[GroupChatFilter()]
-    )
+    ht = InspectableHandlerTable()
+    ht.chat_member_handler(handler, state="state1", filters=[GroupChatFilter()])
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -517,10 +501,10 @@ def test_chat_member_handler(handler: HandlerCallable) -> None:
 
 
 def test_chat_member(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.chat_member(state="state1", filters=[GroupChatFilter()])(handler)
+    ht = InspectableHandlerTable()
+    _ = ht.chat_member(state="state1", filters=[GroupChatFilter()])(handler)
 
-    assert ht._handlers == [
+    assert ht.handlers == [
         Handler(
             handler,
             filters=(
@@ -534,16 +518,16 @@ def test_chat_member(handler: HandlerCallable) -> None:
 
 @pytest.mark.asyncio
 async def test_get_handler(handler: HandlerCallable) -> None:
-    ht = HandlerTable()
-    ht.message(state="state1")(handler)
+    ht = InspectableHandlerTable()
+    _ = ht.message(state="state1")(handler)
     ht.freeze()
-    _bot = PollBot("token", ht, MemoryStorage())
+    bot = PollBot("token", ht, MemoryStorage())
     ctx = Context({"key1": "str1", "key2": "str2", "key3": 4})
     message = msgspec.convert(
         {"message_id": 1, "date": 1, "chat": {"id": 1, "type": "private"}},
         Message,
     )
     bu1 = BotUpdate("state1", ctx, Update(update_id=1, message=message))
-    assert await ht.get_handler(_bot, bu1) == handler
+    assert await ht.get_handler(bot, bu1) == handler
     bu2 = BotUpdate("state2", ctx, Update(update_id=2, message=message))
-    assert await ht.get_handler(_bot, bu2) is None
+    assert await ht.get_handler(bot, bu2) is None

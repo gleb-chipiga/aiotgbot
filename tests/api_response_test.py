@@ -1,5 +1,3 @@
-from typing import Any
-
 import msgspec
 import pytest
 from msgspec import UNSET, Raw
@@ -31,7 +29,7 @@ class Result(API, frozen=True):
         ),
     ),
 )
-def test_api_response_ok(json: bytes, type_: Any, result: Any) -> None:
+def test_api_response_ok(json: bytes, type_: type[object], result: object) -> None:
     api_response = msgspec.json.decode(json, type=APIResponse)
     assert api_response.ok is True
     assert isinstance(api_response.result, Raw)

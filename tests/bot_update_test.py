@@ -1,5 +1,7 @@
 import json
+from dataclasses import dataclass
 from datetime import UTC, datetime
+from typing import cast
 
 import msgspec
 import pytest
@@ -16,7 +18,8 @@ from aiotgbot.api_types import (
     ShippingQuery,
     Update,
 )
-from aiotgbot.bot_update import BotUpdate, Context, ContextKey
+from aiotgbot.bot_update import BotUpdate, BotUpdateKey, Context, ContextKey
+from aiotgbot.helpers import Json
 
 
 @pytest.fixture
@@ -47,6 +50,11 @@ def bot_update(context: Context, update: Update) -> BotUpdate:
 
 
 _UserDict = dict[str, int | bool | str]
+
+
+@dataclass(frozen=True)
+class _Payload:
+    label: str
 
 
 @pytest.fixture
@@ -133,13 +141,14 @@ def test_context_set_typed() -> None:
     c1.set_typed(k2, 10)
     c1.set_typed(k3, "val3")
     j = json.dumps(c1.to_dict())
-    c2 = Context(json.loads(j))
+    c2_data = cast(dict[str, Json], json.loads(j))
+    c2 = Context(c2_data)
     assert c2.get_typed(k1) == v
     assert c2.get_typed(k2) == 10
     assert c2.get_typed(k3) == "val3"
     c2.del_typed(k3)
     with pytest.raises(KeyError, match="key3"):
-        c2.get_typed(k3)
+        _ = c2.get_typed(k3)
 
 
 def test_bot_update_init(context: Context, update: Update) -> None:
@@ -198,35 +207,31 @@ def test_bot_update_message(message: Message, bot_update: BotUpdate) -> None:
 
 
 def test_bot_update_edited_message(message: Message, context: Context) -> None:
-    _update = Update(update_id=1, edited_message=message)
-    _bot_update = BotUpdate("state1", context, _update)
-    assert _bot_update.edited_message == message
+    update_obj = Update(update_id=1, edited_message=message)
+    bot_update = BotUpdate("state1", context, update_obj)
+    assert bot_update.edited_message == message
 
 
 def test_bot_update_channel_post(message: Message, context: Context) -> None:
-    _update = Update(update_id=1, channel_post=message)
-    _bot_update = BotUpdate("state1", context, _update)
-    assert _bot_update.channel_post == message
+    update_obj = Update(update_id=1, channel_post=message)
+    bot_update = BotUpdate("state1", context, update_obj)
+    assert bot_update.channel_post == message
 
 
-def test_bot_update_edited_channel_post(
-    message: Message, context: Context
-) -> None:
-    _update = Update(update_id=1, edited_channel_post=message)
-    _bot_update = BotUpdate("state1", context, _update)
-    assert _bot_update.edited_channel_post == message
+def test_bot_update_edited_channel_post(message: Message, context: Context) -> None:
+    update_obj = Update(update_id=1, edited_channel_post=message)
+    bot_update = BotUpdate("state1", context, update_obj)
+    assert bot_update.edited_channel_post == message
 
 
-def test_bot_update_inline_query(
-    user_dict: _UserDict, context: Context
-) -> None:
+def test_bot_update_inline_query(user_dict: _UserDict, context: Context) -> None:
     inline_query = msgspec.convert(
         {"id": "1", "from": user_dict, "query": "q", "offset": "o"},
         InlineQuery,
     )
-    _update = Update(update_id=1, inline_query=inline_query)
-    _bot_update = BotUpdate("state1", context, _update)
-    assert _bot_update.inline_query == inline_query
+    update_obj = Update(update_id=1, inline_query=inline_query)
+    bot_update = BotUpdate("state1", context, update_obj)
+    assert bot_update.inline_query == inline_query
 
 
 def test_bot_update_chosen_inline_result(
@@ -235,25 +240,21 @@ def test_bot_update_chosen_inline_result(
     chosen_inline_result = msgspec.convert(
         {"result_id": "1", "from": user_dict, "query": "q"}, ChosenInlineResult
     )
-    _update = Update(update_id=1, chosen_inline_result=chosen_inline_result)
-    _bot_update = BotUpdate("state1", context, _update)
-    assert _bot_update.chosen_inline_result == chosen_inline_result
+    update_obj = Update(update_id=1, chosen_inline_result=chosen_inline_result)
+    bot_update = BotUpdate("state1", context, update_obj)
+    assert bot_update.chosen_inline_result == chosen_inline_result
 
 
-def test_bot_update_callback_query(
-    user_dict: _UserDict, context: Context
-) -> None:
+def test_bot_update_callback_query(user_dict: _UserDict, context: Context) -> None:
     callback_query = msgspec.convert(
         {"id": "1", "from": user_dict, "chat_instance": "ci"}, CallbackQuery
     )
-    _update = Update(update_id=1, callback_query=callback_query)
-    _bot_update = BotUpdate("state1", context, _update)
-    assert _bot_update.callback_query == callback_query
+    update_obj = Update(update_id=1, callback_query=callback_query)
+    bot_update = BotUpdate("state1", context, update_obj)
+    assert bot_update.callback_query == callback_query
 
 
-def test_bot_update_shipping_query(
-    user_dict: _UserDict, context: Context
-) -> None:
+def test_bot_update_shipping_query(user_dict: _UserDict, context: Context) -> None:
     shipping_address = {
         "country_code": "cc",
         "state": "s",
@@ -271,14 +272,12 @@ def test_bot_update_shipping_query(
         },
         ShippingQuery,
     )
-    _update = Update(update_id=1, shipping_query=shipping_query)
-    _bot_update = BotUpdate("state1", context, _update)
-    assert _bot_update.shipping_query == shipping_query
+    update_obj = Update(update_id=1, shipping_query=shipping_query)
+    bot_update = BotUpdate("state1", context, update_obj)
+    assert bot_update.shipping_query == shipping_query
 
 
-def test_bot_update_pre_checkout_query(
-    user_dict: _UserDict, context: Context
-) -> None:
+def test_bot_update_pre_checkout_query(user_dict: _UserDict, context: Context) -> None:
     pre_checkout_query = msgspec.convert(
         {
             "id": "1",
@@ -289,12 +288,12 @@ def test_bot_update_pre_checkout_query(
         },
         PreCheckoutQuery,
     )
-    _update = Update(update_id=1, pre_checkout_query=pre_checkout_query)
-    _bot_update = BotUpdate("state1", context, _update)
-    assert _bot_update.pre_checkout_query == pre_checkout_query
+    update_obj = Update(update_id=1, pre_checkout_query=pre_checkout_query)
+    bot_update = BotUpdate("state1", context, update_obj)
+    assert bot_update.pre_checkout_query == pre_checkout_query
 
 
-def test_bot_update_poll(user_dict: _UserDict, context: Context) -> None:
+def test_bot_update_poll(context: Context) -> None:
     poll = msgspec.convert(
         {
             "id": "id",
@@ -309,14 +308,12 @@ def test_bot_update_poll(user_dict: _UserDict, context: Context) -> None:
         },
         Poll,
     )
-    _update = Update(update_id=1, poll=poll)
-    _bot_update = BotUpdate("state1", context, _update)
-    assert _bot_update.poll == poll
+    update_obj = Update(update_id=1, poll=poll)
+    bot_update = BotUpdate("state1", context, update_obj)
+    assert bot_update.poll == poll
 
 
-def test_bot_update_poll_answer(
-    user_dict: _UserDict, context: Context
-) -> None:
+def test_bot_update_poll_answer(context: Context) -> None:
     poll_answer = msgspec.convert(
         {
             "poll_id": "id",
@@ -325,14 +322,12 @@ def test_bot_update_poll_answer(
         },
         PollAnswer,
     )
-    _update = Update(update_id=1, poll_answer=poll_answer)
-    _bot_update = BotUpdate("state1", context, _update)
-    assert _bot_update.poll_answer == poll_answer
+    update_obj = Update(update_id=1, poll_answer=poll_answer)
+    bot_update = BotUpdate("state1", context, update_obj)
+    assert bot_update.poll_answer == poll_answer
 
 
-def test_bot_update_my_chat_member(
-    user_dict: _UserDict, context: Context
-) -> None:
+def test_bot_update_my_chat_member(context: Context) -> None:
     my_chat_member = msgspec.convert(
         {
             "chat": {"id": 111, "type": "group"},
@@ -349,14 +344,12 @@ def test_bot_update_my_chat_member(
         },
         ChatMemberUpdated,
     )
-    _update = Update(update_id=1, my_chat_member=my_chat_member)
-    _bot_update = BotUpdate("state1", context, _update)
-    assert _bot_update.my_chat_member == my_chat_member
+    update_obj = Update(update_id=1, my_chat_member=my_chat_member)
+    bot_update = BotUpdate("state1", context, update_obj)
+    assert bot_update.my_chat_member == my_chat_member
 
 
-def test_bot_update_chat_member(
-    user_dict: _UserDict, context: Context
-) -> None:
+def test_bot_update_chat_member(context: Context) -> None:
     chat_member = msgspec.convert(
         {
             "chat": {"id": 111, "type": "group"},
@@ -373,6 +366,42 @@ def test_bot_update_chat_member(
         },
         ChatMemberUpdated,
     )
-    _update = Update(update_id=1, chat_member=chat_member)
-    _bot_update = BotUpdate("state1", context, _update)
-    assert _bot_update.chat_member == chat_member
+    update_obj = Update(update_id=1, chat_member=chat_member)
+    bot_update = BotUpdate("state1", context, update_obj)
+    assert bot_update.chat_member == chat_member
+
+
+def test_bot_update_allows_arbitrary_payload(context: Context, update: Update) -> None:
+    payload = _Payload("any")
+    bot_update = BotUpdate(state="state1", context=context, update=update)
+    bot_update["payload"] = payload
+    bot_update["another"] = 12
+    assert bot_update["payload"] is payload
+    assert bot_update["another"] == 12
+
+
+def test_bot_update_key_roundtrip(context: Context, update: Update) -> None:
+    key = BotUpdateKey("session", _Payload)
+    bot_update = BotUpdate(state="state1", context=context, update=update)
+    payload = _Payload("typed")
+    bot_update.set_typed(key, payload)
+    result = bot_update.get_typed(key)
+    assert result is payload
+    bot_update.del_typed(key)
+    with pytest.raises(KeyError):
+        _ = bot_update.get_typed(key)
+
+
+def test_bot_update_key_set_type_guard(context: Context, update: Update) -> None:
+    key = BotUpdateKey("session", _Payload)
+    bot_update = BotUpdate(state="state1", context=context, update=update)
+    with pytest.raises(TypeError, match="expected type _Payload"):
+        bot_update.set_typed(key, cast(_Payload, cast(object, "wrong")))
+
+
+def test_bot_update_key_get_type_guard(context: Context, update: Update) -> None:
+    key = BotUpdateKey("session", _Payload)
+    bot_update = BotUpdate(state="state1", context=context, update=update)
+    bot_update["session"] = "wrong"
+    with pytest.raises(TypeError, match="expected value of type _Payload"):
+        _ = bot_update.get_typed(key)

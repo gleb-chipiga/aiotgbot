@@ -1,5 +1,6 @@
 from base64 import b64decode
-from typing import AsyncIterator, Final, Self, Sequence, Union, cast
+from collections.abc import AsyncIterator, Sequence
+from typing import Final, Self, cast
 
 import msgspec.json
 from cryptography.hazmat.primitives import serialization
@@ -60,8 +61,6 @@ class PassportKey:
         self,
         private_key: RSAPrivateKey,
     ) -> None:
-        if not isinstance(private_key, RSAPrivateKey):
-            raise RuntimeError("Key is not RSA private key")
         self._private_key: Final[RSAPrivateKey] = private_key
         public_key = self._private_key.public_key()
         public_bytes = public_key.public_bytes(
@@ -119,9 +118,7 @@ class PassportCipher:
         digest.update(data_hash)
         secret_hash = digest.finalize()
         key = secret_hash[: self._key_size]
-        iv = secret_hash[
-            self._key_size : self._key_size + self._iv_size  # noqa: E203
-        ]
+        iv = secret_hash[self._key_size : self._key_size + self._iv_size]
         self._data_hash: Final[bytes] = data_hash
         self._cipher: Final[Cipher[CBC]] = Cipher(AES(key), CBC(iv))
 
@@ -137,7 +134,7 @@ class PassportCipher:
         computed_hash = digest.finalize()
         if not bytes_eq(computed_hash, self._data_hash):
             raise RuntimeError("Decryption error")
-        return plaintext[plaintext[0] :]  # noqa: E203
+        return plaintext[plaintext[0] :]
 
     async def decrypt_stream(
         self,
@@ -178,10 +175,7 @@ class PassportScopeElementOneOfSeveral(API, frozen=True, kw_only=True):
     translation: bool | None = None
 
 
-PassportScopeElement = Union[
-    PassportScopeElementOne,
-    PassportScopeElementOneOfSeveral,
-]
+PassportScopeElement = PassportScopeElementOne | PassportScopeElementOneOfSeveral
 
 
 class PassportScope(

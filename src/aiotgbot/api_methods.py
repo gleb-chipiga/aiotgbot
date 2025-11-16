@@ -1,7 +1,8 @@
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Iterable, Sequence
 from itertools import count
-from typing import Any, Final, Iterable, Sequence, Type, TypeVar
+from typing import Final, TypeVar, cast
 
 import msgspec
 from yarl import URL
@@ -19,6 +20,7 @@ from .api_types import (
     ChatId,
     ChatInviteLink,
     ChatMember,
+    ChatMemberBase,
     ChatPermissions,
     File,
     FileId,
@@ -87,11 +89,10 @@ api_logger: Final[logging.Logger] = logging.getLogger("aiotgbot.api")
 ParamType = int | float | str | InputFile | None
 
 
-def _encode_json(obj: Any) -> str | None:
+def _encode_json(obj: object | None) -> str | None:
     if obj is not None:
         return msgspec.json.encode(obj).decode()
-    else:
-        return None
+    return None
 
 
 T = TypeVar("T")
@@ -103,7 +104,7 @@ class ApiMethods(ABC):
         self,
         http_method: RequestMethod,
         api_method: str,
-        type_: Type[T],
+        type_: type[T],
         **params: ParamType,
     ) -> T: ...
 
@@ -113,7 +114,7 @@ class ApiMethods(ABC):
         http_method: RequestMethod,
         api_method: str,
         chat_id: ChatId | str,
-        type_: Type[T],
+        type_: type[T],
         **params: ParamType,
     ) -> T: ...
 
@@ -125,8 +126,7 @@ class ApiMethods(ABC):
         allowed_updates: Sequence[UpdateType] | None = None,
     ) -> tuple[Update, ...]:
         api_logger.debug(
-            "Get updates offset: %r, limit: %r, timeout: %r, "
-            "allowed_updates: %r",
+            "Get updates offset: %r, limit: %r, timeout: %r, allowed_updates: %r",
             offset,
             limit,
             timeout,
@@ -649,10 +649,7 @@ class ApiMethods(ABC):
         self,
         chat_id: ChatId | str,
         media: Iterable[
-            InputMediaAudio
-            | InputMediaDocument
-            | InputMediaPhoto
-            | InputMediaVideo
+            InputMediaAudio | InputMediaDocument | InputMediaPhoto | InputMediaVideo
         ],
         message_thread_id: MessageThreadId | None = None,
         disable_notification: bool | None = None,
@@ -663,8 +660,10 @@ class ApiMethods(ABC):
             'Send media group to "%s"',
             chat_id,
         )
-        attached_media = []
-        attachments = {}
+        attached_media: list[
+            InputMediaAudio | InputMediaDocument | InputMediaPhoto | InputMediaVideo
+        ] = []
+        attachments: dict[str, InputFile] = {}
         counter = count()
         for item in media:
             if isinstance(item.media, InputFile):
@@ -674,9 +673,7 @@ class ApiMethods(ABC):
                     item, media=Attach(f"attach://{attachment_name}")
                 )
             elif isinstance(item.media, URL):
-                item = msgspec.structs.replace(
-                    item, media=URLString(str(item.media))
-                )
+                item = msgspec.structs.replace(item, media=URLString(str(item.media)))
             if isinstance(item, InputMediaWithThumbnail) and isinstance(
                 item.thumbnail, InputFile
             ):
@@ -750,6 +747,29 @@ class ApiMethods(ABC):
         inline_message_id: str | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message | bool:
+        if inline_message_id is not None:
+            api_logger.debug(
+                'Edit inline live location "%s"',
+                inline_message_id,
+            )
+            return await self._request(
+                RequestMethod.POST,
+                "editMessageLiveLocation",
+                bool,
+                inline_message_id=inline_message_id,
+                latitude=latitude,
+                longitude=longitude,
+                horizontal_accuracy=horizontal_accuracy,
+                heading=heading,
+                proximity_alert_radius=proximity_alert_radius,
+                reply_markup=_encode_json(reply_markup),
+            )
+
+        if chat_id is None or message_id is None:
+            raise RuntimeError(
+                "chat_id and message_id are required when inline_message_id is None"
+            )
+
         api_logger.debug(
             'Edit live location %s in "%s"',
             message_id,
@@ -758,10 +778,9 @@ class ApiMethods(ABC):
         return await self._request(
             RequestMethod.POST,
             "editMessageLiveLocation",
-            Message | bool,  # type: ignore # TODO
+            Message,
             chat_id=chat_id,
             message_id=message_id,
-            inline_message_id=inline_message_id,
             latitude=latitude,
             longitude=longitude,
             horizontal_accuracy=horizontal_accuracy,
@@ -777,6 +796,21 @@ class ApiMethods(ABC):
         inline_message_id: str | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message | bool:
+        if inline_message_id is not None:
+            api_logger.debug('Stop inline live location "%s"', inline_message_id)
+            return await self._request(
+                RequestMethod.POST,
+                "stopMessageLiveLocation",
+                bool,
+                inline_message_id=inline_message_id,
+                reply_markup=_encode_json(reply_markup),
+            )
+
+        if chat_id is None or message_id is None:
+            raise RuntimeError(
+                "chat_id and message_id are required when inline_message_id is None"
+            )
+
         api_logger.debug(
             'Stop live location %s in "%s"',
             message_id,
@@ -785,10 +819,9 @@ class ApiMethods(ABC):
         return await self._request(
             RequestMethod.POST,
             "stopMessageLiveLocation",
-            Message | bool,  # type: ignore # TODO
+            Message,
             chat_id=chat_id,
             message_id=message_id,
-            inline_message_id=inline_message_id,
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -1509,13 +1542,14 @@ class ApiMethods(ABC):
             chat_id,
             user_id,
         )
-        return await self._request(
+        member = await self._request(
             RequestMethod.GET,
             "getChatMember",
-            ChatMember,  # type: ignore # TODO
+            ChatMemberBase,
             chat_id=chat_id,
             user_id=user_id,
         )
+        return cast(ChatMember, member)
 
     async def set_chat_sticker_set(
         self,
@@ -2008,30 +2042,39 @@ class ApiMethods(ABC):
         link_preview_options: LinkPreviewOptions | None = None,
         reply_markup: InlineKeyboardMarkup | None = None,
     ) -> Message | bool:
-        if (
-            chat_id is None or message_id is None
-        ) and inline_message_id is None:
-            raise RuntimeError(
-                "chat_id or message_id and inline_message_id is None"
-            )
-        if inline_message_id is None:
-            api_logger.debug(
-                'Edit message %s in "%s" text',
-                message_id,
-                chat_id,
-            )
-        else:
+        if inline_message_id is not None:
             api_logger.debug(
                 'Edit inline message "%s" text',
                 inline_message_id,
             )
+            return await self._request(
+                RequestMethod.POST,
+                "editMessageText",
+                bool,
+                inline_message_id=inline_message_id,
+                text=text,
+                parse_mode=parse_mode,
+                entities=_encode_json(entities),
+                link_preview_options=_encode_json(link_preview_options),
+                reply_markup=_encode_json(reply_markup),
+            )
+
+        if chat_id is None or message_id is None:
+            raise RuntimeError(
+                "chat_id and message_id are required when inline_message_id is None"
+            )
+
+        api_logger.debug(
+            'Edit message %s in "%s" text',
+            message_id,
+            chat_id,
+        )
         return await self._request(
             RequestMethod.POST,
             "editMessageText",
-            Message | bool,  # type: ignore # TODO
+            Message,
             chat_id=chat_id,
             message_id=message_id,
-            inline_message_id=inline_message_id,
             text=text,
             parse_mode=parse_mode,
             entities=_encode_json(entities),
@@ -2049,30 +2092,38 @@ class ApiMethods(ABC):
         caption_entities: Sequence[MessageEntity] | None = None,
         reply_markup: InlineKeyboardMarkup | None = None,
     ) -> Message | bool:
-        if (
-            chat_id is None or message_id is None
-        ) and inline_message_id is None:
-            raise RuntimeError(
-                "chat_id or message_id and inline_message_id is None"
-            )
-        if inline_message_id is None:
-            api_logger.debug(
-                'Edit message %s in "%s" caption',
-                message_id,
-                chat_id,
-            )
-        else:
+        if inline_message_id is not None:
             api_logger.debug(
                 'Edit inline message "%s" caption',
                 inline_message_id,
             )
+            return await self._request(
+                RequestMethod.POST,
+                "editMessageCaption",
+                bool,
+                inline_message_id=inline_message_id,
+                caption=caption,
+                parse_mode=parse_mode,
+                caption_entities=_encode_json(caption_entities),
+                reply_markup=_encode_json(reply_markup),
+            )
+
+        if chat_id is None or message_id is None:
+            raise RuntimeError(
+                "chat_id and message_id are required when inline_message_id is None"
+            )
+
+        api_logger.debug(
+            'Edit message %s in "%s" caption',
+            message_id,
+            chat_id,
+        )
         return await self._request(
             RequestMethod.POST,
             "editMessageCaption",
-            Message | bool,  # type: ignore # TODO
+            Message,
             chat_id=chat_id,
             message_id=message_id,
-            inline_message_id=inline_message_id,
             caption=caption,
             parse_mode=parse_mode,
             caption_entities=_encode_json(caption_entities),
@@ -2087,34 +2138,13 @@ class ApiMethods(ABC):
         inline_message_id: str | None = None,
         reply_markup: InlineKeyboardMarkup | None = None,
     ) -> Message | bool:
-        if (
-            chat_id is None or message_id is None
-        ) and inline_message_id is None:
-            raise RuntimeError(
-                "chat_id or message_id and inline_message_id is None"
-            )
-        if inline_message_id is None:
-            api_logger.debug(
-                'Edit message %s in "%s" media',
-                message_id,
-                chat_id,
-            )
-        else:
-            api_logger.debug(
-                'Edit inline message "%s" media',
-                inline_message_id,
-            )
-        attachments = {}
+        attachments: dict[str, InputFile] = {}
         if isinstance(media.media, InputFile):
             attachment_name = "attachment0"
             attachments[attachment_name] = media.media
-            media = msgspec.structs.replace(
-                media, media=f"attach://{attachment_name}"
-            )
+            media = msgspec.structs.replace(media, media=f"attach://{attachment_name}")
         elif isinstance(media.media, URL):
-            media = msgspec.structs.replace(
-                media, media=URLString(str(media.media))
-            )
+            media = msgspec.structs.replace(media, media=URLString(str(media.media)))
         if isinstance(media, InputMediaWithThumbnail) and isinstance(
             media.thumbnail, InputFile
         ):
@@ -2123,13 +2153,37 @@ class ApiMethods(ABC):
             media = msgspec.structs.replace(
                 media, thumbnail=f"attach://{attachment_name}"
             )
+        if inline_message_id is not None:
+            api_logger.debug(
+                'Edit inline message "%s" media',
+                inline_message_id,
+            )
+            return await self._request(
+                RequestMethod.POST,
+                "editMessageMedia",
+                bool,
+                inline_message_id=inline_message_id,
+                media=_encode_json(media),
+                reply_markup=_encode_json(reply_markup),
+                **attachments,
+            )
+
+        if chat_id is None or message_id is None:
+            raise RuntimeError(
+                "chat_id and message_id are required when inline_message_id is None"
+            )
+
+        api_logger.debug(
+            'Edit message %s in "%s" media',
+            message_id,
+            chat_id,
+        )
         return await self._request(
             RequestMethod.POST,
             "editMessageMedia",
-            Message | bool,  # type: ignore # TODO
+            Message,
             chat_id=chat_id,
             message_id=message_id,
-            inline_message_id=inline_message_id,
             media=_encode_json(media),
             reply_markup=_encode_json(reply_markup),
             **attachments,
@@ -2142,30 +2196,35 @@ class ApiMethods(ABC):
         inline_message_id: str | None = None,
         reply_markup: InlineKeyboardMarkup | None = None,
     ) -> Message | bool:
-        if (
-            chat_id is None or message_id is None
-        ) and inline_message_id is None:
-            raise RuntimeError(
-                "chat_id or message_id and inline_message_id is None"
-            )
-        if inline_message_id is None:
-            api_logger.debug(
-                'Edit message %s in "%s" reply markup',
-                message_id,
-                chat_id,
-            )
-        else:
+        if inline_message_id is not None:
             api_logger.debug(
                 'Edit inline message "%s" reply markup',
                 inline_message_id,
             )
+            return await self._request(
+                RequestMethod.POST,
+                "editMessageReplyMarkup",
+                bool,
+                inline_message_id=inline_message_id,
+                reply_markup=_encode_json(reply_markup),
+            )
+
+        if chat_id is None or message_id is None:
+            raise RuntimeError(
+                "chat_id and message_id are required when inline_message_id is None"
+            )
+
+        api_logger.debug(
+            'Edit message %s in "%s" reply markup',
+            message_id,
+            chat_id,
+        )
         return await self._request(
             RequestMethod.POST,
             "editMessageReplyMarkup",
-            Message | bool,  # type: ignore # TODO
+            Message,
             chat_id=chat_id,
             message_id=message_id,
-            inline_message_id=inline_message_id,
             reply_markup=_encode_json(reply_markup),
         )
 
@@ -2314,8 +2373,8 @@ class ApiMethods(ABC):
             name,
             user_id,
         )
-        attached_media = []
-        attachments = {}
+        attached_media: list[InputSticker] = []
+        attachments: dict[str, InputFile] = {}
         counter = count()
         for sticker in stickers:
             if isinstance(sticker.sticker, str):
@@ -2361,7 +2420,7 @@ class ApiMethods(ABC):
             name,
             user_id,
         )
-        attachments = {}
+        attachments: dict[str, InputFile] = {}
         if isinstance(sticker.sticker, InputFile):
             attachment_name = "attachment0"
             attachments[attachment_name] = sticker.sticker
@@ -2791,22 +2850,46 @@ class ApiMethods(ABC):
         message_id: MessageId | None = None,
         inline_message_id: str | None = None,
     ) -> Message | bool:
+        if inline_message_id is not None:
+            api_logger.debug(
+                'Set inline game score %s for %s message "%s"',
+                score,
+                user_id,
+                inline_message_id,
+            )
+            return await self._request(
+                RequestMethod.POST,
+                "setGameScore",
+                bool,
+                user_id=user_id,
+                score=score,
+                force=force,
+                disable_edit_message=disable_edit_message,
+                inline_message_id=inline_message_id,
+            )
+
+        if chat_id is None or message_id is None:
+            raise RuntimeError(
+                "chat_id and message_id are required when inline_message_id is None"
+            )
+
         api_logger.debug(
-            "Set game score %s for %s",
+            'Set game score %s for %s in chat "%s" message %s',
             score,
             user_id,
+            chat_id,
+            message_id,
         )
         return await self._request(
             RequestMethod.POST,
             "setGameScore",
-            Message | bool,  # type: ignore # TODO
+            Message,
             user_id=user_id,
             score=score,
             force=force,
             disable_edit_message=disable_edit_message,
             chat_id=chat_id,
             message_id=message_id,
-            inline_message_id=inline_message_id,
         )
 
     async def get_game_high_scores(
