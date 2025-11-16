@@ -13,6 +13,9 @@ from aiotgbot.api_types import (
     Attach,
     BotCommand,
     BotCommandScopeChat,
+    BusinessConnection,
+    BusinessOpeningHours,
+    BusinessOpeningHoursInterval,
     CallbackQueryId,
     Chat,
     ChatId,
@@ -20,6 +23,7 @@ from aiotgbot.api_types import (
     FileId,
     InputMediaPhoto,
     KeyboardButton,
+    Location,
     Message,
     MessageId,
     ReplyKeyboardMarkup,
@@ -131,6 +135,113 @@ async def test_api_methods_get_me(bot: Bot) -> None:
 
 
 @pytest.mark.asyncio
+async def test_api_methods_get_business_connection(bot: Bot) -> None:
+    business_connection = msgspec.convert(
+        {
+            "id": "conn",
+            "user": {"id": 1, "is_bot": False, "first_name": "fn"},
+            "user_chat_id": 11,
+            "date": 100,
+            "can_reply": True,
+            "is_enabled": True,
+        },
+        BusinessConnection,
+    )
+    bot.request_mock.return_value = business_connection
+    assert await bot.get_business_connection("conn") == business_connection
+    assert bot.request_mock.call_args_list == [
+        call(
+            RequestMethod.GET,
+            "getBusinessConnection",
+            business_connection_id="conn",
+        )
+    ]
+
+
+@pytest.mark.asyncio
+async def test_api_methods_set_my_business_intro(bot: Bot) -> None:
+    bot.request_mock.return_value = True
+    assert await bot.set_my_business_intro(
+        business_connection_id="conn",
+        title="Hi",
+        message="Hello",
+    )
+    assert bot.request_mock.call_args_list == [
+        call(
+            RequestMethod.POST,
+            "setMyBusinessIntro",
+            business_connection_id="conn",
+            title="Hi",
+            message="Hello",
+        )
+    ]
+
+
+@pytest.mark.asyncio
+async def test_api_methods_set_my_business_location(bot: Bot) -> None:
+    bot.request_mock.return_value = True
+    location = Location(longitude=1.0, latitude=2.0)
+    assert await bot.set_my_business_location(
+        business_connection_id="conn",
+        location=location,
+        address="Addr",
+    )
+    assert bot.request_mock.call_args_list == [
+        call(
+            RequestMethod.POST,
+            "setMyBusinessLocation",
+            business_connection_id="conn",
+            location=msgspec.json.encode(location).decode(),
+            address="Addr",
+        )
+    ]
+
+
+@pytest.mark.asyncio
+async def test_api_methods_set_my_business_opening_hours(bot: Bot) -> None:
+    bot.request_mock.return_value = True
+    opening_hours = BusinessOpeningHours(
+        time_zone_name="Etc/UTC",
+        opening_hours=(
+            BusinessOpeningHoursInterval(
+                weekday=1,
+                opening_minute=540,
+                closing_minute=1020,
+            ),
+        ),
+    )
+    assert await bot.set_my_business_opening_hours(
+        business_connection_id="conn",
+        opening_hours=opening_hours,
+    )
+    assert bot.request_mock.call_args_list == [
+        call(
+            RequestMethod.POST,
+            "setMyBusinessOpeningHours",
+            business_connection_id="conn",
+            opening_hours=msgspec.json.encode(opening_hours).decode(),
+        )
+    ]
+
+
+@pytest.mark.asyncio
+async def test_api_methods_set_my_business_greeting(bot: Bot) -> None:
+    bot.request_mock.return_value = True
+    assert await bot.set_my_business_greeting(
+        business_connection_id="conn",
+        greeting_message="Howdy",
+    )
+    assert bot.request_mock.call_args_list == [
+        call(
+            RequestMethod.POST,
+            "setMyBusinessGreeting",
+            business_connection_id="conn",
+            greeting_message="Howdy",
+        )
+    ]
+
+
+@pytest.mark.asyncio
 async def test_api_methods_send_message(
     bot: Bot, make_message: _MakeMessage, reply_kb: ReplyKeyboardMarkup
 ) -> None:
@@ -159,6 +270,7 @@ async def test_api_methods_send_message(
             link_preview_options=None,
             disable_notification=None,
             protect_content=None,
+            business_connection_id=None,
             reply_parameters=None,
             reply_markup=msgspec.json.encode(reply_kb).decode(),
         )
@@ -194,6 +306,7 @@ async def test_api_methods_send_photo(
             has_spoiler=None,
             disable_notification=None,
             protect_content=None,
+            business_connection_id=None,
             reply_parameters=None,
             reply_markup=msgspec.json.encode(reply_kb).decode(),
         )
@@ -239,6 +352,7 @@ async def test_api_methods_send_chat_action(bot: Bot) -> None:
             1,
             action=ChatAction.TYPING,
             message_thread_id=None,
+            business_connection_id=None,
         )
     ]
 
@@ -357,6 +471,7 @@ async def test_send_media_group(bot: Bot, make_message: _MakeMessage) -> None:
             message_thread_id=None,
             disable_notification=None,
             protect_content=None,
+            business_connection_id=None,
             reply_parameters=None,
             attachment0=file0,
             attachment1=file1,

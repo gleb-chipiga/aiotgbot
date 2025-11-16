@@ -10,7 +10,7 @@ import msgspec
 from msgspec import UNSET, Raw, Struct, UnsetType, field
 from yarl import URL
 
-from .constants import ParseMode, PollType
+from .constants import ParseMode, PollType, StickerFormat
 
 __all__ = (
     "API",
@@ -18,6 +18,7 @@ __all__ = (
     "Animation",
     "Attach",
     "Audio",
+    "Birthdate",
     "BotCommand",
     "BotCommandScope",
     "BotCommandScope",
@@ -31,6 +32,12 @@ __all__ = (
     "BotDescription",
     "BotName",
     "BotShortDescription",
+    "BusinessConnection",
+    "BusinessIntro",
+    "BusinessLocation",
+    "BusinessMessagesDeleted",
+    "BusinessOpeningHours",
+    "BusinessOpeningHoursInterval",
     "CallbackGame",
     "CallbackQuery",
     "CallbackQueryId",
@@ -185,6 +192,7 @@ __all__ = (
     "ResponseMessageId",
     "ResponseParameters",
     "SentWebAppMessage",
+    "SharedUser",
     "ShippingAddress",
     "ShippingOption",
     "ShippingQuery",
@@ -323,6 +331,10 @@ class Update(API, frozen=True, kw_only=True):
     my_chat_member: "ChatMemberUpdated | None" = None
     chat_member: "ChatMemberUpdated | None" = None
     chat_join_request: "ChatJoinRequest | None" = None
+    business_connection: "BusinessConnection | None" = None
+    business_message: "Message | None" = None
+    edited_business_message: "Message | None" = None
+    deleted_business_messages: "BusinessMessagesDeleted | None" = None
 
 
 class WebhookInfo(API, frozen=True, kw_only=True):
@@ -356,6 +368,7 @@ class User(API, frozen=True, kw_only=True):
     can_join_groups: bool | None = None
     can_read_all_group_messages: bool | None = None
     supports_inline_queries: bool | None = None
+    can_connect_to_business: bool | None = None
 
 
 ChatId = NewType("ChatId", int)
@@ -399,6 +412,53 @@ class Chat(API, frozen=True, kw_only=True):
     custom_emoji_sticker_set_name: str | None = None
     linked_chat_id: ChatId | None = None
     location: "ChatLocation | None" = None
+    business_intro: "BusinessIntro | None" = None
+    business_location: "BusinessLocation | None" = None
+    business_opening_hours: "BusinessOpeningHours | None" = None
+    personal_chat: "Chat | None" = None
+    birthdate: "Birthdate | None" = None
+
+
+class Birthdate(API, frozen=True, kw_only=True):
+    day: int
+    month: int
+    year: int | None = None
+
+
+class BusinessIntro(API, frozen=True, kw_only=True):
+    title: str | None = None
+    message: str | None = None
+
+
+class BusinessLocation(API, frozen=True, kw_only=True):
+    address: str
+    location: "Location | None" = None
+
+
+class BusinessOpeningHoursInterval(API, frozen=True, kw_only=True):
+    opening_minute: int
+    closing_minute: int
+    weekday: int
+
+
+class BusinessOpeningHours(API, frozen=True, kw_only=True):
+    time_zone_name: str
+    opening_hours: tuple["BusinessOpeningHoursInterval", ...]
+
+
+class BusinessConnection(API, frozen=True, kw_only=True):
+    id: str
+    user: User
+    user_chat_id: ChatId
+    date: int
+    can_reply: bool | None = None
+    is_enabled: bool
+
+
+class BusinessMessagesDeleted(API, frozen=True, kw_only=True):
+    business_connection_id: str
+    chat: Chat
+    message_ids: tuple["MessageId", ...]
 
 
 MessageId = NewType("MessageId", int)
@@ -410,12 +470,15 @@ class Message(API, frozen=True, kw_only=True):
     message_thread_id: MessageThreadId | None = None
     from_: User | None = field(default=None, name="from")
     sender_chat: Chat | None = None
+    business_connection_id: str | None = None
+    sender_business_bot: User | None = None
     sender_boost_count: int | None = None
     date: int
     chat: Chat
     forward_origin: "MessageOrigin | None" = None
     is_topic_message: bool | None = None
     is_automatic_forward: bool | None = None
+    is_from_offline: bool | None = None
     reply_to_message: "Message | None" = None
     external_reply: "ExternalReplyInfo | None" = None
     quote: "TextQuote | None" = None
@@ -806,17 +869,23 @@ class GeneralForumTopicUnhidden(API, frozen=True, kw_only=True):
 
 class UsersShared(API, frozen=True, kw_only=True):
     request_id: int
-    user_ids: tuple[UserId, ...]
+    users: tuple["SharedUser", ...]
 
 
-class UserShared(API, frozen=True, kw_only=True):
-    request_id: int
-    user_id: UserId
+class SharedUser(API, frozen=True, kw_only=True):
+    user_id: UserId | None = None
+    first_name: str | None = None
+    last_name: str | None = None
+    username: Username | None = None
+    photo: "ChatPhoto | None" = None
 
 
 class ChatShared(API, frozen=True, kw_only=True):
     request_id: int
     chat_id: ChatId
+    title: ChatTitle | None = None
+    username: Username | None = None
+    photo: "ChatPhoto | None" = None
 
 
 class WriteAccessAllowed(API, frozen=True, kw_only=True):
@@ -904,6 +973,9 @@ class KeyboardButtonRequestUsers(API, frozen=True, kw_only=True):
     request_id: int
     user_is_bot: bool | None = None
     user_is_premium: bool | None = None
+    request_name: bool | None = None
+    request_username: bool | None = None
+    request_photo: bool | None = None
     max_quantity: int | None = None
 
 
@@ -913,6 +985,9 @@ class KeyboardButtonRequestChat(API, frozen=True, kw_only=True):
     chat_is_forum: bool | None = None
     chat_has_username: bool | None = None
     chat_is_created: bool | None = None
+    request_title: bool | None = None
+    request_username: bool | None = None
+    request_photo: bool | None = None
     user_administrator_rights: "ChatAdministratorRights | None" = None
     bot_administrator_rights: "ChatAdministratorRights | None" = None
     bot_is_member: bool | None = None
@@ -1471,6 +1546,7 @@ class InputMediaDocument(
 
 class InputSticker(API, frozen=True):
     sticker: FileId | URL | URLString | InputFile | Attach
+    format: StickerFormat
     emoji_list: Sequence[str]
     mask_position: "MaskPosition | None"
     keywords: Sequence[str] | None
@@ -1498,8 +1574,6 @@ class StickerSet(API, frozen=True):
     name: str
     title: str
     sticker_type: str
-    is_animated: bool
-    is_video: bool
     stickers: tuple[Sticker, ...]
     thumbnail: PhotoSize | None = None
 

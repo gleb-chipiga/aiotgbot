@@ -14,6 +14,8 @@ from .api_types import (
     BotDescription,
     BotName,
     BotShortDescription,
+    BusinessConnection,
+    BusinessOpeningHours,
     CallbackQueryId,
     Chat,
     ChatAdministratorRights,
@@ -42,6 +44,7 @@ from .api_types import (
     LabeledPrice,
     LastName,
     LinkPreviewOptions,
+    Location,
     MaskPosition,
     MenuButton,
     Message,
@@ -218,6 +221,81 @@ class ApiMethods(ABC):
             bool,
         )
 
+    async def get_business_connection(
+        self,
+        business_connection_id: str,
+    ) -> BusinessConnection:
+        api_logger.debug(
+            "Get business connection: %s",
+            business_connection_id,
+        )
+        return await self._request(
+            RequestMethod.GET,
+            "getBusinessConnection",
+            BusinessConnection,
+            business_connection_id=business_connection_id,
+        )
+
+    async def set_my_business_intro(
+        self,
+        business_connection_id: str | None = None,
+        title: str | None = None,
+        message: str | None = None,
+    ) -> bool:
+        api_logger.debug("Set business intro")
+        return await self._request(
+            RequestMethod.POST,
+            "setMyBusinessIntro",
+            bool,
+            business_connection_id=business_connection_id,
+            title=title,
+            message=message,
+        )
+
+    async def set_my_business_location(
+        self,
+        business_connection_id: str | None = None,
+        location: Location | None = None,
+        address: str | None = None,
+    ) -> bool:
+        api_logger.debug("Set business location")
+        return await self._request(
+            RequestMethod.POST,
+            "setMyBusinessLocation",
+            bool,
+            business_connection_id=business_connection_id,
+            location=_encode_json(location),
+            address=address,
+        )
+
+    async def set_my_business_opening_hours(
+        self,
+        business_connection_id: str | None = None,
+        opening_hours: BusinessOpeningHours | None = None,
+    ) -> bool:
+        api_logger.debug("Set business opening hours")
+        return await self._request(
+            RequestMethod.POST,
+            "setMyBusinessOpeningHours",
+            bool,
+            business_connection_id=business_connection_id,
+            opening_hours=_encode_json(opening_hours),
+        )
+
+    async def set_my_business_greeting(
+        self,
+        business_connection_id: str | None = None,
+        greeting_message: str | None = None,
+    ) -> bool:
+        api_logger.debug("Set business greeting")
+        return await self._request(
+            RequestMethod.POST,
+            "setMyBusinessGreeting",
+            bool,
+            business_connection_id=business_connection_id,
+            greeting_message=greeting_message,
+        )
+
     async def send_message(
         self,
         chat_id: ChatId | str,
@@ -228,6 +306,7 @@ class ApiMethods(ABC):
         link_preview_options: LinkPreviewOptions | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -248,6 +327,7 @@ class ApiMethods(ABC):
             link_preview_options=_encode_json(link_preview_options),
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
@@ -381,6 +461,7 @@ class ApiMethods(ABC):
         has_spoiler: bool | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -401,6 +482,7 @@ class ApiMethods(ABC):
             has_spoiler=has_spoiler,
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
@@ -415,6 +497,7 @@ class ApiMethods(ABC):
         caption_entities: Sequence[MessageEntity] | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         duration: int | None = None,
         performer: str | None = None,
         title: str | None = None,
@@ -438,6 +521,7 @@ class ApiMethods(ABC):
             caption_entities=_encode_json(caption_entities),
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             duration=duration,
             performer=performer,
             title=title,
@@ -458,6 +542,7 @@ class ApiMethods(ABC):
         disable_content_type_detection: bool | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         duration: int | None = None,
         performer: str | None = None,
         title: str | None = None,
@@ -482,6 +567,7 @@ class ApiMethods(ABC):
             disable_content_type_detection=disable_content_type_detection,
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             duration=duration,
             performer=performer,
             title=title,
@@ -505,6 +591,7 @@ class ApiMethods(ABC):
         supports_streaming: bool | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -530,6 +617,7 @@ class ApiMethods(ABC):
             supports_streaming=supports_streaming,
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
@@ -549,6 +637,7 @@ class ApiMethods(ABC):
         has_spoiler: bool | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -573,6 +662,7 @@ class ApiMethods(ABC):
             has_spoiler=has_spoiler,
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
@@ -588,6 +678,7 @@ class ApiMethods(ABC):
         duration: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -608,6 +699,7 @@ class ApiMethods(ABC):
             duration=duration,
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
@@ -622,6 +714,7 @@ class ApiMethods(ABC):
         thumbnail: InputFile | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -641,6 +734,7 @@ class ApiMethods(ABC):
             thumbnail=thumbnail,
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
@@ -654,6 +748,7 @@ class ApiMethods(ABC):
         message_thread_id: MessageThreadId | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
     ) -> tuple[Message, ...]:
         api_logger.debug(
@@ -692,6 +787,7 @@ class ApiMethods(ABC):
             message_thread_id=message_thread_id,
             disable_notification=disable_notification,
             protect_content=_encode_json(protect_content),
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             **attachments,
         )
@@ -709,6 +805,7 @@ class ApiMethods(ABC):
         length: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -731,6 +828,7 @@ class ApiMethods(ABC):
             length=length,
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
@@ -837,6 +935,7 @@ class ApiMethods(ABC):
         foursquare_type: str | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -858,6 +957,7 @@ class ApiMethods(ABC):
             foursquare_type=foursquare_type,
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
@@ -872,6 +972,7 @@ class ApiMethods(ABC):
         vcard: str | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -891,6 +992,7 @@ class ApiMethods(ABC):
             vcard=vcard,
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
@@ -913,6 +1015,7 @@ class ApiMethods(ABC):
         close_date: int | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -940,6 +1043,7 @@ class ApiMethods(ABC):
             close_date=close_date,
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
@@ -951,6 +1055,7 @@ class ApiMethods(ABC):
         emoji: DiceEmoji | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -968,6 +1073,7 @@ class ApiMethods(ABC):
             emoji=emoji,
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
@@ -977,6 +1083,7 @@ class ApiMethods(ABC):
         chat_id: ChatId | str,
         action: ChatAction,
         message_thread_id: MessageThreadId | None = None,
+        business_connection_id: str | None = None,
     ) -> bool:
         api_logger.debug(
             'Send action "%s" to chat "%s"',
@@ -990,6 +1097,7 @@ class ApiMethods(ABC):
             bool,
             action=action,
             message_thread_id=message_thread_id,
+            business_connection_id=business_connection_id,
         )
 
     async def set_message_reaction(
@@ -2291,6 +2399,7 @@ class ApiMethods(ABC):
         message_thread_id: MessageThreadId | None = None,
         disable_notification: bool | None = None,
         protect_content: bool | None = None,
+        business_connection_id: str | None = None,
         reply_parameters: ReplyParameters | None = None,
         reply_markup: ReplyMarkup | None = None,
     ) -> Message:
@@ -2308,6 +2417,7 @@ class ApiMethods(ABC):
             message_thread_id=message_thread_id,
             disable_notification=disable_notification,
             protect_content=protect_content,
+            business_connection_id=business_connection_id,
             reply_parameters=_encode_json(reply_parameters),
             reply_markup=_encode_json(reply_markup),
         )
@@ -2364,7 +2474,6 @@ class ApiMethods(ABC):
         name: str,
         title: str,
         stickers: Iterable[InputSticker],
-        sticker_format: StickerFormat,
         sticker_type: StickerType | None = None,
         needs_repainting: bool | None = None,
     ) -> bool:
@@ -2403,7 +2512,6 @@ class ApiMethods(ABC):
             name=name,
             title=title,
             stickers=_encode_json(attached_media),
-            sticker_format=sticker_format,
             sticker_type=sticker_type,
             needs_repainting=needs_repainting,
             **attachments,
@@ -2543,6 +2651,7 @@ class ApiMethods(ABC):
         self,
         name: str,
         user_id: UserId,
+        format: StickerFormat | None = None,
         thumbnail: InputFile | str | None = None,
     ) -> bool:
         api_logger.debug(
@@ -2556,6 +2665,7 @@ class ApiMethods(ABC):
             bool,
             name=name,
             user_id=user_id,
+            format=format,
             thumbnail=thumbnail,
         )
 
