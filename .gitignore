@@ -7,3 +7,5 @@ build
 dist
 .python-version
 __pycache__
+codebook.toml
+pyrightconfig.json
