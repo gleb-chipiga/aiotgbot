@@ -4,11 +4,11 @@ requires-python = ">=3.11, <3.14"
 
 [[package]]
 name = "aiofreqlimit"
-version = "0.0.16"
+version = "0.1.5"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/b9/f4/2a828b6dd2973745810eec7f82731c61dfda8d983d4b3e12c3dee5c11ecd/aiofreqlimit-0.0.16.tar.gz", hash = "sha256:afb206903fa08b91fb4beba0c0ad617a018f1fb56996917e9b1dfacfaf85f826", size = 5219, upload-time = "2024-07-28T23:41:52.774Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d5/f0/17b4afb33be2efb8232ed51f05a56f4c27424905d7586990cd3f144d8377/aiofreqlimit-0.1.5.tar.gz", hash = "sha256:ffb466128925209e693b8d5f30face84cb3a2975021d4d1fc2f2814276e9d3e2", size = 4013, upload-time = "2025-11-20T20:28:21.441Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1d/f6/a40c273e433e8509e08fb2c83c8912a8e34fc8673a242239fd7dc68f47a7/aiofreqlimit-0.0.16-py3-none-any.whl", hash = "sha256:7c6f1d948b9f3ca971d1d8642e5a6b6dea8f2885c532120895dbdadbe443e6a2", size = 3878, upload-time = "2024-07-28T23:41:51.172Z" },
+    { url = "https://files.pythonhosted.org/packages/23/54/9d7322a21ed2322f6a9511c05a532c5a220f67cf087235888378f1ee1064/aiofreqlimit-0.1.5-py3-none-any.whl", hash = "sha256:23c7a47e9f5714da92a51c6981df7f6c336d6777de10c2f6e4ac3f6ab0025ed9", size = 4276, upload-time = "2025-11-20T20:28:20.384Z" },
 ]
 
 [[package]]
@@ -130,9 +130,9 @@ dependencies = [
     { name = "aiofreqlimit" },
     { name = "aiohttp" },
     { name = "aiojobs" },
-    { name = "backoff" },
     { name = "frozenlist" },
     { name = "msgspec" },
+    { name = "tenacity" },
     { name = "yarl" },
 ]
 
@@ -193,15 +193,15 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiofreqlimit", specifier = ">=0.0.16" },
+    { name = "aiofreqlimit", specifier = ">=0.1.5" },
     { name = "aiohttp", specifier = ">=3.13.2" },
     { name = "aiojobs", specifier = ">=1.4.0" },
     { name = "aiosqlite", marker = "extra == 'sqlite'" },
-    { name = "backoff", specifier = ">=2.2.1" },
     { name = "cryptography", marker = "extra == 'passport'", specifier = ">=46.0.0" },
     { name = "frozenlist", specifier = ">=1.8.0" },
     { name = "msgspec", specifier = ">=0.19.0" },
     { name = "sqlalchemy", marker = "extra == 'sqlalchemy'" },
+    { name = "tenacity", specifier = ">=9.1.2" },
     { name = "yarl", specifier = ">=1.22.0" },
 ]
 provides-extras = ["sqlite", "passport", "sqlalchemy"]
@@ -280,15 +280,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6b/5c/685e6633917e101e5dcb62b9dd76946cbb57c26e133bae9e0cd36033c0a9/attrs-25.4.0.tar.gz", hash = "sha256:16d5969b87f0859ef33a48b35d55ac1be6e42ae49d5e853b597db70c35c57e11", size = 934251, upload-time = "2025-10-06T13:54:44.725Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3a/2a/7cc015f5b9f5db42b7d48157e23356022889fc354a2813c15934b7cb5c0e/attrs-25.4.0-py3-none-any.whl", hash = "sha256:adcf7e2a1fb3b36ac48d97835bb6d8ade15b8dcce26aba8bf1d14847b57a3373", size = 67615, upload-time = "2025-10-06T13:54:43.17Z" },
-]
-
-[[package]]
-name = "backoff"
-version = "2.2.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/47/d7/5bbeb12c44d7c4f2fb5b56abce497eb5ed9f34d85701de869acedd602619/backoff-2.2.1.tar.gz", hash = "sha256:03f829f5bb1923180821643f8753b0502c3b682293992485b0eef2807afa5cba", size = 17001, upload-time = "2022-10-05T19:19:32.061Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/df/73/b6e24bd22e6720ca8ee9a85a0c4a2971af8497d8f3193fa05390cbd46e09/backoff-2.2.1-py3-none-any.whl", hash = "sha256:63579f9a0628e06278f7e47b7d7d5b6ce20dc65c5e96a6f3ca99a6adca0396e8", size = 15148, upload-time = "2022-10-05T19:19:30.546Z" },
 ]
 
 [[package]]
@@ -1573,6 +1564,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/32/d5/0e66097fc64fa266f29a7963296b40a80d6a997b7ac13806183700676f86/sqlalchemy-2.0.44-cp313-cp313-win32.whl", hash = "sha256:ee51625c2d51f8baadf2829fae817ad0b66b140573939dd69284d2ba3553ae73", size = 2101275, upload-time = "2025-10-10T15:03:26.096Z" },
     { url = "https://files.pythonhosted.org/packages/03/51/665617fe4f8c6450f42a6d8d69243f9420f5677395572c2fe9d21b493b7b/sqlalchemy-2.0.44-cp313-cp313-win_amd64.whl", hash = "sha256:c1c80faaee1a6c3428cecf40d16a2365bcf56c424c92c2b6f0f9ad204b899e9e", size = 2127901, upload-time = "2025-10-10T15:03:27.548Z" },
     { url = "https://files.pythonhosted.org/packages/9c/5e/6a29fa884d9fb7ddadf6b69490a9d45fded3b38541713010dad16b77d015/sqlalchemy-2.0.44-py3-none-any.whl", hash = "sha256:19de7ca1246fbef9f9d1bff8f1ab25641569df226364a0e40457dc5457c54b05", size = 1928718, upload-time = "2025-10-10T15:29:45.32Z" },
+]
+
+[[package]]
+name = "tenacity"
+version = "9.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/0a/d4/2b0cd0fe285e14b36db076e78c93766ff1d529d70408bd1d2a5a84f1d929/tenacity-9.1.2.tar.gz", hash = "sha256:1169d376c297e7de388d18b4481760d478b0e99a777cad3a9c86e556f4b697cb", size = 48036, upload-time = "2025-04-02T08:25:09.966Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e5/30/643397144bfbfec6f6ef821f36f33e57d35946c44a2352d3c9f0ae847619/tenacity-9.1.2-py3-none-any.whl", hash = "sha256:f77bf36710d8b73a50b2dd155c97b870017ad21afe6ab300326b0371b3b05138", size = 28248, upload-time = "2025-04-02T08:25:07.678Z" },
 ]
 
 [[package]]

@@ -27,7 +27,7 @@ pip install aiotgbot
 - [aiohttp](https://github.com/aio-libs/aiohttp)
 - [aiojobs](https://github.com/aio-libs/aiojobs)
 - [msgspec](https://github.com/jcrist/msgspec)
-- [backoff](https://github.com/litl/backoff)
+- [tenacity](https://github.com/jd/tenacity)
 - [frozenlist](https://github.com/aio-libs/frozenlist)
 - [aiofreqlimit](https://github.com/gleb-chipiga/aiofreqlimit)
 - [yarl](https://github.com/aio-libs/yarl)

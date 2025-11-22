@@ -27,10 +27,10 @@ from typing import (
 )
 
 import aiojobs
-import backoff
 import msgspec
 from aiofreqlimit import FreqLimit
 from aiohttp import ClientError, ClientSession, FormData, TCPConnector
+from tenacity import retry, retry_if_exception_type, wait_exponential
 from typing_extensions import override  # Python 3.11 compatibility
 
 from .api_methods import ApiMethods, ParamType
@@ -227,7 +227,10 @@ class Bot(MutableMapping[StorageKey, StoredValue], ApiMethods, ABC):
         return TelegramError(error_code, description)
 
     @override
-    @backoff.on_exception(backoff.expo, ClientError)
+    @retry(
+        retry=retry_if_exception_type(ClientError),
+        wait=wait_exponential(multiplier=1, min=1),
+    )
     async def _request(
         self,
         http_method: RequestMethod,
@@ -539,7 +542,10 @@ class PollBot(Bot):
             self._me.username,
         )
 
-    @backoff.on_exception(backoff.expo, TelegramError)
+    @retry(
+        retry=retry_if_exception_type(TelegramError),
+        wait=wait_exponential(multiplier=1, min=1),
+    )
     async def _poll(self) -> None:
         assert self._scheduler is not None, "Scheduler not initialized"
         bot_logger.debug("Get updates from: %s", self._updates_offset)
