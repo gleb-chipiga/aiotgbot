@@ -23,7 +23,7 @@ repos:
           - tests
         pass_filenames: false
         additional_dependencies:
-          - aiofreqlimit>=0.0.12
+          - aiofreqlimit>=0.2.2
           - aiohttp>=3.9
           - aiojobs>=1.2.1
           - tenacity>=9.1.2
@@ -44,7 +44,7 @@ repos:
       - id: basedpyright
         pass_filenames: false
         additional_dependencies:
-          - aiofreqlimit>=0.0.12
+          - aiofreqlimit>=0.2.2
           - aiohttp>=3.9
           - aiojobs>=1.2.1
           - tenacity>=9.1.2

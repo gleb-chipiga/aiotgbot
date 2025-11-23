@@ -4,11 +4,11 @@ requires-python = ">=3.11, <3.14"
 
 [[package]]
 name = "aiofreqlimit"
-version = "0.1.5"
+version = "0.2.2"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/d5/f0/17b4afb33be2efb8232ed51f05a56f4c27424905d7586990cd3f144d8377/aiofreqlimit-0.1.5.tar.gz", hash = "sha256:ffb466128925209e693b8d5f30face84cb3a2975021d4d1fc2f2814276e9d3e2", size = 4013, upload-time = "2025-11-20T20:28:21.441Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/46/83/794bb481104251a4d3170f672a98bc3359d4b75b2021bb817734343de4ca/aiofreqlimit-0.2.2.tar.gz", hash = "sha256:d028d692d14ca6c5ec979841076876df74b5731e924cdf90f321f9673b71ff45", size = 8166, upload-time = "2025-11-23T19:35:58.016Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/23/54/9d7322a21ed2322f6a9511c05a532c5a220f67cf087235888378f1ee1064/aiofreqlimit-0.1.5-py3-none-any.whl", hash = "sha256:23c7a47e9f5714da92a51c6981df7f6c336d6777de10c2f6e4ac3f6ab0025ed9", size = 4276, upload-time = "2025-11-20T20:28:20.384Z" },
+    { url = "https://files.pythonhosted.org/packages/16/41/af8102e3d1e825ebb58de6ef9c23b5c589c23acfe613f1763495f7ded52a/aiofreqlimit-0.2.2-py3-none-any.whl", hash = "sha256:9db66a4e401bb560331a9fc20410a2e9be2a23001cb726ea66295b1a461e87d5", size = 10721, upload-time = "2025-11-23T19:35:55.531Z" },
 ]
 
 [[package]]
@@ -193,7 +193,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiofreqlimit", specifier = ">=0.1.5" },
+    { name = "aiofreqlimit", specifier = ">=0.2.2" },
     { name = "aiohttp", specifier = ">=3.13.2" },
     { name = "aiojobs", specifier = ">=1.4.0" },
     { name = "aiosqlite", marker = "extra == 'sqlite'" },

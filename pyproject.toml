@@ -28,7 +28,7 @@ classifiers = [
     "Framework :: AsyncIO",
 ]
 dependencies = [
-    "aiofreqlimit>=0.1.5",
+    "aiofreqlimit>=0.2.2",
     "aiohttp>=3.13.2",
     "aiojobs>=1.4.0",
     "tenacity>=9.1.2",

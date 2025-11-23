@@ -28,7 +28,8 @@ from typing import (
 
 import aiojobs
 import msgspec
-from aiofreqlimit import FreqLimit
+from aiofreqlimit import FreqLimit, FreqLimitParams
+from aiofreqlimit.backends.memory import InMemoryBackend
 from aiohttp import ClientError, ClientSession, FormData, TCPConnector
 from tenacity import retry, retry_if_exception_type, wait_exponential
 from typing_extensions import override  # Python 3.11 compatibility
@@ -65,9 +66,18 @@ TG_FILE_URL: Final[str] = "https://api.telegram.org/file/bot{token}/{path}"
 TG_GET_UPDATES_TIMEOUT: Final[int] = 60
 STATE_PREFIX: Final[str] = "state"
 CONTEXT_PREFIX: Final[str] = "context"
-MESSAGE_INTERVAL: Final[float] = 1 / 30
-CHAT_INTERVAL: Final[float] = 1
-GROUP_INTERVAL: Final[float] = 3
+MESSAGE_LIMIT_PARAMS: Final[FreqLimitParams] = FreqLimitParams(
+    limit=30,
+    period=1.0,
+)
+CHAT_LIMIT_PARAMS: Final[FreqLimitParams] = FreqLimitParams(
+    limit=1,
+    period=1.0,
+)
+GROUP_LIMIT_PARAMS: Final[FreqLimitParams] = FreqLimitParams(
+    limit=20,
+    period=60.0,
+)
 
 bot_logger: Final[logging.Logger] = logging.getLogger("aiotgbot.bot")
 response_logger: Final[logging.Logger] = logging.getLogger("aiotgbot.response")
@@ -108,9 +118,18 @@ class Bot(MutableMapping[StorageKey, StoredValue], ApiMethods, ABC):
             )
         self._client_session: Final[ClientSession] = client_session
         self._user_chat_lock: Final[KeyLock] = KeyLock()
-        self._message_limit: Final[FreqLimit] = FreqLimit(MESSAGE_INTERVAL)
-        self._chat_limit: Final[FreqLimit] = FreqLimit(CHAT_INTERVAL)
-        self._group_limit: Final[FreqLimit] = FreqLimit(GROUP_INTERVAL)
+        self._message_limit: Final[FreqLimit] = FreqLimit(
+            MESSAGE_LIMIT_PARAMS,
+            backend=InMemoryBackend(),
+        )
+        self._chat_limit: Final[FreqLimit] = FreqLimit(
+            CHAT_LIMIT_PARAMS,
+            backend=InMemoryBackend(),
+        )
+        self._group_limit: Final[FreqLimit] = FreqLimit(
+            GROUP_LIMIT_PARAMS,
+            backend=InMemoryBackend(),
+        )
         self._scheduler: aiojobs.Scheduler | None = None
         self._started: bool = False
         self._stopped = False
