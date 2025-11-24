@@ -23,7 +23,7 @@ pip install aiotgbot
 
 ## Requirements
 
-- Python >= 3.11
+- Python 3.11–3.14
 - [aiohttp](https://github.com/aio-libs/aiohttp)
 - [aiojobs](https://github.com/aio-libs/aiojobs)
 - [msgspec](https://github.com/jcrist/msgspec)
